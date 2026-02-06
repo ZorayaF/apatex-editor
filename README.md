@@ -16,14 +16,11 @@ El sistema utiliza una arquitectura **WYSIWYM** (Lo que ves es lo que quieres de
 | **WSL2** | `Ubuntu` | Entorno de desarrollo sobre Windows. |
 
 
+
 ## Arquitectura del Proyecto
 
 El código sigue una estructura modular para facilitar el mantenimiento:
 
-```
-```
-```
-```
 ```
 frontend/src/features/editor/: Contiene la lógica principal del editor.
 
@@ -40,13 +37,4 @@ frontend/src/features/home/: Página principial para iniciar o continuar un proy
 src/store/: Contiene useDocStore.js, gestiona el estado de los bloques (JSON).
 
 src/components/: Componentes visuales genéricos (Botones, Layouts).
-
-
-```
-```
-```
-```
-```
-```
-```
 ```
