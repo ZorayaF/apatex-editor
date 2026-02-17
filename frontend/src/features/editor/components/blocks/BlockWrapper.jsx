@@ -1,6 +1,6 @@
 import { Box, Group, ActionIcon } from '@mantine/core';
 import { IconGripVertical, IconTrash } from '@tabler/icons-react';
-import { useBlockActions } from '../../hooks/useBlockActions';
+import { useBlockActions } from '@hooks/useBlockActions';
 
 export function BlockWrapper({ children, blockId }) {
   // Conectamos con el hook para tener la función de borrar
