@@ -1,19 +1,23 @@
-import { HashRouter as Router, Routes, Route } from 'react-router-dom';
+import '@mantine/core/styles.css';
 
-// Now these imports actually find a file!
+import { HashRouter as Router, Routes, Route } from 'react-router-dom';
+import { MantineProvider } from '@mantine/core';
+
 import HomePage from '@pages/HomePage';
 import EditorPage from '@pages/EditorPage';
 import LabPage from '@pages/LabPage';
 
 const App = () => {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/editor" element={<EditorPage />} />
-        <Route path="/lab" element={<LabPage />} />
-      </Routes>
-    </Router>
+    <MantineProvider defaultColorScheme="light">
+      <Router>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/editor" element={<EditorPage />} />
+          <Route path="/lab" element={<LabPage />} />
+        </Routes>
+      </Router>
+    </MantineProvider>
   );
 };
 
