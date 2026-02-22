@@ -18,7 +18,9 @@ export const APA_CONFIG = {
   },
   typography: {
     family: '"Times New Roman", Times, serif',
-    size: 12, // pt
+    size: 12,
+    lineHeight: 1.5,
+    indent: 1.27,
   }
 };
 
@@ -29,4 +31,6 @@ export const getAvailableHeightPx = () => {
   const margins = cmToPx(APA_CONFIG.margins.top) + cmToPx(APA_CONFIG.margins.bottom);
   return totalHeight - margins;
 };
+
+export const getLineHeightPx = () => ptToPx(APA_CONFIG.typography.size) * APA_CONFIG.typography.lineHeight;
 
