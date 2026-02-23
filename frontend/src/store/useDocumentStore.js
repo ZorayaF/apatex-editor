@@ -49,45 +49,69 @@ export const useDocumentStore = create((set) => ({
     let targetPageIndex = state.activePageIndex;
     let insertIndex = updatedPages[targetPageIndex].blockIds.length;
 
-    // --- REGLA ESPECIAL PARA H1 (TÍTULO 1) ---
-    if (type === 'h1') {
-      // Si la página activa YA tiene bloques, creamos una página nueva
-      if (updatedPages[targetPageIndex].blockIds.length > 0) {
-        const newPageId = crypto.randomUUID();
-        const newPage = { id: newPageId, blockIds: [] };
-
-        // Insertamos la página justo después de la actual
-        updatedPages.splice(targetPageIndex + 1, 0, newPage);
-
-        // El objetivo ahora es la nueva página, al principio
-        targetPageIndex = targetPageIndex + 1;
-        insertIndex = 0;
+    // Ajuste por selección previa
+    if (state.selectedBlockId) {
+      const pIdx = updatedPages.findIndex(p => p.blockIds.includes(state.selectedBlockId));
+      if (pIdx !== -1) {
+        targetPageIndex = pIdx;
+        insertIndex = updatedPages[pIdx].blockIds.indexOf(state.selectedBlockId) + 1;
       }
     }
-    // --- LÓGICA NORMAL (Si hay algo seleccionado) ---
-    else if (state.selectedBlockId) {
-      const pageIndex = updatedPages.findIndex(page =>
-        page.blockIds.includes(state.selectedBlockId)
+
+    // --- LÓGICA DE INTELIGENCIA PARA TÍTULO 1 (H1) ---
+    if (type === 'h1') {
+      const currentPage = updatedPages[targetPageIndex];
+
+      // Verificamos si la página ACTUAL ya tiene un H1
+      const currentPageHasH1 = currentPage.blockIds.some(id =>
+        state.blocks.find(b => b.id === id)?.type === 'h1'
       );
 
-      if (pageIndex !== -1) {
-        targetPageIndex = pageIndex;
-        const blockIndex = updatedPages[pageIndex].blockIds.indexOf(state.selectedBlockId);
-        insertIndex = blockIndex + 1;
+      if (!currentPageHasH1) {
+        // CASO 0: La página tiene texto pero NO tiene Título 1.
+        // El título "reclama" el inicio de la página actual.
+        insertIndex = 0;
+      } else {
+        // Si la actual ya tiene un H1, aplicamos la lógica de "mirar adelante"
+        const nextPageIndex = targetPageIndex + 1;
+        const nextPage = updatedPages[nextPageIndex];
+
+        if (!nextPage) {
+          // No existe P2, la creamos
+          updatedPages.push({ id: crypto.randomUUID(), blockIds: [] });
+          targetPageIndex = nextPageIndex;
+          insertIndex = 0;
+        } else {
+          const nextPageHasH1 = nextPage.blockIds.some(id =>
+            state.blocks.find(b => b.id === id)?.type === 'h1'
+          );
+
+          if (!nextPageHasH1) {
+            // CASO 2 y 3: La siguiente está vacía o tiene texto sin H1.
+            // Saltamos a la siguiente y tomamos el inicio.
+            targetPageIndex = nextPageIndex;
+            insertIndex = 0;
+          } else {
+            // CASO 4: La siguiente ya tiene un H1.
+            // Creamos una hoja nueva intermedia.
+            updatedPages.splice(nextPageIndex, 0, { id: crypto.randomUUID(), blockIds: [] });
+            targetPageIndex = nextPageIndex;
+            insertIndex = 0;
+          }
+        }
       }
     }
 
-    // Insertar el bloque en la página y posición decidida
+    // Inserción final
     updatedPages[targetPageIndex].blockIds.splice(insertIndex, 0, newId);
 
     return {
       blocks: [...state.blocks, newBlock],
       pages: updatedPages,
-      selectedBlockId: newId, // Se selecciona automáticamente
-      activePageIndex: targetPageIndex // Nos situamos en la página donde quedó el bloque
+      selectedBlockId: newId,
+      activePageIndex: targetPageIndex
     };
   }),
-
   updateBlock: (id, newContent) => set((state) => ({
     blocks: state.blocks.map(b => b.id === id ? { ...b, content: newContent } : b)
   })),
