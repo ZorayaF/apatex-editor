@@ -3,14 +3,14 @@ import React from 'react';
 import { Box } from '@mantine/core';
 import { useDocumentStore } from '@store/useDocumentStore';
 import { Page } from './Page';
-import { BlockWrapper } from './BlockWrapper';
-import { EditableBlock } from './EditableBlock';
+import { BlockWrapper } from '../blocks/BlockWrapper'; // Nueva ubicación
+import { BlockFactory } from '../blocks/BlockFactory';
 
 export const Canvas = () => {
   // 1. Obtenemos los bloques directamente del Store
   const blocks = useDocumentStore((state) => state.blocks);
-
-  return (
+  
+return (
     <Box
       p={40}
       className="canvas-viewport"
@@ -24,14 +24,9 @@ export const Canvas = () => {
       }}
     >
       <Page pageNumber={1}>
-        {/* 2. Mapeamos los bloques aquí adentro */}
         {blocks.map((block) => (
           <BlockWrapper key={block.id} blockId={block.id}>
-            <EditableBlock
-              id={block.id}
-              content={block.content}
-              type={block.type}
-            />
+            {BlockFactory(block)}
           </BlockWrapper>
         ))}
       </Page>
