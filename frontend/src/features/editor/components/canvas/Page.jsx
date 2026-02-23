@@ -1,60 +1,43 @@
-// frontend/src/features/editor/components/canvas/Page.jsx
-import React, { useRef, useEffect, useState } from 'react';
-import { Paper, Box, Badge } from '@mantine/core';
-import { cmToPx, ptToPx, APA_CONFIG, getPageHeightPx, getAvailableHeightPx } from '@core/utils/measurements';
+// src/features/editor/components/canvas/Page.jsx
+import { Paper, Box } from '@mantine/core';
+import { PAGE_WIDTH_PX, PAGE_HEIGHT_PX, cmToPx, APA_CONFIG } from '@core/utils/measurements';
 
 export const Page = ({ children, pageNumber }) => {
-  const contentRef = useRef(null);
-  const [isOverflowing, setIsOverflowing] = useState(false);
-  const { paper, margins, typography } = APA_CONFIG;
-
-  // Lógica de detección de desbordamiento
-  useEffect(() => {
-    if (contentRef.current) {
-      const contentHeight = contentRef.current.scrollHeight;
-      const maxHeight = getAvailableHeightPx();
-
-      setIsOverflowing(contentHeight > maxHeight);
-    }
-  }, [children]); // Se ejecuta cada vez que el contenido cambia
+  const { margins } = APA_CONFIG;
 
   return (
     <Paper
       shadow="md"
       radius={0}
-      mb={30}
       style={{
-        width: cmToPx(paper.width),
-        height: getPageHeightPx(),
-        padding: `${cmToPx(margins.top)}px ${cmToPx(margins.right)}px ${cmToPx(margins.bottom)}px ${cmToPx(margins.left)}px`,
-        margin: '20px auto',
-        position: 'relative',
+        // MEDIDAS CONSTANTES
+        width: `${PAGE_WIDTH_PX}px`,
+        height: `${PAGE_HEIGHT_PX}px`,
+        minHeight: `${PAGE_HEIGHT_PX}px`,
+        maxHeight: `${PAGE_HEIGHT_PX}px`,
+
+        // MÁRGENES
+        paddingTop: `${cmToPx(margins.top)}px`,
+        paddingBottom: `${cmToPx(margins.bottom)}px`,
+        paddingLeft: `${cmToPx(margins.left)}px`,
+        paddingRight: `${cmToPx(margins.right)}px`,
+
+        // IMPORTANTE: El padding no afecta al width/height total
+        boxSizing: 'border-box',
+
         backgroundColor: 'white',
-        fontFamily: typography.family,
-        fontSize: `${ptToPx(typography.size)}px`,
-        outline: isOverflowing ? '2px solid #fa5252' : 'none', // Borde rojo si desborda
-        transition: 'outline 0.2s ease'
+        position: 'relative',
+        overflow: 'hidden', // No dejamos que nada salga de la hoja física
+        margin: '20px auto', // Espaciado entre hojas en el fondo gris
       }}
     >
-      {/* Alerta de Desbordamiento */}
-      {isOverflowing && (
-        <Badge
-          color="red"
-          variant="filled"
-          style={{ position: 'absolute', top: -10, right: -10, zIndex: 10 }}
-        >
-          ¡Contenido excede la página!
-        </Badge>
-      )}
-
-      {/* Indicador de página */}
-      <Box style={{ position: 'absolute', bottom: 10, right: 20, fontSize: '10pt', color: '#adb5bd' }}>
-        Página {pageNumber}
+      <Box style={{ height: '100%', position: 'relative' }}>
+        {children}
       </Box>
 
-      {/* Contenedor medible del contenido */}
-      <Box ref={contentRef} style={{ height: '100%' }}>
-        {children}
+      {/* Indicador de página (opcional) */}
+      <Box style={{ position: 'absolute', bottom: 20, right: 40, fontSize: '10pt' }}>
+        {pageNumber}
       </Box>
     </Paper>
   );

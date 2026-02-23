@@ -1,36 +1,33 @@
 // src/core/utils/measurements.js
-export const CSS_DPI = 96;
-export const CM_PER_INCH = 2.54;
 
-export const cmToPx = (cm) => (cm * CSS_DPI) / CM_PER_INCH;
-export const ptToPx = (pt) => pt * 1.333;
+const DPI = 96;
+const INCH_TO_CM = 2.54;
+const PT_TO_INCH = 72;
+
+// La función de conversión más precisa
+export const cmToPx = (cm) => (cm / INCH_TO_CM) * DPI;
+
+export const ptToPx = (pt) => (pt / PT_TO_INCH) * DPI;
 
 export const APA_CONFIG = {
-  paper: { width: 21.59, height: 27.94 }, // Carta cm
+  paper: {
+    width: 21.59,  // Ancho Carta en cm
+    height: 27.94, // Alto Carta en cm
+  },
   margins: {
     top: 2.54,
     bottom: 2.54,
-    left: 3.0,    // Especial U. Boyacá
+    left: 3.0,     // Universidad de Boyacá
     right: 2.54,
-  },
-  header: {
-    topOffset: 1.27, // El encabezado suele ir a media pulgada del borde superior
   },
   typography: {
     family: '"Times New Roman", Times, serif',
-    size: 12,
-    lineHeight: 1.5,
-    indent: 1.27,
+    size: 12,      // pt
+    lineHeight: 2, // Doble espacio
+    indent: 1.27,  // Sangría media pulgada
   }
 };
 
-export const getPageHeightPx = () => cmToPx(APA_CONFIG.paper.height);
-
-export const getAvailableHeightPx = () => {
-  const totalHeight = cmToPx(APA_CONFIG.paper.height);
-  const margins = cmToPx(APA_CONFIG.margins.top) + cmToPx(APA_CONFIG.margins.bottom);
-  return totalHeight - margins;
-};
-
-export const getLineHeightPx = () => ptToPx(APA_CONFIG.typography.size) * APA_CONFIG.typography.lineHeight;
-
+// Exportamos las constantes ya calculadas para que el sistema sea más rápido
+export const PAGE_WIDTH_PX = cmToPx(APA_CONFIG.paper.width);   // ~816px
+export const PAGE_HEIGHT_PX = cmToPx(APA_CONFIG.paper.height); // ~1056px

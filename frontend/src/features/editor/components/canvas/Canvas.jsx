@@ -7,13 +7,10 @@ import { BlockWrapper } from '../blocks/BlockWrapper'; // Nueva ubicación
 import { BlockFactory } from '../blocks/BlockFactory';
 
 export const Canvas = () => {
-  // 1. Obtenemos los bloques directamente del Store
-  const blocks = useDocumentStore((state) => state.blocks);
-  
-return (
-    <Box
-      p={40}
-      className="canvas-viewport"
+  const { pages, blocks } = useDocumentStore();
+
+  return (
+    <Box className="canvas-viewport"
       style={{
         backgroundColor: '#f1f3f5',
         height: 'calc(100vh - 60px)',
@@ -21,15 +18,19 @@ return (
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center'
-      }}
-    >
-      <Page pageNumber={1}>
-        {blocks.map((block) => (
-          <BlockWrapper key={block.id} blockId={block.id}>
-            {BlockFactory(block)}
-          </BlockWrapper>
-        ))}
-      </Page>
+      }}>
+      {pages.map((page, index) => (
+        <Page key={page.id} pageNumber={index + 1}>
+          {page.blockIds.map((blockId) => {
+            const block = blocks.find(b => b.id === blockId);
+            return (
+              <BlockWrapper key={blockId} blockId={blockId}>
+                {BlockFactory(block)}
+              </BlockWrapper>
+            );
+          })}
+        </Page>
+      ))}
     </Box>
   );
 };
