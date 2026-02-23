@@ -44,16 +44,28 @@ export const useDocumentStore = create((set) => ({
   addBlock: (type, content = '') => set((state) => {
     const newId = crypto.randomUUID();
     const newBlock = { id: newId, type, content };
-    const updatedPages = [...state.pages];
-
-    // Lógica de Inserción Inteligente:
-    // 1. Si hay un bloque seleccionado, insertar justo debajo.
-    // 2. Si no hay selección, insertar al final de la "página activa".
+    let updatedPages = [...state.pages];
 
     let targetPageIndex = state.activePageIndex;
     let insertIndex = updatedPages[targetPageIndex].blockIds.length;
 
-    if (state.selectedBlockId) {
+    // --- REGLA ESPECIAL PARA H1 (TÍTULO 1) ---
+    if (type === 'h1') {
+      // Si la página activa YA tiene bloques, creamos una página nueva
+      if (updatedPages[targetPageIndex].blockIds.length > 0) {
+        const newPageId = crypto.randomUUID();
+        const newPage = { id: newPageId, blockIds: [] };
+
+        // Insertamos la página justo después de la actual
+        updatedPages.splice(targetPageIndex + 1, 0, newPage);
+
+        // El objetivo ahora es la nueva página, al principio
+        targetPageIndex = targetPageIndex + 1;
+        insertIndex = 0;
+      }
+    }
+    // --- LÓGICA NORMAL (Si hay algo seleccionado) ---
+    else if (state.selectedBlockId) {
       const pageIndex = updatedPages.findIndex(page =>
         page.blockIds.includes(state.selectedBlockId)
       );
@@ -65,14 +77,14 @@ export const useDocumentStore = create((set) => ({
       }
     }
 
-    // Ejecutar la inserción en la página correspondiente
+    // Insertar el bloque en la página y posición decidida
     updatedPages[targetPageIndex].blockIds.splice(insertIndex, 0, newId);
 
     return {
       blocks: [...state.blocks, newBlock],
       pages: updatedPages,
-      selectedBlockId: newId,
-      activePageIndex: targetPageIndex
+      selectedBlockId: newId, // Se selecciona automáticamente
+      activePageIndex: targetPageIndex // Nos situamos en la página donde quedó el bloque
     };
   }),
 
