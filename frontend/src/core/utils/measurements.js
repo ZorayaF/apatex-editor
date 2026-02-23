@@ -23,7 +23,7 @@ export const APA_CONFIG = {
   typography: {
     family: '"Times New Roman", Times, serif',
     size: 12,      // pt
-    lineHeight: 2, // Doble espacio
+    lineHeight: 1.5, // Doble espacio
     indent: 1.27,  // Sangría media pulgada
   }
 };
