@@ -1,5 +1,5 @@
 // src/features/editor/components/blocks/TextBlock.jsx
-import { BaseEditable } from './BaseEditable';
+import { BaseEditable } from '../core/BaseEditable';
 import { cmToPx, ptToPx, APA_CONFIG } from '@core/utils/measurements';
 
 export const TextBlock = ({ id, content }) => {

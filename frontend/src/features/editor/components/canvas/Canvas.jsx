@@ -1,10 +1,10 @@
 // src/features/editor/components/canvas/Canvas.jsx
 import React from 'react';
 import { Box } from '@mantine/core';
-import { useDocumentStore } from '@store/useDocumentStore';
+import { useDocumentStore } from '@store';
 import { Page } from './Page';
-import { BlockWrapper } from '../blocks/BlockWrapper'; // Nueva ubicación
-import { BlockFactory } from '../blocks/BlockFactory';
+import { BlockWrapper } from '../blocks/core/BlockWrapper'; // Nueva ubicación
+import { BlockFactory } from '../blocks/core/BlockFactory';
 
 export const Canvas = () => {
   const { pages, blocks } = useDocumentStore();

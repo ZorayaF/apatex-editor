@@ -1,7 +1,7 @@
 // src/pages/LabPage.jsx
 import { Canvas } from '@features/editor/components/canvas/Canvas';
 import { Button, Group, Text } from '@mantine/core';
-import { useDocumentStore } from '@store/useDocumentStore';
+import { useDocumentStore } from '@store';
 
 const LabPage = () => {
   const { addBlock, deleteBlock, addPage, selectedBlockId } = useDocumentStore();

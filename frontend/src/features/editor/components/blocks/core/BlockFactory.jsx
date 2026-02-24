@@ -1,6 +1,6 @@
 // src/features/editor/components/blocks/BlockFactory.jsx
-import { TextBlock } from './TextBlock';
-import { TitleBlock } from './TitleBlock';
+import { TextBlock } from '../text/TextBlock';
+import { TitleBlock } from '../text/TitleBlock';
 
 export const BlockFactory = (block) => {
   switch (block.type) {

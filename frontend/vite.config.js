@@ -9,11 +9,12 @@ export default defineConfig({
   resolve: {
     alias: {
       '@core': path.resolve(__dirname, './src/core'),
-      '@store': path.resolve(__dirname, './src/store'),
+      '@store': path.resolve(__dirname, './src/features/editor/store'),
       '@hooks': path.resolve(__dirname, './src/hooks'),
       '@features': path.resolve(__dirname, './src/features'),
       '@shared': path.resolve(__dirname, './src/shared'),
       '@pages': path.resolve(__dirname, './src/pages'),
+      '@editor': path.resolve(__dirname, '.src/features/editor')
     },
   }
 })

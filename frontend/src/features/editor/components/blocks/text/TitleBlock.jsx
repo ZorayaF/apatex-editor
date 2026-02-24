@@ -1,5 +1,5 @@
 // src/features/editor/components/blocks/TitleBlock.jsx
-import { BaseEditable } from './BaseEditable';
+import { BaseEditable } from '../core/BaseEditable';
 import { ptToPx, APA_CONFIG } from '@core/utils/measurements';
 
 export const TitleBlock = ({ id, content, level = 1 }) => {

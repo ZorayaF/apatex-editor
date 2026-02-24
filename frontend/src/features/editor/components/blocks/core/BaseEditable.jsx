@@ -1,7 +1,7 @@
 // src/features/editor/components/blocks/BaseEditable.jsx
 import React from 'react';
 import { Textarea } from '@mantine/core';
-import { useDocumentStore } from '@store/useDocumentStore';
+import { useDocumentStore } from '@store';
 
 export const BaseEditable = ({ id, content, styles }) => {
   const updateBlock = useDocumentStore((state) => state.updateBlock);

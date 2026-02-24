@@ -1,7 +1,7 @@
 // src/features/editor/components/canvas/Page.jsx
 import { Paper, Box } from '@mantine/core';
 import { PAGE_WIDTH_PX, PAGE_HEIGHT_PX, cmToPx, APA_CONFIG } from '@core/utils/measurements';
-import { useDocumentStore } from '@store/useDocumentStore';
+import { useDocumentStore } from '@store';
 
 export const Page = ({ children, pageNumber }) => {
   const { margins } = APA_CONFIG;
