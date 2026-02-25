@@ -14,7 +14,7 @@ export default defineConfig({
       '@features': path.resolve(__dirname, './src/features'),
       '@shared': path.resolve(__dirname, './src/shared'),
       '@pages': path.resolve(__dirname, './src/pages'),
-      '@editor': path.resolve(__dirname, '.src/features/editor')
+      '@editor': path.resolve(__dirname, './src/features/editor')
     },
   }
 })

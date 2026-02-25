@@ -1,31 +1,40 @@
-// src/pages/LabPage.jsx
-import { Canvas } from '@features/editor/components/canvas/Canvas';
-import { Button, Group, Text } from '@mantine/core';
-import { useDocumentStore } from '@store';
+import React from 'react';
+import { Box } from '@mantine/core';
+
+// Asegúrate de que la ruta de importación coincida con tu estructura
+import { Header } from '@editor/components/header';
+import { Canvas } from '@editor/components/canvas/Canvas';
 
 const LabPage = () => {
-  const { addBlock, deleteBlock, addPage, selectedBlockId } = useDocumentStore();
+  // Nota: Ya no necesitamos importar useDocumentStore aquí.
+  // La página es solo "Layout", la lógica vive dentro de Header y Canvas.
 
   return (
-    <div style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
-      <Group p="md" bg="white" style={{ borderBottom: '1px solid #ddd', gap: '10px' }}>
-        <Button variant="light" onClick={() => addBlock('h1', 'NUEVO TÍTULO')}>+ Título</Button>
-        <Button variant="light" color="gray" onClick={() => addBlock('paragraph', 'Nuevo párrafo')}>+ Párrafo</Button>
+    <Box
+      h="100vh"
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        overflow: 'hidden' // Evita scroll en el body, lo delegamos al canvas
+      }}
+    >
+      {/* 1. Zona de Control (Sticky/Fijo) */}
+      <Header />
 
-        {/* NUEVO BOTÓN */}
-        <Button variant="outline" color="blue" onClick={addPage}>
-          + Nueva Página
-        </Button>
-
-        <div style={{ borderLeft: '1px solid #eee', height: '30px', margin: '0 10px' }} />
-
-        <Button color="red" disabled={!selectedBlockId} onClick={() => deleteBlock(selectedBlockId)}>
-          Eliminar Bloque
-        </Button>
-      </Group>
-
-      <Canvas />
-    </div>
+      {/* 2. Zona de Trabajo (Flexible y Scrollable) */}
+      <Box
+        component="main"
+        bg="gray.0" // Un fondo gris suave para distinguir el "papel" del fondo
+        style={{
+          flex: 1, // Ocupa todo el espacio restante
+          position: 'relative',
+          overflow: 'hidden' // El scroll lo manejará el componente Canvas internamente
+        }}
+      >
+        <Canvas />
+      </Box>
+    </Box>
   );
 };
+
 export default LabPage;
