@@ -3,11 +3,12 @@
     "baseUrl": ".",
     "paths": {
       "@core/*": ["src/core/*"],
-      "@store/*": ["src/store/*"],
+      "@store/*": ["src/features/editor/store/*"], 
       "@hooks/*": ["src/hooks/*"],
       "@features/*": ["src/features/*"],
       "@shared/*": ["src/shared/*"],
-      "@pages/*": ["src/pages/*"]
+      "@pages/*": ["src/pages/*"],
+      "@editor/*": ["src/features/editor/*"]
     },
     "jsx": "react-jsx"
   },
