@@ -10,6 +10,7 @@ import {
   IconPhoto
 } from '@tabler/icons-react';
 import { useDocumentStore } from '@store'; // Importamos desde el index del store refactorizado
+import { useStore } from 'zustand';
 
 /**
  * Helper Component para botones de la barra de herramientas.
@@ -32,7 +33,7 @@ const ToolbarButton = ({ label, icon: Icon, onClick, isActive, shortcut }) => (
 export const Header = () => {
   // 1. Suscripción a Zustand
   // Obtenemos las acciones y el estado necesario para la reactividad
-  const { addBlock, addPage, selectedBlockId, blocks } = useDocumentStore();
+  const { addBlock, addPage, selectedBlockId, blocks } = useStore();
 
   // 2. Lógica Reactiva Visual
   // Determinamos qué tipo de bloque está activo para iluminar el botón correspondiente

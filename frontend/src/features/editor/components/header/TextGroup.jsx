@@ -2,13 +2,11 @@
 import React from 'react';
 import { Group } from '@mantine/core';
 import { IconH1, IconH2, IconTypography, IconQuote } from '@tabler/icons-react';
-import { useDocumentStore } from '@store';
+import { useStore } from '@store';
 import { HeaderButton } from './HeaderButton';
 
 export const TextGroup = () => {
-  const { addBlock, selectedBlockId, blocks } = useDocumentStore();
-
-  // Lógica para detectar el tipo activo
+const { addBlock, selectedBlockId, blocks } = useStore();
   const activeBlock = blocks.find((b) => b.id === selectedBlockId);
   const activeType = activeBlock ? activeBlock.type : null;
 

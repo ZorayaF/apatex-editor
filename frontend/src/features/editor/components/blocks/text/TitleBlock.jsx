@@ -1,18 +1,12 @@
-// src/features/editor/components/blocks/TitleBlock.jsx
 import { BaseEditable } from '../core/BaseEditable';
-import { ptToPx, APA_CONFIG } from '@core/utils/measurements';
+import { DOCUMENT_THEME } from '@editor/logic/rules/documentStyles';
 
-export const TitleBlock = ({ id, content, level = 1 }) => {
-  const { typography } = APA_CONFIG;
-
-  const titleStyles = {
-    fontFamily: typography.family,
-    fontSize: `${ptToPx(typography.size)}px`,
-    fontWeight: 'bold',
-    textAlign: level === 1 ? 'center' : 'left', // Nivel 1 centrado, el resto a la izquierda
-    lineHeight: typography.lineHeight,
-    textIndent: 0, // Los títulos no llevan sangría
-  };
-
-  return <BaseEditable id={id} content={content} styles={titleStyles} />;
-};
+export const TitleBlock = ({ id, content, level = 1 }) => (
+  <BaseEditable
+    id={id}
+    content={content}
+    tag="h1"
+    style={DOCUMENT_THEME.blocks.h1}
+    className="editable-h1" // Para que el CSS counter lo encuentre
+  />
+);

@@ -1,14 +1,25 @@
-// src/features/editor/components/blocks/BlockFactory.jsx
-import { TextBlock } from '../text/TextBlock';
-import { TitleBlock } from '../text/TitleBlock';
+import { BLOCK_COMPONENTS, BLOCK_DEFAULTS } from './BlockRegistry';
 
-export const BlockFactory = (block) => {
-  switch (block.type) {
-    case 'h1':
-      return <TitleBlock id={block.id} content={block.content} level={1} />;
-    case 'paragraph':
-      return <TextBlock id={block.id} content={block.content} />;
-    default:
-      return <div>Tipo de bloque no soportado</div>;
+export const BlockFactory = ({ block }) => {
+  // 1. Si el bloque no existe (es undefined), salimos elegantemente
+  if (!block) {
+    console.warn("Se intentó renderizar un bloque nulo o inexistente.");
+    return null;
   }
+
+  const Component = BLOCK_COMPONENTS[block.type];
+
+  if (!Component) {
+    return <div style={{ color: 'red' }}>Tipo "{block.type}" no soportado</div>;
+  }
+
+  const extraProps = BLOCK_DEFAULTS[block.type] || {};
+
+  return (
+    <Component
+      id={block.id}
+      content={block.content}
+      {...extraProps}
+    />
+  );
 };

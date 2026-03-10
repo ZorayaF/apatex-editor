@@ -1,17 +1,12 @@
-// src/features/editor/components/blocks/TextBlock.jsx
 import { BaseEditable } from '../core/BaseEditable';
-import { cmToPx, ptToPx, APA_CONFIG } from '@core/utils/measurements';
+import { DOCUMENT_THEME } from '@editor/logic/rules/documentStyles';
 
-export const TextBlock = ({ id, content }) => {
-  const { typography } = APA_CONFIG;
-
-  const textStyles = {
-    fontFamily: typography.family,
-    fontSize: `${ptToPx(typography.size)}px`,
-    lineHeight: typography.lineHeight,
-    textAlign: 'justify',
-    textIndent: `${cmToPx(typography.indent)}px`, // Sangría 1.27cm
-  };
-
-  return <BaseEditable id={id} content={content} styles={textStyles} />;
-};
+export const TextBlock = ({ id, content }) => (
+  <BaseEditable
+    id={id}
+    content={content}
+    tag="p"
+    style={DOCUMENT_THEME.blocks.paragraph} // Aplicamos los estilos directos
+    className="editor-block-p"
+  />
+);

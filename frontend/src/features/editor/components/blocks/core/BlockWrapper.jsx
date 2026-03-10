@@ -1,10 +1,10 @@
 // src/features/editor/components/canvas/BlockWrapper.jsx
 import React from 'react';
 import { Box } from '@mantine/core';
-import { useDocumentStore } from '@store';
+import { useStore } from '@store';
 
 export const BlockWrapper = ({ children, blockId }) => {
-  const selectedBlockId = useDocumentStore((state) => state.selectedBlockId);
+  const selectedBlockId = useStore((state) => state.selectedBlockId);
   const isSelected = selectedBlockId === blockId;
 
   return (

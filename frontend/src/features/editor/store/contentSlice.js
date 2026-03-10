@@ -1,6 +1,8 @@
-import { calculateBlockInsertion } from './editorUtils';
+import { calculateSmartInsertion } from '../logic/engine/insertionEngine';
+import { BLOCK_RULES } from '../logic/rules/blockRules'; // <--- Nueva ruta correcta
 
 export const createContentSlice = (set, get) => ({
+  // --- ESTADO ---
   blocks: [
     { id: 'b1', type: 'h1', content: 'TÍTULO DE LA INVESTIGACIÓN' },
     { id: 'b2', type: 'paragraph', content: 'Este es un párrafo inicial.' },
@@ -8,37 +10,32 @@ export const createContentSlice = (set, get) => ({
   pages: [
     { id: 'p1', blockIds: ['b1', 'b2'] }
   ],
+  activePageIndex: 0,
+  selectedBlockId: null,
 
-  addPage: () => set((state) => ({
-    pages: [...state.pages, { id: crypto.randomUUID(), blockIds: [] }],
-    activePageIndex: state.pages.length
-  })),
+  // --- ACCIONES DE ESTRUCTURA ---
 
   addBlock: (type, content = '') => set((state) => {
-    const newId = crypto.randomUUID();
-    const newBlock = { id: newId, type, content };
+    // 1. El motor calcula la posición ideal según tus 5 casos de H1
+    const { updatedPages, targetPageIndex, newId } = calculateSmartInsertion({
+      pages: state.pages,
+      blocks: state.blocks,
+      activePageIndex: state.activePageIndex,
+      selectedBlockId: state.selectedBlockId,
+      newBlockType: type,
+      rules: BLOCK_RULES // Pasamos las reglas desde logic/rules
+    });
 
-    // ¡Aquí ocurre la magia! Delegamos la complejidad al util
-    const { updatedPages, targetPageIndex } = calculateBlockInsertion(
-      state.pages,
-      state.blocks,
-      state.activePageIndex,
-      state.selectedBlockId,
-      type,
-      newId
-    );
+    // 2. Registramos el nuevo objeto de datos
+    const newBlock = { id: newId, type, content };
 
     return {
       blocks: [...state.blocks, newBlock],
       pages: updatedPages,
-      selectedBlockId: newId, // Auto-seleccionar el nuevo
-      activePageIndex: targetPageIndex // Mover el foco si cambió de página
+      selectedBlockId: newId,
+      activePageIndex: targetPageIndex
     };
   }),
-
-  updateBlock: (id, newContent) => set((state) => ({
-    blocks: state.blocks.map(b => b.id === id ? { ...b, content: newContent } : b)
-  })),
 
   deleteBlock: (id) => set((state) => ({
     blocks: state.blocks.filter(b => b.id !== id),
@@ -46,6 +43,17 @@ export const createContentSlice = (set, get) => ({
       ...page,
       blockIds: page.blockIds.filter(blockId => blockId !== id)
     })),
-    selectedBlockId: null
+    // Si borramos el bloque que teníamos seleccionado, limpiamos la selección
+    selectedBlockId: state.selectedBlockId === id ? null : state.selectedBlockId
   })),
+
+  // --- ACCIONES DE CONTENIDO Y UI ---
+
+  updateBlock: (id, newContent) => set((state) => ({
+    blocks: state.blocks.map(b => b.id === id ? { ...b, content: newContent } : b)
+  })),
+
+  setSelectedBlock: (id) => set({ selectedBlockId: id }),
+
+  setActivePage: (index) => set({ activePageIndex: index }),
 });

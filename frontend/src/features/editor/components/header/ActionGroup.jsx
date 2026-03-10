@@ -2,11 +2,11 @@
 import React from 'react';
 import { Group } from '@mantine/core';
 import { IconFilePlus, IconPhoto, IconTable, IconTrash } from '@tabler/icons-react';
-import { useDocumentStore } from '@store';
+import { useStore } from '@store';
 import { HeaderButton } from './HeaderButton';
 
 export const ActionGroup = () => {
-  const { addPage, deleteBlock, selectedBlockId } = useDocumentStore();
+  const { addPage, deleteBlock, selectedBlockId } = useStore();
 
   return (
     <Group gap={4}>

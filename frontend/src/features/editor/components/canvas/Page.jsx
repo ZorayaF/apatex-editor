@@ -1,15 +1,15 @@
 // src/features/editor/components/canvas/Page.jsx
 import { Paper, Box } from '@mantine/core';
 import { PAGE_WIDTH_PX, PAGE_HEIGHT_PX, cmToPx, APA_CONFIG } from '@core/utils/measurements';
-import { useDocumentStore } from '@store';
+import { useStore } from '@store';
 
 export const Page = ({ children, pageNumber }) => {
   const { margins } = APA_CONFIG;
 
   // 1. Suscribirse al índice de la página activa
-  const activePageIndex = useDocumentStore((state) => state.activePageIndex);
-  const setActivePage = useDocumentStore((state) => state.setActivePage);
-  const setSelectedBlockId = useDocumentStore((state) => state.setSelectedBlockId);
+  const activePageIndex = useStore((state) => state.activePageIndex);
+  const setActivePage = useStore((state) => state.setActivePage);
+  const setSelectedBlockId = useStore((state) => state.setSelectedBlockId);
 
   // Comprobar si ESTA página es la activa
   const isActive = activePageIndex === (pageNumber - 1);
