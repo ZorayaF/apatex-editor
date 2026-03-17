@@ -1,59 +1,93 @@
-import { calculateSmartInsertion } from '../logic/engine/insertionEngine';
-import { BLOCK_RULES } from '../logic/rules/blockRules'; // <--- Nueva ruta correcta
+// features/editor/store/contentSlice.js
+import { calculateSplit } from '../logic/engine/insertionEngine';
+import { cleanAndSplitText } from '../logic/engine/parser';
 
 export const createContentSlice = (set, get) => ({
   // --- ESTADO ---
-  blocks: [
-    { id: 'b1', type: 'h1', content: 'TÍTULO DE LA INVESTIGACIÓN' },
-    { id: 'b2', type: 'paragraph', content: 'Este es un párrafo inicial.' },
-  ],
-  pages: [
-    { id: 'p1', blockIds: ['b1', 'b2'] }
-  ],
+  blocks: [],
+  pages: [{ id: 'p1', blockIds: [] }],
   activePageIndex: 0,
   selectedBlockId: null,
 
-  // --- ACCIONES DE ESTRUCTURA ---
-
-  addBlock: (type, content = '') => set((state) => {
-    // 1. El motor calcula la posición ideal según tus 5 casos de H1
-    const { updatedPages, targetPageIndex, newId } = calculateSmartInsertion({
-      pages: state.pages,
+  // --- ACCIÓN: DIVIDIR BLOQUE (Para el Enter) ---
+  splitBlock: (originalBlockId, textBefore, textAfter) => set((state) => {
+    const { updatedBlocks, updatedPages, newBlockId } = calculateSplit({
       blocks: state.blocks,
-      activePageIndex: state.activePageIndex,
-      selectedBlockId: state.selectedBlockId,
-      newBlockType: type,
-      rules: BLOCK_RULES // Pasamos las reglas desde logic/rules
+      pages: state.pages,
+      blockId: originalBlockId,
+      textBefore,
+      textAfter
     });
 
-    // 2. Registramos el nuevo objeto de datos
-    const newBlock = { id: newId, type, content };
+    return {
+      blocks: updatedBlocks,
+      pages: updatedPages,
+      selectedBlockId: newBlockId, // El foco salta automáticamente al nuevo bloque
+    };
+  }),
+  addBlock: (type = 'paragraph') => set((state) => {
+    const newId = crypto.randomUUID();
+    const newBlock = { id: newId, type, content: '' };
+
+    // 1. Añadimos el bloque al array global
+    const updatedBlocks = [...state.blocks, newBlock];
+
+    // 2. Lo añadimos a la página activa actual
+    const updatedPages = state.pages.map((page, index) => {
+      if (index === state.activePageIndex) {
+        return {
+          ...page,
+          blockIds: [...page.blockIds, newId]
+        };
+      }
+      return page;
+    });
 
     return {
-      blocks: [...state.blocks, newBlock],
+      blocks: updatedBlocks,
       pages: updatedPages,
-      selectedBlockId: newId,
-      activePageIndex: targetPageIndex
+      selectedBlockId: newId, // Para que el cursor salte allí de inmediato
     };
   }),
 
-  deleteBlock: (id) => set((state) => ({
-    blocks: state.blocks.filter(b => b.id !== id),
-    pages: state.pages.map(page => ({
-      ...page,
-      blockIds: page.blockIds.filter(blockId => blockId !== id)
-    })),
-    // Si borramos el bloque que teníamos seleccionado, limpiamos la selección
-    selectedBlockId: state.selectedBlockId === id ? null : state.selectedBlockId
-  })),
+  // --- ACCIÓN: PEGAR/INSERTAR MÚLTIPLES (Para el Paste) ---
+  handlePasteText: (rawText) => set((state) => {
+    const lines = cleanAndSplitText(rawText);
+    if (lines.length === 0) return state;
 
-  // --- ACCIONES DE CONTENIDO Y UI ---
+    let currentBlocks = [...state.blocks];
+    let currentPages = [...state.pages];
+    let lastNewId = state.selectedBlockId;
 
-  updateBlock: (id, newContent) => set((state) => ({
-    blocks: state.blocks.map(b => b.id === id ? { ...b, content: newContent } : b)
+    // Insertamos cada línea como un bloque independiente
+    lines.forEach((line) => {
+      const newId = crypto.randomUUID();
+      const newBlock = { id: newId, type: 'paragraph', content: line };
+
+      currentBlocks.push(newBlock);
+
+      // Los añadimos a la página activa actual
+      currentPages = currentPages.map((page, idx) => {
+        if (idx === state.activePageIndex) {
+          return { ...page, blockIds: [...page.blockIds, newId] };
+        }
+        return page;
+      });
+
+      lastNewId = newId;
+    });
+
+    return {
+      blocks: currentBlocks,
+      pages: currentPages,
+      selectedBlockId: lastNewId
+    };
+  }),
+
+  // --- SETTERS AUXILIARES ---
+  updateBlockContent: (id, content) => set((state) => ({
+    blocks: state.blocks.map(b => b.id === id ? { ...b, content } : b)
   })),
 
   setSelectedBlock: (id) => set({ selectedBlockId: id }),
-
-  setActivePage: (index) => set({ activePageIndex: index }),
 });
