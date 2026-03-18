@@ -1,26 +1,28 @@
-// features/editor/logic/rules/documentStyles.js
+import { APA_CONFIG } from '@core/utils/measurements';
 
 export const DOCUMENT_THEME = {
   global: {
-    fontFamily: '"Times New Roman", Times, serif',
-    fontSize: '12pt',
+    fontFamily: APA_CONFIG.typography.family,
+    fontSize: `${APA_CONFIG.typography.size}pt`,
     color: '#000',
+    lineHeight: APA_CONFIG.typography.lineHeight, // 1.5 de interlineado global
   },
   blocks: {
     paragraph: {
-      lineHeight: '1.5',
       textAlign: 'justify',
-      textIndent: '1.27cm', // La famosa sangría APA
-      marginBottom: '0',    // Los párrafos suelen ir pegados en manuscritos
+      textIndent: '1.27cm', // Sangría de primera línea APA
+      marginBottom: '0',
       padding: '2px 0',
+      display: 'block',
     },
     h1: {
       textAlign: 'center',
       fontWeight: 'bold',
-      textTransform: 'uppercase',
       textIndent: '0',      // Los títulos no llevan sangría
       marginTop: '12pt',
       marginBottom: '12pt',
+      display: 'block',
+      // Forzamos minúsculas para que el CSS controle la capitalización
     }
   }
 };

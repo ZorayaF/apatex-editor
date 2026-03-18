@@ -1,22 +1,26 @@
-// features/editor/logic/engine/parser.js
-
 /**
- * Limpia el texto de cualquier HTML y lo divide por saltos de línea.
- * @param {string} rawText - Texto crudo (posiblemente con HTML de un paste)
- * @returns {string[]} - Array de strings limpios
+ * Utilidad para procesar texto externo (Clipboard).
+ * Extrae solo el contenido plano y lo fragmenta en párrafos.
  */
 export const cleanAndSplitText = (rawText) => {
   if (!rawText) return [];
 
-  // 1. Eliminar etiquetas HTML (fuerza texto plano)
+  /**
+   * 1. Eliminamos etiquetas HTML.
+   * Usamos un elemento temporal para que el navegador extraiga solo 
+   * el texto visible, eliminando estilos y scripts del portapapeles.
+   */
   const tempDiv = document.createElement('div');
   tempDiv.innerHTML = rawText;
   const plainText = tempDiv.textContent || tempDiv.innerText || "";
 
-  // 2. Dividir por saltos de línea (uno o más)
-  // Filtramos para evitar bloques vacíos accidentales
+  /**
+   * 2. Segmentación de párrafos.
+   * Dividimos por cualquier tipo de salto de línea (\n o \r\n),
+   * limpiamos espacios en los extremos y descartamos líneas vacías.
+   */
   return plainText
-    .split(/\n+/)
+    .split(/\r?\n/)
     .map(line => line.trim())
-    .filter(line => line.length > 0);
+    .filter(line => line !== ""); // Solo devolvemos bloques con contenido
 };

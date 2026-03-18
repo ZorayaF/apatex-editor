@@ -2,45 +2,57 @@ import React, { useRef, useEffect } from 'react';
 import { useStore } from '@store';
 import { DOCUMENT_THEME } from '@editor/logic/rules/documentStyles';
 
-export const BaseEditable = ({ id, content, tag: Tag = 'div', style, className }) => {
+export const BaseEditable = ({ id, content, type, tag: Tag = 'div', style, className }) => {
   const ref = useRef(null);
   const isTyping = useRef(false);
+
   // Acciones del Store
   const splitBlock = useStore((state) => state.splitBlock);
   const handlePasteText = useStore((state) => state.handlePasteText);
   const updateBlockContent = useStore((state) => state.updateBlockContent);
   const selectedBlockId = useStore((state) => state.selectedBlockId);
-  const setSelectedBlock = useStore((state) => state.setSelectedBlock);
+  const setSelectedBlockId = useStore((state) => state.setSelectedBlockId);
 
-  // 1. AUTO-FOCO: Si este bloque es el seleccionado, le damos el foco real
+  // 1. SINCRONIZACIÓN DE CONTENIDO
+  // Evita que el cursor salte al actualizar el estado desde el teclado
   useEffect(() => {
-    // Solo actualizamos el DOM si el cambio viene de fuera (no por el teclado)
-    if (ref.current && ref.current.innerText !== content && !isTyping.current) {
-      ref.current.innerText = content;
+    if (ref.current && !isTyping.current) {
+      if (ref.current.innerText !== content) {
+        ref.current.innerText = content;
+      }
     }
   }, [content]);
 
+  // 2. GESTIÓN DE FOCO Y CURSOR
   useEffect(() => {
-    if (selectedBlockId === id && ref.current) {
+    if (selectedBlockId === id && ref.current && document.activeElement !== ref.current) {
       ref.current.focus();
 
-      // Mover cursor al final del texto
+      // Mover cursor al final del texto al recibir foco
       const range = document.createRange();
       const sel = window.getSelection();
       range.selectNodeContents(ref.current);
-      range.collapse(false); // false significa "al final"
+      range.collapse(false);
       sel.removeAllRanges();
       sel.addRange(range);
     }
   }, [selectedBlockId, id]);
 
-  // 2. MANEJO DE ENTER (División)
+  // 3. MANEJO DE TECLAS (ENTER PARA DIVIDIR)
   const handleKeyDown = (e) => {
     if (e.key === 'Enter') {
       e.preventDefault();
 
       const selection = window.getSelection();
-      const cursorPosition = selection.anchorOffset;
+      if (!selection.rangeCount) return;
+
+      // Medición robusta de la posición del cursor (Caret)
+      const range = selection.getRangeAt(0);
+      const preCaretRange = range.cloneRange();
+      preCaretRange.selectNodeContents(ref.current);
+      preCaretRange.setEnd(range.endContainer, range.endOffset);
+
+      const cursorPosition = preCaretRange.toString().length;
       const fullText = ref.current.innerText;
 
       const textBefore = fullText.slice(0, cursorPosition);
@@ -50,19 +62,19 @@ export const BaseEditable = ({ id, content, tag: Tag = 'div', style, className }
     }
   };
 
-  // 3. MANEJO DE PEGADO (Limpieza)
+  // 4. MANEJO DE PEGADO (TEXTO PLANO)
   const handlePaste = (e) => {
     e.preventDefault();
     const text = e.clipboardData.getData('text/plain');
     handlePasteText(text);
   };
 
-  // 4. SINCRONIZACIÓN SIMPLE (Escritura)
+  // 5. ACTUALIZACIÓN AL ESCRIBIR
   const handleInput = () => {
-    isTyping.current = true; // Bloqueamos la actualización desde props
+    isTyping.current = true;
     updateBlockContent(id, ref.current.innerText);
 
-    // Liberamos el escudo después de un microsegundo
+    // Pequeño delay para permitir que el estado de React se estabilice
     setTimeout(() => {
       isTyping.current = false;
     }, 10);
@@ -76,18 +88,16 @@ export const BaseEditable = ({ id, content, tag: Tag = 'div', style, className }
       onKeyDown={handleKeyDown}
       onPaste={handlePaste}
       onInput={handleInput}
-      onFocus={() => setSelectedBlock(id)}
+      onFocus={() => setSelectedBlockId(id)}
+      className={className}
       style={{
         ...DOCUMENT_THEME.global,
-        ...style,
+        ...(DOCUMENT_THEME.blocks[type] || {}), // Aplica estilos por tipo (h1 o paragraph)
+        ...style, // Overrides manuales
         outline: 'none',
         whiteSpace: 'pre-wrap',
+        wordBreak: 'break-word',
       }}
-      className={className}
-    >
-      {/* IMPORTANTE: Dejamos el contenido vacío aquí 
-         y dejamos que el useEffect lo gestione al montar.
-      */}
-    </Tag>
+    />
   );
 };

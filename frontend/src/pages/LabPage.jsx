@@ -1,34 +1,36 @@
 import React from 'react';
 import { Box } from '@mantine/core';
 
-// Asegúrate de que la ruta de importación coincida con tu estructura
+// 1. IMPORTAR LOS ESTILOS (Asegúrate de que la ruta sea correcta según tu carpeta)
+import '@editor/styles/editor.css';
+
 import { Header } from '@editor/components/header';
 import { Canvas } from '@editor/components/canvas/Canvas';
 
 const LabPage = () => {
-  // Nota: Ya no necesitamos importar useDocumentStore aquí.
-  // La página es solo "Layout", la lógica vive dentro de Header y Canvas.
-
   return (
     <Box
       h="100vh"
       style={{
         display: 'flex',
         flexDirection: 'column',
-        overflow: 'hidden' // Evita scroll en el body, lo delegamos al canvas
+        overflow: 'hidden'
       }}
     >
-      {/* 1. Zona de Control (Sticky/Fijo) */}
       <Header />
 
-      {/* 2. Zona de Trabajo (Flexible y Scrollable) */}
+      {/* 2. AÑADIMOS LA CLASE 'canvas-viewport' 
+         Esta clase es la que activa el "counter-reset" en tu CSS 
+         para que la numeración de los H1 empiece desde 1.
+      */}
       <Box
         component="main"
-        bg="gray.0" // Un fondo gris suave para distinguir el "papel" del fondo
+        className="canvas-viewport"
+        bg="gray.0"
         style={{
-          flex: 1, // Ocupa todo el espacio restante
+          flex: 1,
           position: 'relative',
-          overflow: 'hidden' // El scroll lo manejará el componente Canvas internamente
+          overflow: 'hidden'
         }}
       >
         <Canvas />

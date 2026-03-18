@@ -1,30 +1,53 @@
-// src/features/editor/components/canvas/Page.jsx
+import { useEffect, useRef } from 'react';
 import { Paper, Box } from '@mantine/core';
-import { PAGE_WIDTH_PX, PAGE_HEIGHT_PX, cmToPx, APA_CONFIG } from '@core/utils/measurements';
+import {
+  PAGE_WIDTH_PX,
+  PAGE_HEIGHT_PX,
+  cmToPx,
+  APA_CONFIG,
+} from '@core/utils/measurements';
 import { useStore } from '@store';
+import { getOverflowBlockId } from '../../logic/engine/paginationEngine';
 
 export const Page = ({ children, pageNumber }) => {
   const { margins } = APA_CONFIG;
+  const pageContentRef = useRef(null);
 
-  // 1. Suscribirse al índice de la página activa
+  // Acciones y estado del Store
   const activePageIndex = useStore((state) => state.activePageIndex);
   const setActivePage = useStore((state) => state.setActivePage);
   const setSelectedBlockId = useStore((state) => state.setSelectedBlockId);
+  const moveToNextPage = useStore((state) => state.moveToNextPage);
+  const blocks = useStore((state) => state.blocks);
 
-  // Comprobar si ESTA página es la activa
   const isActive = activePageIndex === (pageNumber - 1);
 
+  /**
+   * EFECTO DE PAGINACIÓN (PUSH ONLY)
+   * Se dispara cuando cambian los bloques para verificar si alguno 
+   * sobrepasa el margen inferior de 2.54cm.
+   */
+  useEffect(() => {
+    if (pageContentRef.current) {
+      const overflowId = getOverflowBlockId(pageContentRef.current);
+
+      if (overflowId) {
+        moveToNextPage(overflowId);
+      }
+    }
+  }, [children, blocks]); // Reacciona al contenido y a la estructura
+
   const handlePageClick = (e) => {
-    // Si haces clic directamente en el papel blanco
+    // Si haces clic directamente en la hoja (no en un bloque)
     if (e.target === e.currentTarget) {
-      setActivePage(pageNumber - 1); // Activar esta página
-      setSelectedBlockId(null);       // Limpiar selección de bloques
+      setActivePage(pageNumber - 1);
+      setSelectedBlockId(null);
     }
   };
 
   return (
     <Paper
-      shadow={isActive ? "xl" : "md"} // Sombra más profunda si está activa
+      shadow={isActive ? "xl" : "md"}
       radius={0}
       onClick={handlePageClick}
       style={{
@@ -41,29 +64,31 @@ export const Page = ({ children, pageNumber }) => {
         position: 'relative',
         overflow: 'hidden',
         margin: '20px auto',
-        transition: 'all 0.2s ease', // Suaviza el cambio de sombra/borde
-
-        // 2. EFECTO VISUAL: Un borde azul muy sutil por fuera
+        transition: 'all 0.2s ease',
+        display: 'flex',
+        flexDirection: 'column',
         outline: isActive ? '2px solid #228be6' : '1px solid #e0e0e0',
-        // Si no está activa, el borde es gris casi invisible
       }}
     >
-      {/* Contenedor interno para asegurar que el clic llegue al Paper */}
-      <Box style={{ height: '100%', position: 'relative', pointerEvents: 'none' }}>
-        {/* Usamos pointerEvents: 'none' en el Box contenedor para que el clic 
-            atraviese los espacios vacíos y llegue al Paper */}
+      {/* Contenedor de contenido útil */}
+      <Box
+        ref={pageContentRef}
+        style={{ height: '100%', position: 'relative', pointerEvents: 'none' }}
+      >
         <div style={{ pointerEvents: 'auto' }}>
           {children}
         </div>
       </Box>
 
+      {/* Indicador de número de página */}
       <Box style={{
         position: 'absolute',
         bottom: 20,
         right: 40,
         fontSize: '10pt',
-        color: isActive ? '#228be6' : '#ccc', // El número de página se ilumina
-        fontWeight: isActive ? 'bold' : 'normal'
+        color: isActive ? '#228be6' : '#ccc',
+        fontWeight: isActive ? 'bold' : 'normal',
+        userSelect: 'none'
       }}>
         {pageNumber}
       </Box>
