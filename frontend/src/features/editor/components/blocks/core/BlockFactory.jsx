@@ -1,83 +1,29 @@
+// src/features/editor/components/blocks/core/BlockFactory.jsx
 import React from "react";
-import { BaseEditable } from "./BaseEditable";
+import { BLOCK_COMPONENTS, BLOCK_CONFIGS } from "./BlockRegistry";
 
-/**
- * Fábrica de bloques: Determina qué componente renderizar.
- * @param {Object} block - Datos del bloque (id, type, content).
- * @param {string} label - El número calculado por JS (ej: "1.1 ").
- */
 export const BlockFactory = ({ block, label }) => {
   if (!block) return null;
 
-  switch (block.type) {
-    case "h1":
-      return (
-        <BaseEditable
-          id={block.id}
-          content={block.content}
-          type="h1"
-          tag="h1"
-          label={label} // <--- Recibe "1. ", "2. ", etc.
-        />
-      );
+  // 1. Buscamos el componente en el registro
+  const Component = BLOCK_COMPONENTS[block.type];
 
-    case "h2":
-      return (
-        <BaseEditable
-          id={block.id}
-          content={block.content}
-          type="h2"
-          tag="h2"
-          label={label} // <--- Recibe "1.1 ", "1.2 ", etc.
-        />
-      );
+  // 2. Buscamos su configuración (tag, etc.)
+  const config = BLOCK_CONFIGS[block.type] || {};
 
-    case "h3": // <--- NUEVO CASO
-      return (
-        <BaseEditable
-          id={block.id}
-          content={block.content}
-          type="h3"
-          tag="h3"
-          label={label}
-        />
-      );
-
-    case "h4": // <--- NUEVO CASO
-      return (
-        <BaseEditable
-          id={block.id}
-          content={block.content}
-          type="h4"
-          tag="h4"
-          label={label}
-        />
-      );
-    case "h5": // <--- NUEVO CASO
-      return (
-        <BaseEditable
-          id={block.id}
-          content={block.content}
-          type="h5"
-          tag="h5"
-          label={label}
-        />
-      );
-
-    case "paragraph":
-      return (
-        <BaseEditable
-          id={block.id}
-          content={block.content}
-          type="paragraph"
-          tag="p"
-          // Los párrafos no suelen llevar label, pero BaseEditable
-          // lo manejará como null internamente.
-        />
-      );
-
-    default:
-      console.warn(`Tipo de bloque no reconocido: ${block.type}`);
-      return null;
+  if (!Component) {
+    console.warn(`[BlockFactory] No hay componente para: ${block.type}`);
+    return null;
   }
+
+  // 3. Renderizado limpio
+  return (
+    <Component
+      id={block.id}
+      content={block.content}
+      type={block.type}
+      tag={config.tag || "div"}
+      label={block.type.startsWith("h") ? label : null}
+    />
+  );
 };

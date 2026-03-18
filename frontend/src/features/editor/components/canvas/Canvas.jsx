@@ -8,31 +8,30 @@ import { BlockFactory } from "../blocks/core/BlockFactory";
 import { calculateBlockLabels } from "@editor/logic/engine/numberingEngine";
 
 export const Canvas = () => {
-  const { pages, blocks } = useStore();
+  // 1. Selectores específicos para evitar re-renders innecesarios
+  const pages = useStore((s) => s.pages);
+  const blocks = useStore((s) => s.blocks);
 
-  // Generamos el mapa de números (ej: { "id-123": "1.1 " })
+  // 2. Indexamos los bloques por ID para búsqueda O(1)
+  const blocksMap = useMemo(() => {
+    return blocks.reduce((acc, block) => {
+      acc[block.id] = block;
+      return acc;
+    }, {});
+  }, [blocks]);
+
+  // 3. Mapa de números
   const labels = useMemo(
     () => calculateBlockLabels(pages, blocks),
     [pages, blocks],
   );
 
   return (
-    <Box
-      className="canvas-viewport"
-      style={{
-        backgroundColor: "#f1f3f5",
-        height: "calc(100vh - 60px)",
-        overflowY: "auto",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        padding: "20px 0",
-      }}
-    >
+    <Box className="canvas-viewport" style={viewportStyle}>
       {pages.map((page, index) => (
         <Page key={page.id} pageNumber={index + 1}>
           {page.blockIds.map((blockId) => {
-            const blockData = blocks.find((b) => b.id === blockId);
+            const blockData = blocksMap[blockId]; // Búsqueda instantánea
             if (!blockData) return null;
 
             return (
@@ -41,8 +40,6 @@ export const Canvas = () => {
                 blockId={blockId}
                 type={blockData.type}
               >
-                {/* Pasamos la etiqueta calculada (si existe)
-                 */}
                 <BlockFactory block={blockData} label={labels[blockId]} />
               </BlockWrapper>
             );
@@ -51,4 +48,15 @@ export const Canvas = () => {
       ))}
     </Box>
   );
+};
+
+// --- ESTILOS EXTRAÍDOS ---
+const viewportStyle = {
+  backgroundColor: "#f1f3f5",
+  height: "calc(100vh - 60px)",
+  overflowY: "auto",
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  padding: "20px 0",
 };

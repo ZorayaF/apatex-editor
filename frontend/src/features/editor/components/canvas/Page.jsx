@@ -1,97 +1,93 @@
-import { useEffect, useRef } from 'react';
-import { Paper, Box } from '@mantine/core';
+import React, { useRef } from "react";
+import { Paper, Box } from "@mantine/core";
+import { useStore } from "@store";
 import {
   PAGE_WIDTH_PX,
   PAGE_HEIGHT_PX,
   cmToPx,
   APA_CONFIG,
-} from '@core/utils/measurements';
-import { useStore } from '@store';
-import { getOverflowBlockId } from '../../logic/engine/paginationEngine';
+} from "@core/utils/measurements";
+import { usePagePagination } from "@editor/hooks/usePagePagination";
 
 export const Page = ({ children, pageNumber }) => {
-  const { margins } = APA_CONFIG;
   const pageContentRef = useRef(null);
+  const { margins } = APA_CONFIG;
 
-  // Acciones y estado del Store
-  const activePageIndex = useStore((state) => state.activePageIndex);
-  const setActivePage = useStore((state) => state.setActivePage);
-  const setSelectedBlockId = useStore((state) => state.setSelectedBlockId);
-  const moveToNextPage = useStore((state) => state.moveToNextPage);
-  const blocks = useStore((state) => state.blocks);
+  // Selectores limpios
+  const activePageIndex = useStore((s) => s.activePageIndex);
+  const setActivePage = useStore((s) => s.setActivePage);
+  const setSelectedBlockId = useStore((s) => s.setSelectedBlockId);
 
-  const isActive = activePageIndex === (pageNumber - 1);
+  const isActive = activePageIndex === pageNumber - 1;
 
-  /**
-   * EFECTO DE PAGINACIÓN (PUSH ONLY)
-   * Se dispara cuando cambian los bloques para verificar si alguno 
-   * sobrepasa el margen inferior de 2.54cm.
-   */
-  useEffect(() => {
-    if (pageContentRef.current) {
-      const overflowId = getOverflowBlockId(pageContentRef.current);
-
-      if (overflowId) {
-        moveToNextPage(overflowId);
-      }
-    }
-  }, [children, blocks]); // Reacciona al contenido y a la estructura
+  // Delegamos la paginación al hook
+  usePagePagination(pageContentRef, children, pageNumber);
 
   const handlePageClick = (e) => {
-    // Si haces clic directamente en la hoja (no en un bloque)
     if (e.target === e.currentTarget) {
       setActivePage(pageNumber - 1);
       setSelectedBlockId(null);
     }
   };
 
+  // --- CONFIGURACIÓN DE ESTILOS (Fuera del return para legibilidad) ---
+  const pageStyle = {
+    // Dimensiones Estrictas
+    width: `${PAGE_WIDTH_PX}px`,
+    height: `${PAGE_HEIGHT_PX}px`,
+    minHeight: `${PAGE_HEIGHT_PX}px`, // Esto evita que se reduzca
+    maxHeight: `${PAGE_HEIGHT_PX}px`, // Esto evita que crezca de más
+
+    // Márgenes internos (Padding)
+    paddingTop: `${cmToPx(margins.top)}px`,
+    paddingBottom: `${cmToPx(margins.bottom)}px`,
+    paddingLeft: `${cmToPx(margins.left)}px`,
+    paddingRight: `${cmToPx(margins.right)}px`,
+
+    // Visual y Posicionamiento
+    backgroundColor: "white",
+    margin: "20px auto",
+    position: "relative",
+    display: "flex",
+    flexDirection: "column",
+    overflow: "hidden",
+    boxSizing: "border-box", // Crucial para que el padding no sume al tamaño
+    transition: "all 0.2s ease",
+    outline: isActive ? "2px solid #228be6" : "1px solid #e0e0e0",
+    boxShadow: isActive
+      ? "0 10px 30px rgba(0,0,0,0.1)"
+      : "0 2px 10px rgba(0,0,0,0.05)",
+  };
+
   return (
-    <Paper
-      shadow={isActive ? "xl" : "md"}
-      radius={0}
-      onClick={handlePageClick}
-      style={{
-        width: `${PAGE_WIDTH_PX}px`,
-        height: `${PAGE_HEIGHT_PX}px`,
-        minHeight: `${PAGE_HEIGHT_PX}px`,
-        maxHeight: `${PAGE_HEIGHT_PX}px`,
-        paddingTop: `${cmToPx(margins.top)}px`,
-        paddingBottom: `${cmToPx(margins.bottom)}px`,
-        paddingLeft: `${cmToPx(margins.left)}px`,
-        paddingRight: `${cmToPx(margins.right)}px`,
-        boxSizing: 'border-box',
-        backgroundColor: 'white',
-        position: 'relative',
-        overflow: 'hidden',
-        margin: '20px auto',
-        transition: 'all 0.2s ease',
-        display: 'flex',
-        flexDirection: 'column',
-        outline: isActive ? '2px solid #228be6' : '1px solid #e0e0e0',
-      }}
-    >
-      {/* Contenedor de contenido útil */}
+    <Paper radius={0} onClick={handlePageClick} style={pageStyle}>
+      {/* Área de contenido: Aquí es donde vive el BlockFactory */}
       <Box
         ref={pageContentRef}
-        style={{ height: '100%', position: 'relative', pointerEvents: 'none' }}
+        style={{ height: "100%", position: "relative", pointerEvents: "none" }}
       >
-        <div style={{ pointerEvents: 'auto' }}>
-          {children}
-        </div>
+        <div style={{ pointerEvents: "auto" }}>{children}</div>
       </Box>
 
-      {/* Indicador de número de página */}
-      <Box style={{
-        position: 'absolute',
-        bottom: 20,
-        right: 40,
-        fontSize: '10pt',
-        color: isActive ? '#228be6' : '#ccc',
-        fontWeight: isActive ? 'bold' : 'normal',
-        userSelect: 'none'
-      }}>
-        {pageNumber}
-      </Box>
+      {/* Footer de página */}
+      <PageNumber indicator={pageNumber} active={isActive} />
     </Paper>
   );
 };
+
+// Sub-componente pequeño para no ensuciar el principal
+const PageNumber = ({ indicator, active }) => (
+  <Box
+    style={{
+      position: "absolute",
+      bottom: 20,
+      right: 40,
+      fontSize: "10pt",
+      color: active ? "#228be6" : "#ccc",
+      fontWeight: active ? "bold" : "normal",
+      userSelect: "none",
+    }}
+  >
+    {indicator}
+  </Box>
+);
