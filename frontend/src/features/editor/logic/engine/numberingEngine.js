@@ -4,6 +4,7 @@ export const calculateBlockLabels = (pages, blocks) => {
   const labels = {};
   let h1Count = 0;
   let h2Count = 0;
+  let h3Count = 0; // Tercer nivel
 
   pages.forEach((page) => {
     page.blockIds.forEach((blockId) => {
@@ -12,11 +13,16 @@ export const calculateBlockLabels = (pages, blocks) => {
 
       if (block.type === "h1") {
         h1Count++;
-        h2Count = 0; // REINICIO: Cada h1 pone a cero los h2
+        h2Count = 0; // Reinicia el nivel 2
+        h3Count = 0; // Reinicia el nivel 3
         labels[blockId] = `${h1Count}. `;
       } else if (block.type === "h2") {
         h2Count++;
+        h3Count = 0; // Reinicia el nivel 3 al cambiar de H2
         labels[blockId] = `${h1Count}.${h2Count} `;
+      } else if (block.type === "h3") {
+        h3Count++;
+        labels[blockId] = `${h1Count}.${h2Count}.${h3Count} `;
       }
     });
   });

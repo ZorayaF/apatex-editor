@@ -1,12 +1,19 @@
 // features/editor/components/header/TextGroup.jsx
-import React from 'react';
-import { Group } from '@mantine/core';
-import { IconH1, IconH2, IconTypography, IconQuote } from '@tabler/icons-react';
-import { useStore } from '@store';
-import { HeaderButton } from './HeaderButton';
+import React from "react";
+import { Group } from "@mantine/core";
+import {
+  IconH1,
+  IconH2,
+  IconH3,
+  IconTypography,
+  IconQuote,
+} from "@tabler/icons-react";
+import { useStore } from "@store";
+import { HeaderButton } from "./HeaderButton";
 
 export const TextGroup = () => {
-const { addBlock, selectedBlockId, blocks } = useStore();
+  const { addBlock, selectedBlockId, blocks } = useStore();
+
   const activeBlock = blocks.find((b) => b.id === selectedBlockId);
   const activeType = activeBlock ? activeBlock.type : null;
 
@@ -14,31 +21,39 @@ export const TextGroup = () => {
     <Group gap={4}>
       <HeaderButton
         label="Título 1"
-        description="Encabezado principal de la sección"
+        description="Encabezado principal"
         icon={IconH1}
-        onClick={() => addBlock('h1')}
-        isActive={activeType === 'h1'}
+        onClick={() => addBlock("h1")}
+        isActive={activeType === "h1"}
       />
       <HeaderButton
         label="Título 2"
         description="Subtítulo de sección"
         icon={IconH2}
-        onClick={() => addBlock('h2')}
-        isActive={activeType === 'h2'}
+        onClick={() => addBlock("h2")}
+        isActive={activeType === "h2"}
+      />
+      {/* Nuevo componente H3 */}
+      <HeaderButton
+        label="Título 3"
+        description="Encabezado de tercer nivel"
+        icon={IconH3}
+        onClick={() => addBlock("h3")}
+        isActive={activeType === "h3"}
       />
       <HeaderButton
         label="Párrafo"
-        description="Texto normal del cuerpo"
+        description="Texto normal"
         icon={IconTypography}
-        onClick={() => addBlock('paragraph')}
-        isActive={activeType === 'paragraph'}
+        onClick={() => addBlock("paragraph")}
+        isActive={activeType === "paragraph"}
       />
       <HeaderButton
         label="Cita"
-        description="Bloque de cita destacado"
+        description="Bloque de cita"
         icon={IconQuote}
-        onClick={() => addBlock('blockquote')}
-        isActive={activeType === 'blockquote'}
+        onClick={() => addBlock("blockquote")}
+        isActive={activeType === "blockquote"}
       />
     </Group>
   );
