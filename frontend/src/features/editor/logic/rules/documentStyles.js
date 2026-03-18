@@ -38,5 +38,21 @@ export const DOCUMENT_THEME = {
       marginBottom: "8pt",
       display: "block",
     },
+    h4: {
+      textAlign: "left",
+      textIndent: "1.27cm", // Sangría APA
+      marginTop: "10pt",
+      marginBottom: "10pt",
+      display: "block",
+      fontWeight: "normal", // El contenedor es normal, la negrita la pondrá el JS
+    },
+    h5: {
+      textAlign: "left",
+      textIndent: "1.27cm",
+      marginTop: "10pt",
+      marginBottom: "10pt",
+      display: "block",
+      fontWeight: "normal",
+    },
   },
 };

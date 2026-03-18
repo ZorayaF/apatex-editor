@@ -43,6 +43,27 @@ export const BlockFactory = ({ block, label }) => {
         />
       );
 
+    case "h4": // <--- NUEVO CASO
+      return (
+        <BaseEditable
+          id={block.id}
+          content={block.content}
+          type="h4"
+          tag="h4"
+          label={label}
+        />
+      );
+    case "h5": // <--- NUEVO CASO
+      return (
+        <BaseEditable
+          id={block.id}
+          content={block.content}
+          type="h5"
+          tag="h5"
+          label={label}
+        />
+      );
+
     case "paragraph":
       return (
         <BaseEditable

@@ -5,6 +5,8 @@ import {
   IconH1,
   IconH2,
   IconH3,
+  IconH4,
+  IconH5,
   IconTypography,
   IconQuote,
 } from "@tabler/icons-react";
@@ -40,6 +42,20 @@ export const TextGroup = () => {
         icon={IconH3}
         onClick={() => addBlock("h3")}
         isActive={activeType === "h3"}
+      />
+      <HeaderButton
+        label="Título 4"
+        description="Encabezado de cuarto nivel"
+        icon={IconH4}
+        onClick={() => addBlock("h4")}
+        isActive={activeType === "h4"}
+      />
+      <HeaderButton
+        label="Título 5"
+        description="Encabezado de quinto nivel"
+        icon={IconH5}
+        onClick={() => addBlock("h5")}
+        isActive={activeType === "h5"}
       />
       <HeaderButton
         label="Párrafo"
