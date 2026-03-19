@@ -42,14 +42,8 @@ El entorno de pruebas actual se encuentra en `LabPage.jsx`. Este componente act�
 
 Para iniciar el entorno de desarrollo del frontend:
 
-Bash
-
 ```
-
 npm run dev
-
 ```
-
 ---
-
 El resultado final de este módulo es una interfaz que garantiza una distancia uniforme entre bloques, idéntica al interlineado interno de los párrafos, manteniendo la coherencia visual requerida en documentos académicos.
