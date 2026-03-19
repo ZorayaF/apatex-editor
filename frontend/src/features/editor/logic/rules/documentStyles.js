@@ -1,63 +1,59 @@
+// src/features/editor/logic/rules/documentStyles.js
 import { APA_CONFIG } from "@core/utils/measurements";
+
+const { typography } = APA_CONFIG;
 
 export const DOCUMENT_THEME = {
   global: {
-    fontFamily: APA_CONFIG.typography.family,
-    fontSize: `${APA_CONFIG.typography.size}pt`,
+    fontFamily: typography.family,
+    fontSize: `${typography.size}pt`,
+    lineHeight: typography.lineHeight, // 1.5
     color: "#000",
-    lineHeight: APA_CONFIG.typography.lineHeight, // 1.5 de interlineado global
   },
   blocks: {
+    // REGLA DE ORO: Margins y Paddings en 0 para que mande el line-height
     paragraph: {
       textAlign: "justify",
-      textIndent: "1.27cm", // Sangría de primera línea APA
-      marginBottom: "0",
-      padding: "2px 0",
-      display: "block",
+      textIndent: `${typography.indent}cm`, // 1.27cm
+      margin: "0",
+      padding: "0",
     },
     h1: {
       textAlign: "center",
       fontWeight: "bold",
-      textIndent: "0", // Los títulos no llevan sangría
-      marginTop: "12pt",
-      marginBottom: "12pt",
-      display: "block",
-      // Forzamos minúsculas para que el CSS controle la capitalización
+      textIndent: "0",
+      margin: "0", // Eliminamos los 12pt previos
     },
     h2: {
       textAlign: "left",
       fontWeight: "bold",
-      marginTop: "10pt",
-      marginBottom: "10pt",
+      textIndent: "0",
+      margin: "0", // Eliminamos los 10pt previos
     },
     h3: {
-      textAlign: "left", // Alineado a la izquierda
-      fontWeight: "bold", // Negrita
-      fontStyle: "italic", // CURSIVA (La diferencia clave)
-      marginTop: "8pt",
-      marginBottom: "8pt",
-      display: "block",
+      textAlign: "left",
+      fontWeight: "bold",
+      fontStyle: "italic",
+      textIndent: "0",
+      margin: "0",
     },
     h4: {
       textAlign: "left",
-      textIndent: "1.27cm", // Sangría APA
-      marginTop: "10pt",
-      marginBottom: "10pt",
-      display: "block",
-      fontWeight: "normal", // El contenedor es normal, la negrita la pondrá el JS
+      textIndent: `${typography.indent}cm`,
+      fontWeight: "normal", // El CSS del wrapper o JS pondrá la negrita
+      margin: "0",
     },
     h5: {
       textAlign: "left",
-      textIndent: "1.27cm",
-      marginTop: "10pt",
-      marginBottom: "10pt",
-      display: "block",
+      textIndent: `${typography.indent}cm`,
       fontWeight: "normal",
+      margin: "0",
     },
     bullet: {
-      paddingLeft: "1.27cm", // Alineado con la sangría normal
+      paddingLeft: `${typography.indent}cm`, // Alineado con la sangría
       textAlign: "left",
-      display: "flex", // Para que la viñeta y el texto convivan
+      display: "flex",
+      margin: "0",
     },
   },
 };
