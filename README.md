@@ -34,14 +34,14 @@ Para poner en marcha el entorno de desarrollo, es necesario instalar las depende
    Bash
 
 ```
-npm install
+npm install
 ```  
 
 **Instalación de dependencias del editor (frontend):**  
    Bash
 
 ```
-cd frontend
+cd frontend
 npm install
 ```
 
@@ -53,7 +53,7 @@ Debido a la naturaleza desacoplada del proyecto, se pueden ejecutar los entornos
   Bash
 
 ```
-cd frontend
+cd frontend
 npm run dev
 ```
 
@@ -61,7 +61,7 @@ npm run dev
   Bash
 
 ```
-npm run start
+npm run start
 ``` 
 
 ## **Metodología de Trabajo**
