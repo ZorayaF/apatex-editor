@@ -1,4 +1,5 @@
-import React, { useRef } from "react";
+// src/features/editor/components/canvas/Page.jsx
+import React, { useRef, memo } from "react";
 import { Paper, Box } from "@mantine/core";
 import { useStore } from "@store";
 import {
@@ -8,20 +9,21 @@ import {
   APA_CONFIG,
 } from "@core/utils/measurements";
 import { usePagePagination } from "@editor/hooks/usePagePagination";
+import { ConnectedBlock } from "./ConnectedBlock";
 
-export const Page = ({ children, pageNumber }) => {
+export const Page = memo(({ pageId, pageNumber }) => {
   const pageContentRef = useRef(null);
   const { margins } = APA_CONFIG;
 
-  // Selectores limpios
-  const activePageIndex = useStore((s) => s.activePageIndex);
-  const setActivePage = useStore((s) => s.setActivePage);
-  const setSelectedBlockId = useStore((s) => s.setSelectedBlockId);
+  // Obtenemos solo los blockIds de ESTA página
+  const blockIds = useStore(
+    (s) => s.pages.find((p) => p.id === pageId)?.blockIds || [],
+  );
+  const isActive = useStore((s) => s.activePageIndex === pageNumber - 1);
+  const { setActivePage, setSelectedBlockId } = useStore();
 
-  const isActive = activePageIndex === pageNumber - 1;
-
-  // Delegamos la paginación al hook
-  usePagePagination(pageContentRef, children, pageNumber);
+  // La paginación ahora solo observa la lista de IDs de esta página
+  usePagePagination(pageContentRef, blockIds, pageNumber);
 
   const handlePageClick = (e) => {
     if (e.target === e.currentTarget) {
@@ -30,64 +32,51 @@ export const Page = ({ children, pageNumber }) => {
     }
   };
 
-  // --- CONFIGURACIÓN DE ESTILOS (Fuera del return para legibilidad) ---
-  const pageStyle = {
-    // Dimensiones Estrictas
-    width: `${PAGE_WIDTH_PX}px`,
-    height: `${PAGE_HEIGHT_PX}px`,
-    minHeight: `${PAGE_HEIGHT_PX}px`, // Esto evita que se reduzca
-    maxHeight: `${PAGE_HEIGHT_PX}px`, // Esto evita que crezca de más
-
-    // Márgenes internos (Padding)
-    paddingTop: `${cmToPx(margins.top)}px`,
-    paddingBottom: `${cmToPx(margins.bottom)}px`,
-    paddingLeft: `${cmToPx(margins.left)}px`,
-    paddingRight: `${cmToPx(margins.right)}px`,
-
-    // Visual y Posicionamiento
-    backgroundColor: "white",
-    margin: "20px auto",
-    position: "relative",
-    display: "flex",
-    flexDirection: "column",
-    overflow: "hidden",
-    boxSizing: "border-box", // Crucial para que el padding no sume al tamaño
-    transition: "all 0.2s ease",
-    outline: isActive ? "2px solid #228be6" : "1px solid #e0e0e0",
-    boxShadow: isActive
-      ? "0 10px 30px rgba(0,0,0,0.1)"
-      : "0 2px 10px rgba(0,0,0,0.05)",
-  };
-
   return (
-    <Paper radius={0} onClick={handlePageClick} style={pageStyle}>
-      {/* Área de contenido: Aquí es donde vive el BlockFactory */}
+    <Paper
+      radius={0}
+      onClick={handlePageClick}
+      style={getPageStyle(margins, isActive)}
+    >
       <Box
         ref={pageContentRef}
-        style={{ height: "100%", position: "relative", pointerEvents: "none" }}
+        style={{ height: "100%", position: "relative" }}
       >
-        <div style={{ pointerEvents: "auto" }}>{children}</div>
+        <div style={{ pointerEvents: "auto" }}>
+          {blockIds.map((id) => (
+            <ConnectedBlock key={id} blockId={id} />
+          ))}
+        </div>
       </Box>
 
-      {/* Footer de página */}
-      <PageNumber indicator={pageNumber} active={isActive} />
+      {/* Footer simplificado */}
+      <Box style={pageNumberStyle(isActive)}>{pageNumber}</Box>
     </Paper>
   );
-};
+});
 
-// Sub-componente pequeño para no ensuciar el principal
-const PageNumber = ({ indicator, active }) => (
-  <Box
-    style={{
-      position: "absolute",
-      bottom: 20,
-      right: 40,
-      fontSize: "10pt",
-      color: active ? "#228be6" : "#ccc",
-      fontWeight: active ? "bold" : "normal",
-      userSelect: "none",
-    }}
-  >
-    {indicator}
-  </Box>
-);
+// Estilos extraídos para evitar recrearlos en cada render
+const getPageStyle = (margins, isActive) => ({
+  width: `${PAGE_WIDTH_PX}px`,
+  height: `${PAGE_HEIGHT_PX}px`,
+  minHeight: `${PAGE_HEIGHT_PX}px`,
+  maxHeight: `${PAGE_HEIGHT_PX}px`,
+  padding: `${cmToPx(margins.top)}px ${cmToPx(margins.right)}px ${cmToPx(margins.bottom)}px ${cmToPx(margins.left)}px`,
+  backgroundColor: "white",
+  margin: "20px auto",
+  position: "relative",
+  display: "flex",
+  flexDirection: "column",
+  overflow: "hidden",
+  boxSizing: "border-box",
+  outline: isActive ? "2px solid #228be6" : "1px solid #e0e0e0",
+});
+
+const pageNumberStyle = (isActive) => ({
+  position: "absolute",
+  bottom: 20,
+  right: 40,
+  fontSize: "10pt",
+  color: isActive ? "#228be6" : "#ccc",
+  fontWeight: isActive ? "bold" : "normal",
+});

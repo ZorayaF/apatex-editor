@@ -1,23 +1,14 @@
-// features/editor/hooks/useEditor.js
+// src/features/editor/hooks/useEditor.js
+import { useStore } from "@store";
 
 export const useEditor = () => {
-  const store = useStore(); // Zustand
+  const addBlock = useStore((s) => s.addBlock);
 
-  const handleInsertBlock = (type) => {
-    // 1. Pedir al Motor de Inserción que calcule el nuevo estado
-    const { updatedPages, targetPage } = calculateInsertion(
-      store.pages,
-      store.blocks,
-      type,
-      store.activePageIndex
-    );
-
-    // 2. Ejecutar el cambio en el store
-    store.updateEditorState(updatedPages, targetPage);
+  const insertBlock = (type) => {
+    addBlock(type);
   };
 
   return {
-    insertBlock: handleInsertBlock,
-    // ... otras funciones como deleteBlock, moveBlock
+    insertBlock,
   };
 };
