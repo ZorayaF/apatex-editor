@@ -23,6 +23,7 @@ export const BaseEditable = ({
     setSelectedBlockId,
     selectedBlockId,
     splitBlock,
+    handlePasteText,
   } = useStore();
 
   // --- EFECTOS ---
@@ -81,7 +82,15 @@ export const BaseEditable = ({
       splitBlock(id, fullText.slice(0, offset), fullText.slice(offset));
     }
   };
+  const handlePaste = (e) => {
+    e.preventDefault();
 
+    // Extraemos el texto plano directamente (el navegador hace el trabajo sucio)
+    const plainText = e.clipboardData.getData("text/plain");
+
+    // Enviamos al store
+    handlePasteText(plainText);
+  };
   const blockStyle = DOCUMENT_THEME.blocks[type] || {};
   const isCentered = blockStyle.textAlign === "center";
 
@@ -115,6 +124,7 @@ export const BaseEditable = ({
       <span
         ref={textRef}
         contentEditable
+        onPaste={handlePaste}
         suppressContentEditableWarning
         onKeyDown={handleKeyDown}
         onInput={handleInput}

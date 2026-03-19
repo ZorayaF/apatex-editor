@@ -102,29 +102,32 @@ export const calculatePasteStructure = ({
 
   let currentBlocks = [...state.blocks];
   let currentPages = JSON.parse(JSON.stringify(state.pages));
-  let lastNewId = state.selectedBlockId;
 
-  const activeBlock = currentBlocks.find((b) => b.id === state.selectedBlockId);
-  const isCurrentEmpty = activeBlock && activeBlock.content.trim() === "";
-
+  // Empezamos insertando después del bloque actualmente seleccionado
+  let lastId = state.selectedBlockId;
   let linesToProcess = [...lines];
 
-  if (isCurrentEmpty) {
+  // Si el bloque actual está vacío, lo "llenamos" con la primera línea
+  const activeBlock = currentBlocks.find((b) => b.id === lastId);
+  if (activeBlock && activeBlock.content.trim() === "") {
     const firstLine = linesToProcess.shift();
     currentBlocks = currentBlocks.map((b) =>
-      b.id === state.selectedBlockId ? { ...b, content: firstLine } : b,
+      b.id === lastId ? { ...b, content: firstLine } : b,
     );
   }
 
+  // El resto de líneas se convierten en nuevos bloques de párrafo
   linesToProcess.forEach((line) => {
     const newId = crypto.randomUUID();
     currentBlocks.push({ id: newId, type: "paragraph", content: line });
 
     const page = currentPages[state.activePageIndex];
-    const currentIndex = page.blockIds.indexOf(lastNewId);
+    const currentIndex = page.blockIds.indexOf(lastId);
+
+    // Insertamos justo debajo del anterior
     page.blockIds.splice(currentIndex + 1, 0, newId);
-    lastNewId = newId;
+    lastId = newId;
   });
 
-  return { currentBlocks, currentPages, lastNewId };
+  return { currentBlocks, currentPages, lastNewId: lastId };
 };

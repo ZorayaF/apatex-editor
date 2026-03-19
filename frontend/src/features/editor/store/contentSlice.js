@@ -86,27 +86,48 @@ export const createContentSlice = (set, get) => ({
   // --- PAGINACIÓN ---
   moveToNextPage: (blockId) =>
     set((state) => {
-      const fromIdx = state.pages.findIndex((p) =>
+      const fromPageIndex = state.pages.findIndex((p) =>
         p.blockIds.includes(blockId),
       );
-      if (fromIdx === -1) return state;
+      if (fromPageIndex === -1) return state;
 
       const newPages = JSON.parse(JSON.stringify(state.pages));
-      newPages[fromIdx].blockIds = newPages[fromIdx].blockIds.filter(
-        (id) => id !== blockId,
-      );
+      const targetPageIndex = fromPageIndex + 1;
+      const nextPage = newPages[targetPageIndex];
 
-      if (!newPages[fromIdx + 1]) {
-        newPages.push({ id: crypto.randomUUID(), blockIds: [] });
+      // 1. Extraer el bloque de la página actual
+      newPages[fromPageIndex].blockIds = newPages[
+        fromPageIndex
+      ].blockIds.filter((id) => id !== blockId);
+
+      // 2. LÓGICA DE DETECCIÓN DE H1 EN DESTINO
+      const targetHasH1 =
+        nextPage &&
+        nextPage.blockIds.some(
+          (id) => state.blocks.find((b) => b.id === id)?.type === "h1",
+        );
+
+      if (targetHasH1) {
+        // REGLA NUEVA: Si hay un H1, creamos una página intermedia
+        // para que el texto desbordado no se mezcle con el título principal.
+        newPages.splice(targetPageIndex, 0, {
+          id: crypto.randomUUID(),
+          blockIds: [blockId],
+        });
+      } else if (!nextPage) {
+        // Si no hay página siguiente, la creamos al final
+        newPages.push({
+          id: crypto.randomUUID(),
+          blockIds: [blockId],
+        });
+      } else {
+        // Si la página siguiente existe y NO tiene H1, simplemente lo ponemos al inicio
+        nextPage.blockIds = [blockId, ...nextPage.blockIds];
       }
-      newPages[fromIdx + 1].blockIds = [
-        blockId,
-        ...newPages[fromIdx + 1].blockIds,
-      ];
 
       return {
         pages: newPages,
-        activePageIndex: fromIdx + 1,
+        activePageIndex: targetPageIndex, // El foco sigue al bloque
         selectedBlockId: blockId,
       };
     }),
