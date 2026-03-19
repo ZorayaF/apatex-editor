@@ -3,6 +3,7 @@ import {
   calculateSplit,
   calculateNewBlockStructure,
   calculatePasteStructure,
+  calculateMerge,
 } from "../logic/engine/insertionEngine";
 import { cleanAndSplitText } from "../logic/engine/parser";
 
@@ -74,6 +75,17 @@ export const createContentSlice = (set, get) => ({
         blocks: result.updatedBlocks,
         pages: result.updatedPages,
         selectedBlockId: result.newBlockId,
+      };
+    }),
+  mergeBlocks: (currentBlockId) =>
+    set((state) => {
+      const result = calculateMerge({ state, currentBlockId });
+      if (!result) return state;
+
+      return {
+        blocks: result.updatedBlocks,
+        pages: result.updatedPages,
+        selectedBlockId: result.prevBlockId, // El foco sube
       };
     }),
 

@@ -131,3 +131,46 @@ export const calculatePasteStructure = ({
 
   return { currentBlocks, currentPages, lastNewId: lastId };
 };
+
+export const calculateMerge = ({ state, currentBlockId }) => {
+  const { blocks, pages } = state;
+
+  // 1. Encontrar la ubicación del bloque actual
+  const currentPageIndex = pages.findIndex((p) =>
+    p.blockIds.includes(currentBlockId),
+  );
+  const currentPage = pages[currentPageIndex];
+  const blockIndexInPage = currentPage.blockIds.indexOf(currentBlockId);
+
+  // 2. Encontrar el bloque anterior (puede estar en la misma página o en la anterior)
+  let prevBlockId = null;
+  if (blockIndexInPage > 0) {
+    prevBlockId = currentPage.blockIds[blockIndexInPage - 1];
+  } else if (currentPageIndex > 0) {
+    const prevPage = pages[currentPageIndex - 1];
+    prevBlockId = prevPage.blockIds[prevPage.blockIds.length - 1];
+  }
+
+  if (!prevBlockId) return null; // No hay nada arriba para fusionar
+
+  const currentBlock = blocks.find((b) => b.id === currentBlockId);
+  const prevBlock = blocks.find((b) => b.id === prevBlockId);
+
+  // 3. Fusionar contenido
+  const junctionOffset = prevBlock.content.length; // Guardamos dónde se unirán para el cursor
+  const newContent = prevBlock.content + currentBlock.content;
+
+  // 4. Actualizar bloques y páginas
+  const updatedBlocks = blocks
+    .map((b) => (b.id === prevBlockId ? { ...b, content: newContent } : b))
+    .filter((b) => b.id !== currentBlockId);
+
+  const updatedPages = pages
+    .map((p) => ({
+      ...p,
+      blockIds: p.blockIds.filter((id) => id !== currentBlockId),
+    }))
+    .filter((p) => p.blockIds.length > 0 || pages.length === 1);
+
+  return { updatedBlocks, updatedPages, prevBlockId, junctionOffset };
+};

@@ -17,13 +17,14 @@ export const BaseEditable = ({
   const isTyping = useRef(false);
 
   // Hooks personalizados y Store
-  const { getOffset, setOffset } = useCaret(textRef);
+  const { getOffset, setOffset, setAtEnd } = useCaret(textRef);
   const {
     updateBlockContent,
     setSelectedBlockId,
     selectedBlockId,
     splitBlock,
     handlePasteText,
+    mergeBlocks,
   } = useStore();
 
   // --- EFECTOS ---
@@ -46,17 +47,11 @@ export const BaseEditable = ({
       requestAnimationFrame(() => {
         if (document.activeElement !== textRef.current) {
           textRef.current.focus();
-          // Mover al final por defecto
-          const range = document.createRange();
-          const sel = window.getSelection();
-          range.selectNodeContents(textRef.current);
-          range.collapse(false);
-          sel.removeAllRanges();
-          sel.addRange(range);
+          setAtEnd(); // <--- Mucho más limpio que crear el range a mano
         }
       });
     }
-  }, [selectedBlockId, id]);
+  }, [selectedBlockId, id, setAtEnd]);
 
   // --- HANDLERS ---
   const handleInput = () => {
@@ -75,11 +70,19 @@ export const BaseEditable = ({
   };
 
   const handleKeyDown = (e) => {
+    const offset = getOffset();
+    const fullText = textRef.current.innerText;
+
     if (e.key === "Enter") {
       e.preventDefault();
-      const offset = getOffset();
-      const fullText = textRef.current.innerText;
       splitBlock(id, fullText.slice(0, offset), fullText.slice(offset));
+    }
+
+    // --- NUEVA LÓGICA DE BORRADO ---
+    if (e.key === "Backspace" && offset === 0) {
+      // Si estamos al inicio del bloque y borramos, intentamos fusionar con el de arriba
+      e.preventDefault();
+      mergeBlocks(id);
     }
   };
   const handlePaste = (e) => {
