@@ -8,6 +8,7 @@ import {
   IconH4,
   IconH5,
   IconTypography,
+  IconList,
   IconQuote,
 } from "@tabler/icons-react";
 import { useStore } from "@store";
@@ -63,6 +64,13 @@ export const TextGroup = () => {
         icon={IconTypography}
         onClick={() => addBlock("paragraph")}
         isActive={activeType === "paragraph"}
+      />
+      <HeaderButton
+        label="Lista"
+        description="Lista con viñetas"
+        icon={IconList}
+        onClick={() => addBlock("bullet")}
+        isActive={activeType === "bullet"}
       />
       <HeaderButton
         label="Cita"

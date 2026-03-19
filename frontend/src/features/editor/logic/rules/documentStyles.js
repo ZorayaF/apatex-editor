@@ -54,5 +54,10 @@ export const DOCUMENT_THEME = {
       display: "block",
       fontWeight: "normal",
     },
+    bullet: {
+      paddingLeft: "1.27cm", // Alineado con la sangría normal
+      textAlign: "left",
+      display: "flex", // Para que la viñeta y el texto convivan
+    },
   },
 };

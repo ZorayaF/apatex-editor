@@ -10,17 +10,49 @@ export const calculateSplit = ({
   textBefore,
   textAfter,
 }) => {
-  const newBlockId = crypto.randomUUID();
+  const originalBlock = blocks.find((b) => b.id === blockId);
+  if (!originalBlock)
+    return { updatedBlocks: blocks, updatedPages: pages, newBlockId: null };
 
-  // 1. Actualizar el contenido del bloque original
-  const updatedBlocks = blocks.map((b) =>
+  let newBlockId = crypto.randomUUID();
+  let updatedBlocks = [...blocks];
+
+  // --- LÓGICA DE HERENCIA Y SALIDA DE LISTA ---
+
+  // Por defecto, al dar Enter creamos un párrafo
+  let newType = "paragraph";
+
+  // CASO ESPECIAL: Si estamos en una viñeta (bullet)
+  if (originalBlock.type === "bullet") {
+    // Si la viñeta tiene texto, la siguiente también será una viñeta
+    if (textBefore.trim() !== "" || textAfter.trim() !== "") {
+      newType = "bullet";
+    }
+    // Si la viñeta está VACÍA y damos Enter, "salimos" de la lista:
+    // Convertimos el bloque actual en párrafo y NO creamos uno nuevo.
+    else {
+      const finalBlocks = blocks.map((b) =>
+        // Forzamos content: "" para asegurar que el párrafo nuevo esté limpio
+        b.id === blockId ? { ...b, type: "paragraph", content: "" } : b,
+      );
+
+      return {
+        updatedBlocks: finalBlocks,
+        updatedPages: pages,
+        newBlockId: blockId,
+      };
+    }
+  }
+
+  // 1. Actualizar el contenido del bloque original con la primera mitad del texto
+  updatedBlocks = updatedBlocks.map((b) =>
     b.id === blockId ? { ...b, content: textBefore } : b,
   );
 
-  // 2. Crear el nuevo bloque con la segunda mitad del texto
+  // 2. Crear el nuevo bloque con el tipo heredado y la segunda mitad del texto
   updatedBlocks.push({
     id: newBlockId,
-    type: "paragraph",
+    type: newType,
     content: textAfter,
   });
 
@@ -37,7 +69,6 @@ export const calculateSplit = ({
 
   return { updatedBlocks, updatedPages, newBlockId };
 };
-// features/editor/logic/engine/insertionEngine.js
 
 // Lógica que antes estaba dentro de addBlock
 export const calculateNewBlockStructure = ({ type, state, newId }) => {

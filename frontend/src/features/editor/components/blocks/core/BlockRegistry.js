@@ -7,6 +7,7 @@ export const BLOCK_COMPONENTS = {
   h4: BaseEditable,
   h5: BaseEditable,
   paragraph: BaseEditable,
+  bullet: BaseEditable,
   // image: ImageBlock, <-- Aquí sí tendría sentido un archivo distinto
 };
 
@@ -17,4 +18,5 @@ export const BLOCK_CONFIGS = {
   h4: { tag: "h4" },
   h5: { tag: "h5" },
   paragraph: { tag: "p" },
+  bullet: { tag: "div" },
 };

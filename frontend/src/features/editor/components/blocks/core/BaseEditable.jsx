@@ -45,13 +45,18 @@ export const BaseEditable = ({
   useEffect(() => {
     if (selectedBlockId === id && textRef.current) {
       requestAnimationFrame(() => {
+        // Si el elemento no tiene el foco o si el tipo acaba de cambiar, lo forzamos
         if (document.activeElement !== textRef.current) {
           textRef.current.focus();
-          setAtEnd(); // <--- Mucho más limpio que crear el range a mano
+
+          // Usamos la utilidad que añadimos a useCaret para ponerlo al final
+          // Esto es vital para que al convertirse en párrafo el cursor aparezca donde debe
+          setAtEnd();
         }
       });
     }
-  }, [selectedBlockId, id, setAtEnd]);
+    // Añadimos 'type' y 'setAtEnd' a las dependencias
+  }, [selectedBlockId, id, type, setAtEnd]);
 
   // --- HANDLERS ---
   const handleInput = () => {

@@ -5,25 +5,25 @@ import { BLOCK_COMPONENTS, BLOCK_CONFIGS } from "./BlockRegistry";
 export const BlockFactory = ({ block, label }) => {
   if (!block) return null;
 
-  // 1. Buscamos el componente en el registro
   const Component = BLOCK_COMPONENTS[block.type];
-
-  // 2. Buscamos su configuración (tag, etc.)
   const config = BLOCK_CONFIGS[block.type] || {};
 
-  if (!Component) {
-    console.warn(`[BlockFactory] No hay componente para: ${block.type}`);
-    return null;
-  }
+  if (!Component) return null;
 
-  // 3. Renderizado limpio
+  // --- LÓGICA DE ETIQUETA UNIFICADA ---
+  // 1. Si es bullet, mostramos el punto.
+  // 2. Si es encabezado (h1-h5), mostramos el número (label).
+  // 3. Si es párrafo, mostramos null.
+  const finalLabel =
+    block.type === "bullet" ? "•" : block.type.startsWith("h") ? label : null;
+
   return (
     <Component
       id={block.id}
       content={block.content}
       type={block.type}
       tag={config.tag || "div"}
-      label={block.type.startsWith("h") ? label : null}
+      label={finalLabel} // <--- Solo un atributo 'label'
     />
   );
 };
