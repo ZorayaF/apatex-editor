@@ -1,52 +1,77 @@
-# APATEX - Editor de Texto Académico (v0.1.0)
+# **APATEX \- Sistema de Redacción Académica Estructurada**
 
-**APATEX** es un sistema de redacción estructurada diseñado específicamente para automatizar el cumplimiento de las normas de presentación de trabajos de grado de la **Universidad de Boyacá (Politeca)**.
+APATEX es un editor de texto especializado en la automatización de formatos de redacción académica. Utiliza un modelo basado en bloques semánticos (WYSIWYM), lo que permite al usuario centrarse en la estructura del contenido mientras el sistema gestiona de forma automática las reglas de estilo, márgenes y paginación.
 
-El sistema utiliza una arquitectura **WYSIWYM** (Lo que ves es lo que quieres decir), donde el usuario se enfoca en el contenido semántico (Títulos, Párrafos, Tablas) y el software se encarga de aplicar las reglas de formato estrictas (márgenes, tipografía, interlineado) de manera automática.
+## **Estructura del Proyecto**
 
-## 🛠️ Stack Tecnológico
-| Tecnología | Versión | Propósito |
-| :--- | :--- | :--- |
-| **Node.js** | `v20.20.0` | Entorno de ejecución principal (LTS). |
-| **Electron** | `v31.7.7` | Motor de escritorio para integración con el sistema de archivos. |
-| **React** | `v18.x` | Librería de interfaz para la construcción de componentes. |
-| **Vite** | `v5.x` | Empaquetador de módulos y servidor de desarrollo rápido. |
-| **Mantine** | `v8.x` | Sistema de diseño y componentes UI. |
-| **Zustand** | `v4/5` | Gestión de estado global (Store) para los bloques de texto. |
-| **WSL2** | `Ubuntu` | Entorno de desarrollo sobre Windows. |
+El proyecto está dividido en dos capas principales para separar el entorno de ejecución de escritorio de la lógica del editor:
 
+* **Raíz (/):** Contiene la configuración de Electron, la gestión del ciclo de vida de la aplicación de escritorio y los scripts de empaquetamiento.  
+* **Frontend (/frontend):** Contiene el núcleo del editor desarrollado en React, incluyendo los motores de paginación, inserción de bloques y gestión de estado global.
 
-## Arquitectura del Proyecto
+## **Especificaciones Técnicas**
 
-El código sigue una estructura modular para facilitar el mantenimiento:
+| Componente | Tecnología | Versión |
+| :---- | :---- | :---- |
+| Entorno de ejecución | Node.js | ^20.x (LTS) |
+| Contenedor de escritorio | Electron | 31.x |
+| Biblioteca de interfaz | React | 18.x |
+| Gestión de estado | Zustand | 5.x |
+| Herramienta de construcción | Vite | 5.x |
+| Sistema de diseño | Mantine UI | 7.x / 8.x |
 
-```
-```
-```
-```
-```
-frontend/src/features/editor/: Contiene la lógica principal del editor.
+## **Requisitos Previos**
 
-  Canvas.jsx: El área de escritura central.
+* Node.js en su versión Long Term Support (LTS).  
+* Gestor de paquetes npm o yarn.  
+* Entorno de ejecución compatible con Electron (Windows, macOS o Linux).
 
-  Sidebar.jsx: Navegación por capítulos.
+## **Instalación y Configuración**
 
-  Inspector.jsx: Panel de asistente y metadatos.
+Para poner en marcha el entorno de desarrollo, es necesario instalar las dependencias en ambos niveles del proyecto:
 
-  Editor.jsx: Organiza los anteriores componentes en una sola pantalla.
-
-frontend/src/features/home/: Página principial para iniciar o continuar un proyecto.
-
-src/store/: Contiene useDocStore.js, gestiona el estado de los bloques (JSON).
-
-src/components/: Componentes visuales genéricos (Botones, Layouts).
-
+**Instalación de dependencias del contenedor:**  
+   Bash
 
 ```
+npm install
+```  
+
+**Instalación de dependencias del editor (frontend):**  
+   Bash
+
 ```
+cd frontend
+npm install
 ```
+
+## **Comandos de Ejecución**
+
+Debido a la naturaleza desacoplada del proyecto, se pueden ejecutar los entornos de forma independiente o conjunta:
+
+* **Solo Frontend (Navegador):** Útil para el desarrollo de componentes y lógica de bloques.  
+  Bash
+
 ```
+cd frontend
+npm run dev
 ```
+
+* **Aplicación Completa (Electron \+ React):** Ejecuta el contenedor de escritorio vinculando el servidor de desarrollo del frontend.  
+  Bash
+
 ```
-```
-```
+npm run start
+``` 
+
+## **Metodología de Trabajo**
+
+El sistema implementa una arquitectura de motores internos encargados de tareas específicas:
+
+1. **Motor de Inserción:** Gestiona la partición y unión de bloques de texto.  
+2. **Motor de Paginación:** Calcula el desbordamiento de contenido en tiempo real según medidas físicas reales (cm).  
+3. **Gestión Atómica:** Cada bloque de texto funciona como una unidad independiente que se comunica directamente con el estado global para optimizar el rendimiento.
+
+---
+
+Para detalles específicos sobre la lógica del editor, consulte el archivo README dentro de la carpeta /frontend.
