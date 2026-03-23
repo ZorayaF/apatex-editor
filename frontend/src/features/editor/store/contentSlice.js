@@ -143,4 +143,30 @@ export const createContentSlice = (set, get) => ({
         selectedBlockId: blockId,
       };
     }),
+
+  sources: [], // La "Bodega" global de libros, artículos, etc.
+
+  addAndEditSource: (type) => {
+    const newSource = {
+      id: crypto.randomUUID(),
+      type: type, // 'articulo', 'video', etc.
+      author: "",
+      year: "",
+      title: "",
+      metadata: {}, // Campos específicos según el tipo
+    };
+
+    set((state) => ({
+      sources: [...state.sources, newSource],
+      // Le avisamos al uiSlice (que está en el mismo store) que la seleccione
+      selectedSourceId: newSource.id,
+      selectedBlockId: null, // Limpiamos la selección de bloques para evitar confusión
+    }));
+  },
+
+  // Función para cuando el usuario escriba en el Inspector
+  updateSource: (id, data) =>
+    set((state) => ({
+      sources: state.sources.map((s) => (s.id === id ? { ...s, ...data } : s)),
+    })),
 });
