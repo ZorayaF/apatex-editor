@@ -18,9 +18,10 @@ import {
   IconFilePlus,
 } from "@tabler/icons-react";
 
-// 1. Importamos el nuevo formulario
+// --- IMPORTACIÓN DE FORMULARIOS ---
 import { ReferenceForm } from "./forms/reference/ReferenceForm";
-import { TableForm } from "./forms/table/TableForm"; // Asegúrate de que la ruta sea correcta
+import { TableForm } from "./forms/table/TableForm";
+import { FigureForm } from "./forms/figure/FigureForm"; // <--- Nueva importación
 import { SourceLibrary } from "./SourceLibrary";
 
 export const Inspector = () => {
@@ -31,24 +32,17 @@ export const Inspector = () => {
 
   // --- RENDERIZADO DE PESTAÑA: PROPIEDADES ---
   const renderPropertiesTab = () => {
-    // Si el bloque es una tabla, cargamos su formulario real
+    // 1. Caso Tabla
     if (activeBlock?.type === "table") {
       return <TableForm blockData={activeBlock} />;
     }
 
+    // 2. Caso Figura (Ya no es próximamente)
     if (activeBlock?.type === "figure") {
-      return (
-        <Box p="md">
-          <Text fw={600} size="sm" mb="xs">
-            Configuración de Figura
-          </Text>
-          <Text size="xs" c="dimmed">
-            Formulario de Figura (Próximamente)
-          </Text>
-        </Box>
-      );
+      return <FigureForm blockData={activeBlock} />;
     }
 
+    // 3. Caso por defecto (Toolbox)
     return <Toolbox />;
   };
 
@@ -114,7 +108,7 @@ const Toolbox = () => {
           leftSection={<IconTable size={18} />}
           fullWidth
           justify="flex-start"
-          onClick={() => addBlock("table")} // 2. ¡Ya funciona!
+          onClick={() => addBlock("table")}
         >
           Insertar Tabla APA
         </Button>
@@ -124,7 +118,7 @@ const Toolbox = () => {
           leftSection={<IconPhoto size={18} />}
           fullWidth
           justify="flex-start"
-          onClick={() => addBlock("figure")} // 3. ¡Ya funciona!
+          onClick={() => addBlock("figure")}
         >
           Insertar Figura o Imagen
         </Button>
