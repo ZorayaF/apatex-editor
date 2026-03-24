@@ -1,3 +1,4 @@
+// src/features/editor/components/header/ObjectGroup.jsx
 import React from "react";
 import { Group } from "@mantine/core";
 import { IconPhoto, IconTable, IconFilePlus } from "@tabler/icons-react";
@@ -5,11 +6,24 @@ import { useStore } from "@store";
 import { HeaderButton } from "./HeaderButton";
 
 export const ObjectGroup = () => {
-  const { addAndEditSource, setActiveTab, selectedSourceId } = useStore();
+  const {
+    addBlock,
+    addAndEditSource,
+    setActiveTab,
+    setInspectorOpen, // Esta es la función que ya tienes en el slice
+    selectedSourceId,
+  } = useStore();
+
+  const handleAddBlock = (type) => {
+    addBlock(type);
+    setActiveTab("properties");
+    setInspectorOpen(true); // <--- Abrimos el inspector
+  };
 
   const handleAddReference = () => {
     addAndEditSource("articulo");
-    setActiveTab("library"); // Movemos al usuario a la pestaña de fuentes
+    setActiveTab("library");
+    setInspectorOpen(true); // <--- Abrimos el inspector
   };
 
   return (
@@ -18,17 +32,13 @@ export const ObjectGroup = () => {
         label="Imagen"
         description="Insertar figura o imagen"
         icon={IconPhoto}
-        onClick={() => {
-          /* addBlock('image'); setActiveTab('properties'); */
-        }}
+        onClick={() => handleAddBlock("figure")}
       />
       <HeaderButton
         label="Tabla"
         description="Insertar tabla APA"
         icon={IconTable}
-        onClick={() => {
-          /* addBlock('table'); setActiveTab('properties'); */
-        }}
+        onClick={() => handleAddBlock("table")}
       />
       <HeaderButton
         label="Referencia"
