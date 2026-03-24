@@ -1,86 +1,165 @@
 import React from "react";
-import { ScrollArea, Title, Text, Box, Center, Stack } from "@mantine/core";
+import {
+  ScrollArea,
+  Title,
+  Text,
+  Box,
+  Center,
+  Stack,
+  Tabs,
+  Button,
+} from "@mantine/core";
 import { useStore } from "@store";
-import { IconClick, IconBooks } from "@tabler/icons-react";
+import {
+  IconClick,
+  IconSettings,
+  IconBooks,
+  IconTable,
+  IconPhoto,
+  IconFilePlus,
+} from "@tabler/icons-react";
 
 import { ReferenceForm } from "./forms/reference/ReferenceForm";
-// import { TableForm } from "./forms/table/TableForm";
-// import { FigureForm } from "./forms/figure/FigureForm";
+import { SourceLibrary } from "./SourceLibrary";
 
 export const Inspector = () => {
-  // 1. Extraemos los dos tipos de selección posibles
-  const { selectedBlockId, selectedSourceId, blocks, sources } = useStore();
+  const { activeTab, setActiveTab, selectedBlockId, selectedSourceId, blocks } =
+    useStore();
 
-  // 2. Buscamos la información activa según lo que esté seleccionado
   const activeBlock = blocks.find((b) => b.id === selectedBlockId);
-  const activeSource = sources?.find((s) => s.id === selectedSourceId);
 
-  // 3. Función para decidir qué formulario mostrar
-  const renderActiveForm = () => {
-    // PRIORIDAD 1: Estamos creando o editando una fuente desde el Header
-    if (selectedSourceId) {
-      return <ReferenceForm sourceData={activeSource} />;
+  // --- RENDERIZADO DE PESTAÑA: PROPIEDADES ---
+  const renderPropertiesTab = () => {
+    // Si el bloque es complejo, mostramos su formulario específico
+    if (activeBlock?.type === "table") {
+      return (
+        <Box p="md">
+          <Text fw={600} size="sm" mb="xs">
+            Configuración de Tabla APA
+          </Text>
+          <Text size="xs" c="dimmed">
+            Formulario de Tabla (Próximamente)
+          </Text>
+        </Box>
+      );
     }
 
-    // PRIORIDAD 2: Estamos editando un bloque en el documento
-    if (activeBlock) {
-      switch (activeBlock.type) {
-        case "table":
-          return (
-            <Box p="md">
-              <Text>Formulario de Tabla (Próximamente)</Text>
-            </Box>
-          );
-        case "figure":
-          return (
-            <Box p="md">
-              <Text>Formulario de Figura (Próximamente)</Text>
-            </Box>
-          );
-        default:
-          return <DefaultState type={activeBlock.type} />;
-      }
+    if (activeBlock?.type === "figure") {
+      return (
+        <Box p="md">
+          <Text fw={600} size="sm" mb="xs">
+            Configuración de Figura
+          </Text>
+          <Text size="xs" c="dimmed">
+            Formulario de Figura (Próximamente)
+          </Text>
+        </Box>
+      );
     }
 
-    // POR DEFECTO: Nada seleccionado
-    return <EmptyState />;
+    // Si no hay bloque seleccionado O es un bloque simple (h1, p, etc.),
+    // mostramos siempre la Caja de Herramientas.
+    return <Toolbox />;
   };
 
-  // Dinamismo para el título según el contexto
-  const getTitle = () => {
-    if (selectedSourceId) return "Gestor de Referencia";
-    if (selectedBlockId) return "Propiedades del Bloque";
-    return "Inspector";
+  const renderLibraryTab = () => {
+    if (selectedSourceId) return <ReferenceForm />;
+    return <SourceLibrary />;
   };
 
   return (
-    <ScrollArea h="100%" p="md" scrollbarSize={8}>
-      <Title order={4} mb="lg" c="gray.7">
-        {getTitle()}
-      </Title>
+    <Box h="100%" style={{ display: "flex", flexDirection: "column" }}>
+      <Tabs
+        variant="pills"
+        value={activeTab}
+        onChange={setActiveTab}
+        p="md"
+        styles={{
+          root: { display: "flex", flexDirection: "column", flex: 1 },
+          panel: { flex: 1, overflow: "hidden" },
+        }}
+      >
+        <Title order={4} mb="lg" c="gray.7" px="xs">
+          {activeTab === "properties"
+            ? "Diseño y Herramientas"
+            : "Gestor Bibliográfico"}
+        </Title>
 
-      {renderActiveForm()}
-    </ScrollArea>
+        <Tabs.List grow mb="md">
+          <Tabs.Tab value="properties" leftSection={<IconSettings size={16} />}>
+            Diseño
+          </Tabs.Tab>
+          <Tabs.Tab value="library" leftSection={<IconBooks size={16} />}>
+            Fuentes
+          </Tabs.Tab>
+        </Tabs.List>
+
+        <ScrollArea h="calc(100vh - 200px)" scrollbarSize={6} offsetScrollbars>
+          <Tabs.Panel value="properties">{renderPropertiesTab()}</Tabs.Panel>
+          <Tabs.Panel value="library">{renderLibraryTab()}</Tabs.Panel>
+        </ScrollArea>
+      </Tabs>
+    </Box>
   );
 };
 
-// --- COMPONENTES AUXILIARES ACTUALIZADOS ---
+// --- LA CAJA DE HERRAMIENTAS (Sustituye a EmptyState y DefaultState) ---
 
-const EmptyState = () => (
-  <Center h={300}>
-    <Stack align="center" gap="xs" style={{ opacity: 0.4 }}>
-      <IconClick size={48} stroke={1.5} />
-      <Text size="sm" ta="center" px="xl">
-        Selecciona un bloque o añade una nueva referencia para ver opciones.
+const Toolbox = () => {
+  const { setActiveTab, addAndEditSource } = useStore();
+
+  return (
+    <Stack gap="xl" px="md" mt="xl">
+      <Stack align="center" gap="xs" style={{ opacity: 0.4 }}>
+        <IconClick size={40} stroke={1.5} />
+        <Text size="xs" fw={700} tt="uppercase" lts={1}>
+          Insertar Elementos
+        </Text>
+      </Stack>
+
+      <Stack gap="sm" w="100%">
+        <Button
+          variant="light"
+          color="gray"
+          leftSection={<IconTable size={18} />}
+          fullWidth
+          justify="flex-start"
+          onClick={() => {
+            /* addBlock('table') */
+          }}
+        >
+          Insertar Tabla APA
+        </Button>
+        <Button
+          variant="light"
+          color="gray"
+          leftSection={<IconPhoto size={18} />}
+          fullWidth
+          justify="flex-start"
+          onClick={() => {
+            /* addBlock('image') */
+          }}
+        >
+          Insertar Figura o Imagen
+        </Button>
+        <Button
+          variant="filled"
+          color="blue"
+          leftSection={<IconFilePlus size={18} />}
+          fullWidth
+          justify="flex-start"
+          onClick={() => {
+            addAndEditSource("articulo");
+            setActiveTab("library");
+          }}
+        >
+          Nueva Referencia
+        </Button>
+      </Stack>
+
+      <Text size="xs" c="dimmed" ta="center" mt="md">
+        Selecciona una tabla o imagen en el lienzo para ver sus propiedades.
       </Text>
     </Stack>
-  </Center>
-);
-
-const DefaultState = ({ type }) => (
-  <Box p="md" ta="center" style={{ opacity: 0.6 }}>
-    <Text size="sm">
-      El bloque de tipo <b>{type}</b> no requiere configuración adicional.
-    </Text>
-  </Box>
-);
+  );
+};
