@@ -63,7 +63,7 @@ const getPageStyle = (margins, isActive) => ({
   maxHeight: `${PAGE_HEIGHT_PX}px`,
   padding: `${cmToPx(margins.top)}px ${cmToPx(margins.right)}px ${cmToPx(margins.bottom)}px ${cmToPx(margins.left)}px`,
   backgroundColor: "white",
-  margin: "20px auto",
+  margin: "0",
   position: "relative",
   display: "flex",
   flexDirection: "column",

@@ -1,4 +1,8 @@
 import { BaseEditable } from "./BaseEditable";
+import { ReferenceBlock } from "../complex/ReferenceBlock";
+import { CitationInline } from "../complex/CitationInline.jsx";
+import { TableBlock } from "../complex/TableBlock";
+import { FigureBlock } from "../complex/FigureBlock";
 
 export const BLOCK_COMPONENTS = {
   h1: BaseEditable,
@@ -8,7 +12,10 @@ export const BLOCK_COMPONENTS = {
   h5: BaseEditable,
   paragraph: BaseEditable,
   bullet: BaseEditable,
-  // image: ImageBlock, <-- Aquí sí tendría sentido un archivo distinto
+  reference: ReferenceBlock,
+  citation: CitationInline,
+  table: TableBlock,
+  figure: FigureBlock,
 };
 
 export const BLOCK_CONFIGS = {
@@ -19,4 +26,8 @@ export const BLOCK_CONFIGS = {
   h5: { tag: "h5" },
   paragraph: { tag: "p" },
   bullet: { tag: "div" },
+  reference: { tag: "div" },
+  citation: { tag: "span" },
+  table: { tag: "div" },
+  figure: { tag: "div" },
 };

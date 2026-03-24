@@ -1,28 +1,32 @@
-// features/editor/components/header/index.jsx
 import React from "react";
-import { Paper, Group, ScrollArea } from "@mantine/core";
-import { TextGroup } from "./TextGroup";
+import { Paper, Group, Divider, Box } from "@mantine/core";
+import { FormattingGroup } from "./FormattingGroup";
+import { ObjectGroup } from "./ObjectGroup";
 
 export const Header = () => {
   return (
     <Paper
-      h={70} // Ajustado para que sea más esbelto
+      h={52} // Altura fija y esbelta
       px="md"
       pos="sticky"
       top={0}
-      style={{
-        zIndex: 100,
-        borderBottom: "1px solid var(--mantine-color-gray-3)",
-        backgroundColor: "var(--mantine-color-white)",
-      }}
+      shadow="none"
       radius={0}
     >
-      <ScrollArea h="100%" type="never">
-        <Group h="100%" align="center">
-          {/* Solo mostramos lo que funciona actualmente */}
-          <TextGroup />
-        </Group>
-      </ScrollArea>
+      <Group h="100%" align="center" gap="lg">
+        {/* Grupo A: Escritura y Formato */}
+        <Box>
+          <FormattingGroup />
+        </Box>
+
+        {/* El Divisor Vertical Limpio */}
+        <Divider orientation="vertical" h={30} my="auto" color="gray.3" />
+
+        {/* Grupo B: Inserción de Objetos */}
+        <Box>
+          <ObjectGroup />
+        </Box>
+      </Group>
     </Paper>
   );
 };

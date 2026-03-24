@@ -10,20 +10,14 @@ export const BlockFactory = ({ block, label }) => {
 
   if (!Component) return null;
 
-  // --- LÓGICA DE ETIQUETA UNIFICADA ---
-  // 1. Si es bullet, mostramos el punto.
-  // 2. Si es encabezado (h1-h5), mostramos el número (label).
-  // 3. Si es párrafo, mostramos null.
   const finalLabel =
     block.type === "bullet" ? "•" : block.type.startsWith("h") ? label : null;
 
   return (
     <Component
-      id={block.id}
-      content={block.content}
-      type={block.type}
+      {...block} // <--- CAMBIO CLAVE: Pasa todas las propiedades (data, title, note, etc.)
       tag={config.tag || "div"}
-      label={finalLabel} // <--- Solo un atributo 'label'
+      label={finalLabel}
     />
   );
 };

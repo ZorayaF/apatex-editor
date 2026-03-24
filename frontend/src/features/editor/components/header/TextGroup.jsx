@@ -1,4 +1,3 @@
-// features/editor/components/header/TextGroup.jsx
 import React from "react";
 import { Group } from "@mantine/core";
 import {
@@ -9,13 +8,19 @@ import {
   IconH5,
   IconTypography,
   IconList,
-  IconQuote,
+  IconFilePlus,
 } from "@tabler/icons-react";
 import { useStore } from "@store";
 import { HeaderButton } from "./HeaderButton";
 
 export const TextGroup = () => {
-  const { addBlock, selectedBlockId, blocks } = useStore();
+  const {
+    addBlock,
+    selectedBlockId,
+    blocks,
+    addAndEditSource,
+    selectedSourceId,
+  } = useStore();
 
   const activeBlock = blocks.find((b) => b.id === selectedBlockId);
   const activeType = activeBlock ? activeBlock.type : null;
@@ -73,11 +78,11 @@ export const TextGroup = () => {
         isActive={activeType === "bullet"}
       />
       <HeaderButton
-        label="Cita"
-        description="Bloque de cita"
-        icon={IconQuote}
-        onClick={() => addBlock("blockquote")}
-        isActive={activeType === "blockquote"}
+        label="Referencia"
+        description="Añadir fuente bibliográfica"
+        icon={IconFilePlus}
+        onClick={() => addAndEditSource("articulo")}
+        isActive={!!selectedSourceId}
       />
     </Group>
   );

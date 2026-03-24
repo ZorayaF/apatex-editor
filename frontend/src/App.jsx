@@ -1,11 +1,10 @@
-import '@mantine/core/styles.css';
+import "@mantine/core/styles.css";
 
-import { HashRouter as Router, Routes, Route } from 'react-router-dom';
-import { MantineProvider } from '@mantine/core';
+import { HashRouter as Router, Routes, Route } from "react-router-dom";
+import { MantineProvider } from "@mantine/core";
 
-import HomePage from '@pages/HomePage';
-import EditorPage from '@pages/EditorPage';
-import LabPage from '@pages/LabPage';
+import HomePage from "@pages/HomePage";
+import EditorPage from "@pages/EditorPage";
 
 const App = () => {
   return (
@@ -14,7 +13,6 @@ const App = () => {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/editor" element={<EditorPage />} />
-          <Route path="/lab" element={<LabPage />} />
         </Routes>
       </Router>
     </MantineProvider>
