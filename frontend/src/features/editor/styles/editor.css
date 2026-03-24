@@ -33,3 +33,21 @@
 .editable-cell:hover:not(:focus) {
   background-color: rgba(0, 0, 0, 0.03);
 }
+
+.editor-block-wrapper {
+  border-left: 3px solid transparent;
+  background-color: transparent;
+  transition: all 0.2s ease; /* Transición suave para todos los estados */
+}
+
+/* EFECTO HOVER: Un gris muy sutil para indicar presencia */
+.editor-block-wrapper:hover:not(.is-selected) {
+  background-color: rgba(0, 0, 0, 0.02); /* Gris muy tenue */
+  border-left-color: #e9ecef; /* Una línea gris clara a la izquierda */
+}
+
+/* CLASE DE SELECCIÓN: El azul manda sobre el hover */
+.editor-block-wrapper.is-selected {
+  border-left: 3px solid #228be6;
+  background-color: rgba(34, 139, 230, 0.05);
+}

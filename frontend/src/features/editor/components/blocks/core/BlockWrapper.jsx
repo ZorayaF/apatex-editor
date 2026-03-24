@@ -10,13 +10,14 @@ export const BlockWrapper = ({ children, blockId }) => {
   return (
     <Box
       data-block-id={blockId}
-      // Aplicamos la clase base y la clase de selección condicional
+      // VERIFICA ESTA LÍNEA: Debe tener el espacio entre las dos clases
       className={`editor-block-wrapper ${isSelected ? "is-selected" : ""}`}
       style={{
         position: "relative",
         width: "100%",
         paddingLeft: "15px",
         marginBottom: "4px",
+        transition: "all 0.2s ease",
       }}
     >
       {children}
