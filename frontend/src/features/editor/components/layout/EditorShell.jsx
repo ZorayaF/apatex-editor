@@ -14,13 +14,22 @@ import {
 import { Header } from "../header";
 import { Canvas } from "../canvas/Canvas";
 import { Inspector } from "../inspector";
-// 1. Importamos el store
 import { useStore } from "../../store";
+import "../../styles/editor.css";
+import { APA_CONFIG } from "@core/utils/measurements";
 
 export const EditorShell = () => {
-  // 2. Traemos el estado global en lugar del local
   const isInspectorOpen = useStore((state) => state.isInspectorOpen);
   const setInspectorOpen = useStore((state) => state.setInspectorOpen);
+
+  // --- INYECCIÓN DE LA "FUENTE DE LA VERDAD" ---
+  // Estas variables permiten que el CSS sea dinámico basado en measurements.js
+  const dynamicStyles = {
+    "--apa-font": APA_CONFIG.typography.family,
+    "--apa-size": `${APA_CONFIG.typography.size}pt`,
+    "--apa-line-height": APA_CONFIG.typography.lineHeight,
+    "--apa-indent": `${APA_CONFIG.typography.indent}cm`,
+  };
 
   return (
     <AppShell
@@ -28,10 +37,11 @@ export const EditorShell = () => {
       aside={{
         width: 350,
         breakpoint: "md",
-        // 3. Ahora depende del Store global
         collapsed: { desktop: !isInspectorOpen },
       }}
       padding="0"
+      // Aplicamos los estilos dinámicos aquí para que todo el árbol los herede
+      style={dynamicStyles}
     >
       <AppShell.Header style={{ zIndex: 102 }}>
         <Group
@@ -41,12 +51,10 @@ export const EditorShell = () => {
           align="center"
           wrap="nowrap"
         >
-          {/* El Header ocupa el espacio restante */}
           <Box style={{ flex: 1 }}>
             <Header />
           </Box>
 
-          {/* Botón Maestro de Visibilidad */}
           <Tooltip
             label={
               isInspectorOpen ? "Ocultar propiedades" : "Mostrar propiedades"
@@ -56,7 +64,6 @@ export const EditorShell = () => {
               variant="subtle"
               color="gray"
               size="lg"
-              // 4. Cambiamos el estado global
               onClick={() => setInspectorOpen(!isInspectorOpen)}
             >
               {isInspectorOpen ? (
@@ -86,7 +93,6 @@ export const EditorShell = () => {
         </ScrollArea>
       </AppShell.Main>
 
-      {/* Solo mostramos el Aside si el store dice que está abierto */}
       <AppShell.Aside style={{ zIndex: 101 }}>
         <Inspector />
       </AppShell.Aside>

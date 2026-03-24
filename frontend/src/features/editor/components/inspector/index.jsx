@@ -4,7 +4,6 @@ import {
   Title,
   Text,
   Box,
-  Center,
   Stack,
   Tabs,
   Button,
@@ -19,7 +18,9 @@ import {
   IconFilePlus,
 } from "@tabler/icons-react";
 
+// 1. Importamos el nuevo formulario
 import { ReferenceForm } from "./forms/reference/ReferenceForm";
+import { TableForm } from "./forms/table/TableForm"; // Asegúrate de que la ruta sea correcta
 import { SourceLibrary } from "./SourceLibrary";
 
 export const Inspector = () => {
@@ -30,18 +31,9 @@ export const Inspector = () => {
 
   // --- RENDERIZADO DE PESTAÑA: PROPIEDADES ---
   const renderPropertiesTab = () => {
-    // Si el bloque es complejo, mostramos su formulario específico
+    // Si el bloque es una tabla, cargamos su formulario real
     if (activeBlock?.type === "table") {
-      return (
-        <Box p="md">
-          <Text fw={600} size="sm" mb="xs">
-            Configuración de Tabla APA
-          </Text>
-          <Text size="xs" c="dimmed">
-            Formulario de Tabla (Próximamente)
-          </Text>
-        </Box>
-      );
+      return <TableForm blockData={activeBlock} />;
     }
 
     if (activeBlock?.type === "figure") {
@@ -57,8 +49,6 @@ export const Inspector = () => {
       );
     }
 
-    // Si no hay bloque seleccionado O es un bloque simple (h1, p, etc.),
-    // mostramos siempre la Caja de Herramientas.
     return <Toolbox />;
   };
 
@@ -103,10 +93,10 @@ export const Inspector = () => {
   );
 };
 
-// --- LA CAJA DE HERRAMIENTAS (Sustituye a EmptyState y DefaultState) ---
+// --- LA CAJA DE HERRAMIENTAS (Toolbox) ---
 
 const Toolbox = () => {
-  const { setActiveTab, addAndEditSource } = useStore();
+  const { setActiveTab, addAndEditSource, addBlock } = useStore();
 
   return (
     <Stack gap="xl" px="md" mt="xl">
@@ -124,9 +114,7 @@ const Toolbox = () => {
           leftSection={<IconTable size={18} />}
           fullWidth
           justify="flex-start"
-          onClick={() => {
-            /* addBlock('table') */
-          }}
+          onClick={() => addBlock("table")} // 2. ¡Ya funciona!
         >
           Insertar Tabla APA
         </Button>
@@ -136,9 +124,7 @@ const Toolbox = () => {
           leftSection={<IconPhoto size={18} />}
           fullWidth
           justify="flex-start"
-          onClick={() => {
-            /* addBlock('image') */
-          }}
+          onClick={() => addBlock("figure")} // 3. ¡Ya funciona!
         >
           Insertar Figura o Imagen
         </Button>
@@ -157,8 +143,9 @@ const Toolbox = () => {
         </Button>
       </Stack>
 
-      <Text size="xs" c="dimmed" ta="center" mt="md">
-        Selecciona una tabla o imagen en el lienzo para ver sus propiedades.
+      <Text size="xs" c="dimmed" ta="center" mt="md" px="xs">
+        Selecciona un elemento en el lienzo para ajustar sus propiedades
+        específicas.
       </Text>
     </Stack>
   );

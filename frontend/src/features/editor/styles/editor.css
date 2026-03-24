@@ -1,0 +1,35 @@
+/* src/features/editor/styles/editor.css */
+
+.apa-table-container,
+.editable-cell {
+  font-family: var(--apa-font);
+  line-height: var(--apa-line-height);
+  font-size: var(--apa-size);
+  color: #000;
+}
+
+.editable-cell {
+  /* Tamaño predeterminado perceptible */
+  min-width: 120px;
+  min-height: 1.5em;
+  padding: 12px; /* Más espacio para que no se vea apretado */
+
+  outline: none;
+  border-radius: 2px;
+  transition:
+    background-color 0.2s ease,
+    box-shadow 0.2s ease;
+  cursor: text;
+}
+
+/* El resplandor azul al hacer foco */
+.editable-cell:focus {
+  background-color: #fff;
+  box-shadow: 0 0 0 2px #228be6;
+  position: relative;
+  z-index: 5;
+}
+
+.editable-cell:hover:not(:focus) {
+  background-color: rgba(0, 0, 0, 0.03);
+}

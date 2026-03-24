@@ -27,6 +27,8 @@ export const createContentSlice = (set, get) => ({
   addBlock: (type = "paragraph") =>
     set((state) => {
       const newId = crypto.randomUUID();
+
+      // 1. Usamos tu motor actual para calcular la posición y estructura básica
       const { newBlock, newPages, newActiveIndex } = calculateNewBlockStructure(
         {
           type,
@@ -35,11 +37,31 @@ export const createContentSlice = (set, get) => ({
         },
       );
 
+      // 2. Si es una TABLA, le inyectamos la estructura APA por defecto
+      if (type === "table") {
+        newBlock.title = "Título de la tabla"; // En cursiva según APA
+        newBlock.note = "Nota."; // Tamaño 10 según APA
+        // Matriz inicial 3x3 (Fila 0 es el encabezado)
+        newBlock.data = [
+          ["Encabezado 1", "Encabezado 2", "Encabezado 3"],
+          ["", "", ""],
+          ["", "", ""],
+        ];
+      }
+
+      // 3. Verificamos si es un objeto complejo para activar el Inspector
+      const isComplex = ["table", "figure"].includes(type);
+
       return {
         blocks: [...state.blocks, newBlock],
         pages: newPages,
         activePageIndex: newActiveIndex,
         selectedBlockId: newId,
+        // Abrimos el inspector y movemos a la pestaña de diseño automáticamente
+        ...(isComplex && {
+          isInspectorOpen: true,
+          activeTab: "properties",
+        }),
       };
     }),
 
@@ -91,6 +113,11 @@ export const createContentSlice = (set, get) => ({
   updateBlockContent: (id, content) =>
     set((state) => ({
       blocks: state.blocks.map((b) => (b.id === id ? { ...b, content } : b)),
+    })),
+
+  updateBlock: (id, updates) =>
+    set((state) => ({
+      blocks: state.blocks.map((b) => (b.id === id ? { ...b, ...updates } : b)),
     })),
 
   // --- PAGINACIÓN ---

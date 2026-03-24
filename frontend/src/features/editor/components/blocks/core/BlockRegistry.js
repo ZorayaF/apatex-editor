@@ -1,6 +1,7 @@
 import { BaseEditable } from "./BaseEditable";
 import { ReferenceBlock } from "../complex/ReferenceBlock";
 import { CitationInline } from "../complex/CitationInline.jsx";
+import { TableBlock } from "../complex/TableBlock";
 
 export const BLOCK_COMPONENTS = {
   h1: BaseEditable,
@@ -12,6 +13,7 @@ export const BLOCK_COMPONENTS = {
   bullet: BaseEditable,
   reference: ReferenceBlock,
   citation: CitationInline,
+  table: TableBlock,
 };
 
 export const BLOCK_CONFIGS = {
@@ -24,4 +26,5 @@ export const BLOCK_CONFIGS = {
   bullet: { tag: "div" },
   reference: { tag: "div" },
   citation: { tag: "span" },
+  table: { tag: "div" },
 };
