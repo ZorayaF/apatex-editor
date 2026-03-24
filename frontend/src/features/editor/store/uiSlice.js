@@ -3,34 +3,44 @@ export const createUiSlice = (set, get) => ({
   selectedSourceId: null,
   activePageIndex: 0,
   activeTab: "properties",
+  // Nuevo estado para controlar la visibilidad lateral
+  isInspectorOpen: true,
 
   setActivePage: (index) => set({ activePageIndex: index }),
   setActiveTab: (tab) => set({ activeTab: tab }),
 
-  // 1. Selección de bloques INDEPENDIENTE
+  // Acción para abrir/cerrar manualmente el panel
+  setInspectorOpen: (open) => set({ isInspectorOpen: open }),
+
   setSelectedBlockId: (id) =>
     set((state) => {
       if (!id) return { selectedBlockId: null };
 
       const pageIndex = state.pages.findIndex((p) => p.blockIds.includes(id));
 
+      // Verificamos si es un bloque que requiere atención en el inspector
+      const block = state.blocks.find((b) => b.id === id);
+      const isComplex = ["table", "figure"].includes(block?.type);
+
       return {
         selectedBlockId: id,
-        // YA NO LIMPIAMOS selectedSourceId.
-        // Si el usuario está editando una fuente, la dejamos ahí.
         activePageIndex: pageIndex !== -1 ? pageIndex : state.activePageIndex,
+        // Si insertamos o tocamos tabla/figura, forzamos apertura y pestaña de diseño
+        ...(isComplex && {
+          activeTab: "properties",
+          isInspectorOpen: true,
+        }),
       };
     }),
 
-  // 2. Selección de fuentes INDEPENDIENTE
   setSelectedSourceId: (id) =>
     set({
       selectedSourceId: id,
-      // YA NO LIMPIAMOS selectedBlockId.
-      activeTab: "library", // Nos movemos a la pestaña de biblioteca
+      activeTab: "library",
+      // Siempre abrimos el inspector al editar una fuente
+      isInspectorOpen: true,
     }),
 
-  // 3. NUEVO: Función para cerrar la edición de la fuente (el botón "Guardar/Volver")
   clearSourceSelection: () =>
     set({
       selectedSourceId: null,

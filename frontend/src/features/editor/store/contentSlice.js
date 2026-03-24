@@ -1,4 +1,3 @@
-// features/editor/store/contentSlice.js
 import {
   calculateSplit,
   calculateNewBlockStructure,
@@ -25,7 +24,6 @@ export const createContentSlice = (set, get) => ({
     })),
 
   // --- ACCIONES (Delegando al Engine) ---
-
   addBlock: (type = "paragraph") =>
     set((state) => {
       const newId = crypto.randomUUID();
@@ -77,6 +75,7 @@ export const createContentSlice = (set, get) => ({
         selectedBlockId: result.newBlockId,
       };
     }),
+
   mergeBlocks: (currentBlockId) =>
     set((state) => {
       const result = calculateMerge({ state, currentBlockId });
@@ -85,11 +84,10 @@ export const createContentSlice = (set, get) => ({
       return {
         blocks: result.updatedBlocks,
         pages: result.updatedPages,
-        selectedBlockId: result.prevBlockId, // El foco sube
+        selectedBlockId: result.prevBlockId,
       };
     }),
 
-  // --- ACTUALIZACIÓN SIMPLE ---
   updateBlockContent: (id, content) =>
     set((state) => ({
       blocks: state.blocks.map((b) => (b.id === id ? { ...b, content } : b)),
@@ -107,12 +105,10 @@ export const createContentSlice = (set, get) => ({
       const targetPageIndex = fromPageIndex + 1;
       const nextPage = newPages[targetPageIndex];
 
-      // 1. Extraer el bloque de la página actual
       newPages[fromPageIndex].blockIds = newPages[
         fromPageIndex
       ].blockIds.filter((id) => id !== blockId);
 
-      // 2. LÓGICA DE DETECCIÓN DE H1 EN DESTINO
       const targetHasH1 =
         nextPage &&
         nextPage.blockIds.some(
@@ -120,53 +116,68 @@ export const createContentSlice = (set, get) => ({
         );
 
       if (targetHasH1) {
-        // REGLA NUEVA: Si hay un H1, creamos una página intermedia
-        // para que el texto desbordado no se mezcle con el título principal.
         newPages.splice(targetPageIndex, 0, {
           id: crypto.randomUUID(),
           blockIds: [blockId],
         });
       } else if (!nextPage) {
-        // Si no hay página siguiente, la creamos al final
         newPages.push({
           id: crypto.randomUUID(),
           blockIds: [blockId],
         });
       } else {
-        // Si la página siguiente existe y NO tiene H1, simplemente lo ponemos al inicio
         nextPage.blockIds = [blockId, ...nextPage.blockIds];
       }
 
       return {
         pages: newPages,
-        activePageIndex: targetPageIndex, // El foco sigue al bloque
+        activePageIndex: targetPageIndex,
         selectedBlockId: blockId,
       };
     }),
 
-  sources: [], // La "Bodega" global de libros, artículos, etc.
+  // --- GESTIÓN DE REFERENCIAS (BIBLIOGRAFÍA) ---
+  sources: [],
 
   addAndEditSource: (type) => {
+    const { sources } = get();
+
+    const emptySource = sources.find(
+      (s) => !s.author && !s.title && s.type === type,
+    );
+
+    if (emptySource) {
+      get().setSelectedSourceId(emptySource.id);
+      return;
+    }
+
+    const newId = crypto.randomUUID();
     const newSource = {
-      id: crypto.randomUUID(),
-      type: type, // 'articulo', 'video', etc.
+      id: newId,
+      type,
       author: "",
-      year: "",
       title: "",
-      metadata: {}, // Campos específicos según el tipo
+      year: "",
+      metadata: {},
     };
 
     set((state) => ({
       sources: [...state.sources, newSource],
-      // Le avisamos al uiSlice (que está en el mismo store) que la seleccione
-      selectedSourceId: newSource.id,
-      selectedBlockId: null, // Limpiamos la selección de bloques para evitar confusión
     }));
+
+    get().setSelectedSourceId(newId);
   },
 
-  // Función para cuando el usuario escriba en el Inspector
-  updateSource: (id, data) =>
+  // --- ESTA ES LA QUE FALTABA PARA QUE EL FORMULARIO FUNCIONE ---
+  updateSource: (id, updates) =>
     set((state) => ({
-      sources: state.sources.map((s) => (s.id === id ? { ...s, ...data } : s)),
+      sources: state.sources.map((s) =>
+        s.id === id ? { ...s, ...updates } : s,
+      ),
+    })),
+
+  removeSource: (id) =>
+    set((state) => ({
+      sources: state.sources.filter((s) => s.id !== id),
     })),
 });

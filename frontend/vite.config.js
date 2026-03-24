@@ -1,6 +1,6 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
-import path from 'path'
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+import path from "path";
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -8,13 +8,17 @@ export default defineConfig({
   // vite.config.js
   resolve: {
     alias: {
-      '@core': path.resolve(__dirname, './src/core'),
-      '@store': path.resolve(__dirname, './src/features/editor/store'),
-      '@hooks': path.resolve(__dirname, './src/hooks'),
-      '@features': path.resolve(__dirname, './src/features'),
-      '@shared': path.resolve(__dirname, './src/shared'),
-      '@pages': path.resolve(__dirname, './src/pages'),
-      '@editor': path.resolve(__dirname, './src/features/editor')
+      "@core": path.resolve(__dirname, "./src/core"),
+      "@store": path.resolve(__dirname, "./src/features/editor/store"),
+      "@hooks": path.resolve(__dirname, "./src/hooks"),
+      "@features": path.resolve(__dirname, "./src/features"),
+      "@shared": path.resolve(__dirname, "./src/shared"),
+      "@pages": path.resolve(__dirname, "./src/pages"),
+      "@editor": path.resolve(__dirname, "./src/features/editor"),
+      "@inspector": path.resolve(
+        __dirname,
+        "./src/features/editor/components/inspector/",
+      ),
     },
-  }
-})
+  },
+});

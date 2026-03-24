@@ -11,48 +11,62 @@ import {
 } from "@mantine/core";
 import { IconAlertCircle, IconArrowLeft, IconCheck } from "@tabler/icons-react";
 import { useStore } from "@store";
-import { InspectorSection } from "../../InspectorSection";
-import { REFERENCE_SCHEMAS } from "../../../../logic/references/referenceSchemas";
+import { InspectorSection } from "@inspector/InspectorSection";
+import { REFERENCE_SCHEMAS } from "@editor/logic/references/referenceSchemas";
 import { DynamicReferenceForm } from "./DynamicReferenceForm";
 
 export const ReferenceForm = () => {
-  // Sacamos 'clearSourceSelection' que creamos en el uiSlice
-  const { selectedSourceId, sources, updateSource, clearSourceSelection } =
-    useStore();
-  const sourceData = sources.find((s) => s.id === selectedSourceId);
+  // 1. Extraemos con cuidado del store
+  const {
+    selectedSourceId,
+    sources,
+    updateSource,
+    clearSourceSelection,
+    removeSource,
+  } = useStore();
 
+  // 2. Buscamos la fuente
+  const sourceData = sources?.find((s) => s.id === selectedSourceId);
+
+  // 3. Si no hay datos, evitamos que el componente explote
   if (!sourceData) return null;
 
   const currentSchema = REFERENCE_SCHEMAS[sourceData.type];
 
   const handleChange = (field, value) => {
-    updateSource(selectedSourceId, { [field]: value });
+    // Aquí es donde daba el error si updateSource no existía
+    if (typeof updateSource === "function") {
+      updateSource(selectedSourceId, { [field]: value });
+    } else {
+      console.error("Error: updateSource no está definida en el Store");
+    }
+  };
+
+  const handleFinish = () => {
+    const isEmpty = !sourceData.author?.trim() && !sourceData.title?.trim();
+    if (isEmpty && typeof removeSource === "function") {
+      removeSource(selectedSourceId);
+    }
+    clearSourceSelection();
   };
 
   return (
     <Stack gap="lg">
-      {/* --- CABECERA DE EDICIÓN --- */}
       <Group justify="space-between" align="center">
         <Group gap="xs">
-          <ActionIcon
-            variant="subtle"
-            color="gray"
-            onClick={clearSourceSelection} // Volver a la lista
-            title="Volver a la biblioteca"
-          >
+          <ActionIcon variant="subtle" color="gray" onClick={handleFinish}>
             <IconArrowLeft size={18} />
           </ActionIcon>
           <Text fw={700} size="sm">
             Editar Fuente
           </Text>
         </Group>
-
         <Button
           variant="light"
           color="green"
           size="compact-xs"
           leftSection={<IconCheck size={14} />}
-          onClick={clearSourceSelection} // Finalizar edición
+          onClick={handleFinish}
         >
           Finalizar
         </Button>
@@ -87,7 +101,7 @@ export const ReferenceForm = () => {
         mt="xl"
         variant="light"
       >
-        Los cambios se guardan automáticamente mientras escribes.
+        Los cambios se guardan automáticamente.
       </Alert>
     </Stack>
   );

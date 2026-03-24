@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   AppShell,
   Box,
@@ -14,9 +14,13 @@ import {
 import { Header } from "../header";
 import { Canvas } from "../canvas/Canvas";
 import { Inspector } from "../inspector";
+// 1. Importamos el store
+import { useStore } from "../../store";
 
 export const EditorShell = () => {
-  const [inspectorOpened, setInspectorOpened] = useState(true);
+  // 2. Traemos el estado global en lugar del local
+  const isInspectorOpen = useStore((state) => state.isInspectorOpen);
+  const setInspectorOpen = useStore((state) => state.setInspectorOpen);
 
   return (
     <AppShell
@@ -24,25 +28,38 @@ export const EditorShell = () => {
       aside={{
         width: 350,
         breakpoint: "md",
-        collapsed: { desktop: !inspectorOpened },
+        // 3. Ahora depende del Store global
+        collapsed: { desktop: !isInspectorOpen },
       }}
       padding="0"
     >
       <AppShell.Header style={{ zIndex: 102 }}>
-        <Group h="100%" px="md" justify="space-between" align="center">
-          <Header />
+        <Group
+          h="100%"
+          px="md"
+          justify="space-between"
+          align="center"
+          wrap="nowrap"
+        >
+          {/* El Header ocupa el espacio restante */}
+          <Box style={{ flex: 1 }}>
+            <Header />
+          </Box>
+
+          {/* Botón Maestro de Visibilidad */}
           <Tooltip
             label={
-              inspectorOpened ? "Ocultar propiedades" : "Mostrar propiedades"
+              isInspectorOpen ? "Ocultar propiedades" : "Mostrar propiedades"
             }
           >
             <ActionIcon
               variant="subtle"
               color="gray"
               size="lg"
-              onClick={() => setInspectorOpened(!inspectorOpened)}
+              // 4. Cambiamos el estado global
+              onClick={() => setInspectorOpen(!isInspectorOpen)}
             >
-              {inspectorOpened ? (
+              {isInspectorOpen ? (
                 <IconLayoutSidebarRightCollapse size={24} />
               ) : (
                 <IconLayoutSidebarRightExpand size={24} />
@@ -53,16 +70,15 @@ export const EditorShell = () => {
       </AppShell.Header>
 
       <AppShell.Main bg="gray.2">
-        {/* ScrollArea: El ÚNICO lugar donde debe haber scroll */}
         <ScrollArea h="calc(100vh - 70px)" scrollbarSize={12} offsetScrollbars>
           <Box
-            py={60} // Espacio arriba y abajo del documento
-            px={100} // Padding lateral GENEROSO para que el outline azul no se corte
+            py={60}
+            px={100}
             style={{
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
-              gap: "40px", // Espacio entre páginas (reemplaza el margin de Page)
+              gap: "40px",
             }}
           >
             <Canvas />
@@ -70,6 +86,7 @@ export const EditorShell = () => {
         </ScrollArea>
       </AppShell.Main>
 
+      {/* Solo mostramos el Aside si el store dice que está abierto */}
       <AppShell.Aside style={{ zIndex: 101 }}>
         <Inspector />
       </AppShell.Aside>
