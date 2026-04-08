@@ -1,47 +1,46 @@
+// src/features/editor/layout/EditorShell.jsx
 import React from "react";
 import {
   AppShell,
-  Box,
   ActionIcon,
   Tooltip,
   Group,
   ScrollArea,
+  Box,
 } from "@mantine/core";
 import {
   IconLayoutSidebarRightCollapse,
   IconLayoutSidebarRightExpand,
+  IconLayoutSidebarLeftCollapse,
+  IconLayoutSidebarLeftExpand,
 } from "@tabler/icons-react";
 import { Header } from "../header";
 import { Canvas } from "../canvas/Canvas";
-import { Inspector } from "../inspector";
-import { useStore } from "../../store";
-import "../../styles/editor.css";
+import { Inspector } from "@inspector";
+import { useStore } from "@store";
+import { DocumentMap } from "../navbar/DocumentMap";
 import { APA_CONFIG } from "@core/utils/measurements";
+import "../../styles/editor.css";
 
 export const EditorShell = () => {
-  const isInspectorOpen = useStore((state) => state.isInspectorOpen);
-  const setInspectorOpen = useStore((state) => state.setInspectorOpen);
-
-  // --- INYECCIÓN DE LA "FUENTE DE LA VERDAD" ---
-  // Estas variables permiten que el CSS sea dinámico basado en measurements.js
-  const dynamicStyles = {
-    "--apa-font": APA_CONFIG.typography.family,
-    "--apa-size": `${APA_CONFIG.typography.size}pt`,
-    "--apa-line-height": APA_CONFIG.typography.lineHeight,
-    "--apa-indent": `${APA_CONFIG.typography.indent}cm`,
-  };
+  // Traemos los estados y las funciones para abrir/cerrar ambos paneles
+  const { isNavbarOpen, setNavbarOpen, isInspectorOpen, setInspectorOpen } =
+    useStore();
 
   return (
     <AppShell
-      header={{ height: 70 }}
-      aside={{
-        width: 350,
-        breakpoint: "md",
-        collapsed: { desktop: !isInspectorOpen },
+      header={{ height: 60 }}
+      navbar={{
+        width: 260,
+        breakpoint: "sm",
+        collapsed: { desktop: !isNavbarOpen, mobile: !isNavbarOpen },
       }}
-      padding="0"
-      // Aplicamos los estilos dinámicos aquí para que todo el árbol los herede
-      style={dynamicStyles}
+      aside={{
+        width: 300,
+        breakpoint: "md",
+        collapsed: { desktop: !isInspectorOpen, mobile: !isInspectorOpen },
+      }}
+      padding="md"
     >
       <AppShell.Header style={{ zIndex: 102 }}>
         <Group
@@ -51,10 +50,28 @@ export const EditorShell = () => {
           align="center"
           wrap="nowrap"
         >
-          <Box style={{ flex: 1 }}>
+          {/* 1. LADO IZQUIERDO: Toggle del Mapa del Documento */}
+          <Tooltip label={isNavbarOpen ? "Ocultar mapa" : "Mostrar mapa"}>
+            <ActionIcon
+              variant="subtle"
+              color="gray"
+              size="lg"
+              onClick={() => setNavbarOpen(!isNavbarOpen)}
+            >
+              {isNavbarOpen ? (
+                <IconLayoutSidebarLeftCollapse size={22} />
+              ) : (
+                <IconLayoutSidebarLeftExpand size={22} />
+              )}
+            </ActionIcon>
+          </Tooltip>
+
+          {/* 2. CENTRO: Tus herramientas principales (Formatting, Objects, etc.) */}
+          <Box style={{ flex: 1, display: "flex", justifyContent: "center" }}>
             <Header />
           </Box>
 
+          {/* 3. LADO DERECHO: Toggle del Inspector de Propiedades */}
           <Tooltip
             label={
               isInspectorOpen ? "Ocultar propiedades" : "Mostrar propiedades"
@@ -67,20 +84,24 @@ export const EditorShell = () => {
               onClick={() => setInspectorOpen(!isInspectorOpen)}
             >
               {isInspectorOpen ? (
-                <IconLayoutSidebarRightCollapse size={24} />
+                <IconLayoutSidebarRightCollapse size={22} />
               ) : (
-                <IconLayoutSidebarRightExpand size={24} />
+                <IconLayoutSidebarRightExpand size={22} />
               )}
             </ActionIcon>
           </Tooltip>
         </Group>
       </AppShell.Header>
 
+      <AppShell.Navbar>
+        <DocumentMap />
+      </AppShell.Navbar>
+
       <AppShell.Main bg="gray.2">
-        <ScrollArea h="calc(100vh - 70px)" scrollbarSize={12} offsetScrollbars>
+        <ScrollArea h="calc(100vh - 60px)" scrollbarSize={12} offsetScrollbars>
           <Box
             py={60}
-            px={100}
+            px={40} // Bajé un poco el padding lateral para que no se vea tan apretado
             style={{
               display: "flex",
               flexDirection: "column",

@@ -1,5 +1,5 @@
 // src/features/editor/components/canvas/Page.jsx
-import React, { useRef, memo } from "react";
+import React, { useRef, memo, useMemo } from "react";
 import { Paper, Box } from "@mantine/core";
 import { useStore } from "@store";
 import {
@@ -11,19 +11,24 @@ import {
 import { usePagePagination } from "@editor/hooks/usePagePagination";
 import { ConnectedBlock } from "./ConnectedBlock";
 
-export const Page = memo(({ pageId, pageNumber }) => {
+export const Page = memo(({ pageId, pageNumber, allowedBlockIds }) => {
   const pageContentRef = useRef(null);
   const { margins } = APA_CONFIG;
 
-  // Obtenemos solo los blockIds de ESTA página
-  const blockIds = useStore(
-    (s) => s.pages.find((p) => p.id === pageId)?.blockIds || [],
-  );
+  const page = useStore((s) => s.pages.find((p) => p.id === pageId));
+  const rawBlockIds = page?.blockIds || [];
+
+  // FILTRADO INTERNO: Si hay enfoque, solo mostramos los bloques permitidos
+  const visibleBlockIds = useMemo(() => {
+    if (!allowedBlockIds) return rawBlockIds;
+    return rawBlockIds.filter((id) => allowedBlockIds.has(id));
+  }, [rawBlockIds, allowedBlockIds]);
+
   const isActive = useStore((s) => s.activePageIndex === pageNumber - 1);
   const { setActivePage, setSelectedBlockId } = useStore();
 
-  // La paginación ahora solo observa la lista de IDs de esta página
-  usePagePagination(pageContentRef, blockIds, pageNumber);
+  // La paginación sigue usando rawBlockIds para mantener el flujo del documento intacto
+  usePagePagination(pageContentRef, rawBlockIds, pageNumber);
 
   const handlePageClick = (e) => {
     if (e.target === e.currentTarget) {
@@ -43,19 +48,18 @@ export const Page = memo(({ pageId, pageNumber }) => {
         style={{ height: "100%", position: "relative" }}
       >
         <div style={{ pointerEvents: "auto" }}>
-          {blockIds.map((id) => (
+          {visibleBlockIds.map((id) => (
             <ConnectedBlock key={id} blockId={id} />
           ))}
         </div>
       </Box>
 
-      {/* Footer simplificado */}
       <Box style={pageNumberStyle(isActive)}>{pageNumber}</Box>
     </Paper>
   );
 });
 
-// Estilos extraídos para evitar recrearlos en cada render
+// ... (tus funciones de estilo se mantienen iguales abajo)
 const getPageStyle = (margins, isActive) => ({
   width: `${PAGE_WIDTH_PX}px`,
   height: `${PAGE_HEIGHT_PX}px`,
@@ -63,13 +67,13 @@ const getPageStyle = (margins, isActive) => ({
   maxHeight: `${PAGE_HEIGHT_PX}px`,
   padding: `${cmToPx(margins.top)}px ${cmToPx(margins.right)}px ${cmToPx(margins.bottom)}px ${cmToPx(margins.left)}px`,
   backgroundColor: "white",
-  margin: "0",
   position: "relative",
   display: "flex",
   flexDirection: "column",
   overflow: "hidden",
   boxSizing: "border-box",
   outline: isActive ? "2px solid #228be6" : "1px solid #e0e0e0",
+  boxShadow: "0 4px 10px rgba(0,0,0,0.1)", // Un toque de sombra para que se vea mejor en gris
 });
 
 const pageNumberStyle = (isActive) => ({

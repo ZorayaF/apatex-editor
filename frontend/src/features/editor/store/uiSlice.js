@@ -5,13 +5,14 @@ export const createUiSlice = (set, get) => ({
   activeTab: "properties",
   // Nuevo estado para controlar la visibilidad lateral
   isInspectorOpen: true,
+  isNavbarOpen: true,
 
   setActivePage: (index) => set({ activePageIndex: index }),
   setActiveTab: (tab) => set({ activeTab: tab }),
 
   // Acción para abrir/cerrar manualmente el panel
   setInspectorOpen: (open) => set({ isInspectorOpen: open }),
-
+  setNavbarOpen: (open) => set({ isNavbarOpen: open }),
   setSelectedBlockId: (id) =>
     set((state) => {
       if (!id) return { selectedBlockId: null };

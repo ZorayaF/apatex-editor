@@ -1,4 +1,5 @@
-import React, { useRef, useEffect } from "react";
+// src/features/editor/components/blocks/core/BaseEditable.jsx
+import React, { useRef, useEffect, useCallback } from "react";
 import { useStore } from "@store";
 import { useCaret } from "@editor/hooks/useCaret";
 import { formatRunInHeading } from "@editor/logic/engine/formatting";
@@ -16,7 +17,6 @@ export const BaseEditable = ({
   const textRef = useRef(null);
   const isTyping = useRef(false);
 
-  // Hooks personalizados y Store
   const { getOffset, setOffset, setAtEnd } = useCaret(textRef);
   const {
     updateBlockContent,
@@ -27,36 +27,36 @@ export const BaseEditable = ({
     mergeBlocks,
   } = useStore();
 
-  // --- EFECTOS ---
-
-  // Sincronización inicial y actualizaciones externas
+  // --- SINCRONIZACIÓN DE CONTENIDO ---
   useEffect(() => {
+    // Solo actualizamos el DOM si NO estamos escribiendo y el contenido cambió
     if (textRef.current && !isTyping.current) {
       const isRunIn = type === "h4" || type === "h5";
-      if (isRunIn) {
-        textRef.current.innerHTML = formatRunInHeading(content, type);
-      } else {
-        textRef.current.innerText = content;
+      const newHTML = isRunIn ? formatRunInHeading(content, type) : content;
+
+      // Guardia para evitar layouts innecesarios
+      if (textRef.current.innerHTML !== newHTML) {
+        if (isRunIn) textRef.current.innerHTML = newHTML;
+        else textRef.current.innerText = content;
       }
     }
   }, [content, type]);
 
-  // Gestión de foco
+  // --- GESTIÓN DE FOCO (EL PUNTO CRÍTICO) ---
   useEffect(() => {
     if (selectedBlockId === id && textRef.current) {
-      requestAnimationFrame(() => {
-        // Si el elemento no tiene el foco o si el tipo acaba de cambiar, lo forzamos
-        if (document.activeElement !== textRef.current) {
-          textRef.current.focus();
-
-          // Usamos la utilidad que añadimos a useCaret para ponerlo al final
-          // Esto es vital para que al convertirse en párrafo el cursor aparezca donde debe
-          setAtEnd();
-        }
-      });
+      // Solo enfocamos si el navegador no tiene ya el foco aquí
+      if (document.activeElement !== textRef.current) {
+        const frameId = requestAnimationFrame(() => {
+          if (textRef.current) {
+            textRef.current.focus();
+            if (typeof setAtEnd === "function") setAtEnd();
+          }
+        });
+        return () => cancelAnimationFrame(frameId);
+      }
     }
-    // Añadimos 'type' y 'setAtEnd' a las dependencias
-  }, [selectedBlockId, id, type, setAtEnd]);
+  }, [selectedBlockId, id, setAtEnd]);
 
   // --- HANDLERS ---
   const handleInput = () => {
@@ -71,8 +71,16 @@ export const BaseEditable = ({
       setOffset(offset);
     }
 
-    setTimeout(() => (isTyping.current = false), 10);
+    // Aumentamos un poco el margen para asegurar que el Store se estabilice
+    setTimeout(() => (isTyping.current = false), 50);
   };
+
+  const handleFocus = useCallback(() => {
+    // GUARDIA: Solo notificamos al store si no somos ya el bloque seleccionado
+    if (selectedBlockId !== id) {
+      setSelectedBlockId(id);
+    }
+  }, [id, selectedBlockId, setSelectedBlockId]);
 
   const handleKeyDown = (e) => {
     const offset = getOffset();
@@ -83,29 +91,19 @@ export const BaseEditable = ({
       splitBlock(id, fullText.slice(0, offset), fullText.slice(offset));
     }
 
-    // --- NUEVA LÓGICA DE BORRADO ---
     if (e.key === "Backspace" && offset === 0) {
-      // Si estamos al inicio del bloque y borramos, intentamos fusionar con el de arriba
       e.preventDefault();
       mergeBlocks(id);
     }
   };
-  const handlePaste = (e) => {
-    e.preventDefault();
 
-    // Extraemos el texto plano directamente (el navegador hace el trabajo sucio)
-    const plainText = e.clipboardData.getData("text/plain");
-
-    // Enviamos al store
-    handlePasteText(plainText);
-  };
   const blockStyle = DOCUMENT_THEME.blocks[type] || {};
   const isCentered = blockStyle.textAlign === "center";
 
   return (
     <Tag
       className={className}
-      onClick={() => setSelectedBlockId(id)}
+      onClick={handleFocus} // Usamos la misma lógica de guardia
       style={{
         ...DOCUMENT_THEME.global,
         ...blockStyle,
@@ -132,11 +130,14 @@ export const BaseEditable = ({
       <span
         ref={textRef}
         contentEditable
-        onPaste={handlePaste}
         suppressContentEditableWarning
+        onPaste={(e) => {
+          e.preventDefault();
+          handlePasteText(e.clipboardData.getData("text/plain"));
+        }}
         onKeyDown={handleKeyDown}
         onInput={handleInput}
-        onFocus={() => setSelectedBlockId(id)}
+        onFocus={handleFocus} // <--- Handler con guardia
         style={{
           outline: "none",
           flex: isCentered ? "initial" : 1,

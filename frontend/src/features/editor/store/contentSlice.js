@@ -11,6 +11,7 @@ export const createContentSlice = (set, get) => ({
   pages: [{ id: "p1", blockIds: [] }],
   activePageIndex: 0,
   selectedBlockId: null,
+  focusedChapterId: null,
 
   // --- NAVEGACIÓN ---
   setActivePage: (index) => set({ activePageIndex: index }),
@@ -207,4 +208,8 @@ export const createContentSlice = (set, get) => ({
     set((state) => ({
       sources: state.sources.filter((s) => s.id !== id),
     })),
+  setFocusedChapterId: (id) => set({ focusedChapterId: id }),
+
+  // Limpiar el enfoque para ver todo el documento
+  clearFocus: () => set({ focusedChapterId: null }),
 });
