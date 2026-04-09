@@ -3,14 +3,15 @@ import React from "react";
 import { Box } from "@mantine/core";
 import { useStore } from "@store";
 
-export const BlockWrapper = ({ children, blockId }) => {
+// Añadimos 'type' a las props
+export const BlockWrapper = ({ children, blockId, type }) => {
   const selectedBlockId = useStore((state) => state.selectedBlockId);
   const isSelected = selectedBlockId === blockId;
 
   return (
     <Box
       data-block-id={blockId}
-      // VERIFICA ESTA LÍNEA: Debe tener el espacio entre las dos clases
+      data-block-type={type} // <--- ¡Nueva línea crítica para el motor!
       className={`editor-block-wrapper ${isSelected ? "is-selected" : ""}`}
       style={{
         position: "relative",

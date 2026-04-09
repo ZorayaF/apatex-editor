@@ -1,19 +1,26 @@
 import React from "react";
+
 import { Box, Text, Table } from "@mantine/core";
+
 import { useStore } from "@store";
+
 import { APA_CONFIG } from "@core/utils/measurements";
 
 export const TableBlock = ({ id, data, title, note }) => {
   const { blocks, updateBlock, setSelectedBlockId } = useStore();
 
   // Numeración automática basada en la posición en el array de bloques
+
   const tableNumber =
     blocks.filter((b) => b.type === "table").findIndex((b) => b.id === id) + 1;
 
   const handleCellChange = (rowIndex, colIndex, value) => {
     const newData = [...data];
+
     newData[rowIndex] = [...newData[rowIndex]];
+
     newData[rowIndex][colIndex] = value;
+
     updateBlock(id, { data: newData });
   };
 
@@ -25,6 +32,7 @@ export const TableBlock = ({ id, data, title, note }) => {
       onClick={() => setSelectedBlockId(id)}
     >
       {/* Etiqueta: Tabla X (Negrita) */}
+
       <Text
         fw={700}
         style={{ fontSize: `${APA_CONFIG.typography.size}pt` }}
@@ -34,6 +42,7 @@ export const TableBlock = ({ id, data, title, note }) => {
       </Text>
 
       {/* Título: Cursiva */}
+
       <Text
         fs="italic"
         style={{ fontSize: `${APA_CONFIG.typography.size}pt` }}
@@ -47,6 +56,7 @@ export const TableBlock = ({ id, data, title, note }) => {
           <tr
             style={{
               borderTop: "2px solid black",
+
               borderBottom: "1px solid black",
             }}
           >
@@ -67,6 +77,7 @@ export const TableBlock = ({ id, data, title, note }) => {
             ))}
           </tr>
         </thead>
+
         <tbody>
           {data.slice(1).map((row, rowIndex) => (
             <tr
@@ -85,7 +96,9 @@ export const TableBlock = ({ id, data, title, note }) => {
                     onBlur={(e) =>
                       handleCellChange(
                         rowIndex + 1,
+
                         colIndex,
+
                         e.currentTarget.innerText,
                       )
                     }
@@ -101,11 +114,13 @@ export const TableBlock = ({ id, data, title, note }) => {
       </Table>
 
       {/* Nota: Tamaño 10pt (2 puntos menos que el base) */}
+
       {note && (
         <Text
           mt="xs"
           style={{
             fontSize: `${APA_CONFIG.typography.size - 2}pt`,
+
             textAlign: "left",
           }}
         >

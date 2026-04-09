@@ -1,8 +1,9 @@
 // src/features/editor/components/blocks/core/BaseEditable.jsx
-import React, { useRef, useEffect, useCallback } from "react";
+import React, { useRef } from "react";
 import { useStore } from "@store";
 import { useCaret } from "@editor/hooks/useCaret";
-import { formatRunInHeading } from "@editor/logic/engine/formatting";
+import { useBlockSync } from "@editor/hooks/useBlockSync";
+import { useBlockHandlers } from "@editor/hooks/useBlockHandlers";
 import { DOCUMENT_THEME } from "@editor/logic/rules/documentStyles";
 
 export const BaseEditable = ({
@@ -17,93 +18,37 @@ export const BaseEditable = ({
   const textRef = useRef(null);
   const isTyping = useRef(false);
 
-  const { getOffset, setOffset, setAtEnd } = useCaret(textRef);
-  const {
-    updateBlockContent,
-    setSelectedBlockId,
+  const caret = useCaret(textRef);
+  const { selectedBlockId, handlePasteText } = useStore();
+
+  // 1. Conectar lógica de sincronización (Pasiva)
+  useBlockSync({
+    id,
+    textRef,
+    content,
+    type,
     selectedBlockId,
-    splitBlock,
-    handlePasteText,
-    mergeBlocks,
-  } = useStore();
+    isTyping,
+    setAtEnd: caret.setAtEnd,
+  });
 
-  // --- SINCRONIZACIÓN DE CONTENIDO ---
-  useEffect(() => {
-    // Solo actualizamos el DOM si NO estamos escribiendo y el contenido cambió
-    if (textRef.current && !isTyping.current) {
-      const isRunIn = type === "h4" || type === "h5";
-      const newHTML = isRunIn ? formatRunInHeading(content, type) : content;
+  // 2. Conectar lógica de eventos (Activa)
+  const { handleInput, handleKeyDown, handleFocus } = useBlockHandlers({
+    id,
+    type,
+    textRef,
+    isTyping,
+    caret,
+  });
 
-      // Guardia para evitar layouts innecesarios
-      if (textRef.current.innerHTML !== newHTML) {
-        if (isRunIn) textRef.current.innerHTML = newHTML;
-        else textRef.current.innerText = content;
-      }
-    }
-  }, [content, type]);
-
-  // --- GESTIÓN DE FOCO (EL PUNTO CRÍTICO) ---
-  useEffect(() => {
-    if (selectedBlockId === id && textRef.current) {
-      // Solo enfocamos si el navegador no tiene ya el foco aquí
-      if (document.activeElement !== textRef.current) {
-        const frameId = requestAnimationFrame(() => {
-          if (textRef.current) {
-            textRef.current.focus();
-            if (typeof setAtEnd === "function") setAtEnd();
-          }
-        });
-        return () => cancelAnimationFrame(frameId);
-      }
-    }
-  }, [selectedBlockId, id, setAtEnd]);
-
-  // --- HANDLERS ---
-  const handleInput = () => {
-    isTyping.current = true;
-    const offset = getOffset();
-    const rawText = textRef.current.innerText;
-
-    updateBlockContent(id, rawText);
-
-    if (type === "h4" || type === "h5") {
-      textRef.current.innerHTML = formatRunInHeading(rawText, type);
-      setOffset(offset);
-    }
-
-    // Aumentamos un poco el margen para asegurar que el Store se estabilice
-    setTimeout(() => (isTyping.current = false), 50);
-  };
-
-  const handleFocus = useCallback(() => {
-    // GUARDIA: Solo notificamos al store si no somos ya el bloque seleccionado
-    if (selectedBlockId !== id) {
-      setSelectedBlockId(id);
-    }
-  }, [id, selectedBlockId, setSelectedBlockId]);
-
-  const handleKeyDown = (e) => {
-    const offset = getOffset();
-    const fullText = textRef.current.innerText;
-
-    if (e.key === "Enter") {
-      e.preventDefault();
-      splitBlock(id, fullText.slice(0, offset), fullText.slice(offset));
-    }
-
-    if (e.key === "Backspace" && offset === 0) {
-      e.preventDefault();
-      mergeBlocks(id);
-    }
-  };
-
+  // 3. Estilos calculados
   const blockStyle = DOCUMENT_THEME.blocks[type] || {};
   const isCentered = blockStyle.textAlign === "center";
 
   return (
     <Tag
       className={className}
-      onClick={handleFocus} // Usamos la misma lógica de guardia
+      onClick={handleFocus}
       style={{
         ...DOCUMENT_THEME.global,
         ...blockStyle,
@@ -131,13 +76,13 @@ export const BaseEditable = ({
         ref={textRef}
         contentEditable
         suppressContentEditableWarning
+        onInput={handleInput}
+        onKeyDown={handleKeyDown}
+        onFocus={handleFocus}
         onPaste={(e) => {
           e.preventDefault();
           handlePasteText(e.clipboardData.getData("text/plain"));
         }}
-        onKeyDown={handleKeyDown}
-        onInput={handleInput}
-        onFocus={handleFocus} // <--- Handler con guardia
         style={{
           outline: "none",
           flex: isCentered ? "initial" : 1,

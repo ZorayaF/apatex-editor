@@ -1,33 +1,52 @@
 // src/features/editor/hooks/usePagePagination.js
 import { useEffect } from "react";
 import { useStore } from "@store";
-import { getOverflowBlockId } from "../logic/engine/paginationEngine";
+import { notifications } from "@mantine/notifications";
+import { analyzeOverflow } from "../logic/engine/paginationEngine";
 
 export const usePagePagination = (pageContentRef, blockIds, pageNumber) => {
-  // 1. Selector selectivo: Solo traemos la acción, no el estado.
-  // Esto evita que el hook cause re-renders por sí solo.
   const moveToNextPage = useStore((s) => s.moveToNextPage);
 
   useEffect(() => {
-    // 2. Usamos requestAnimationFrame para esperar a que el
-    // navegador termine de pintar el layout antes de medir.
     const handlePagination = () => {
-      if (pageContentRef.current) {
-        const overflowId = getOverflowBlockId(pageContentRef.current);
-        if (overflowId) {
-          moveToNextPage(overflowId);
+      if (!pageContentRef.current) return;
+
+      const result = analyzeOverflow(pageContentRef.current);
+
+      if (result) {
+        if (result.isImpossiblyLarge) {
+          // 1. Avisar que el bloque es gigante
+          notifications.show({
+            id: `overflow-${result.id}`,
+            title: "Objeto demasiado grande",
+            message: `La ${result.type} excede el tamaño de la página. Por favor, redúcela.`,
+            color: "orange",
+            autoClose: 5000,
+          });
+
+          // 2. ¡SOLUCIÓN AQUÍ!: Empujar al siguiente bloque
+          // Buscamos quién es el que está justo después del bloque gigante en esta página
+          const currentIndex = blockIds.indexOf(result.id);
+          const nextBlockId = blockIds[currentIndex + 1];
+
+          // Si hay alguien después, lo mandamos a la siguiente página
+          if (nextBlockId) {
+            moveToNextPage(nextBlockId);
+          }
+        } else {
+          // Escenario normal: El bloque sí cabe en una página limpia, así que lo movemos
+          moveToNextPage(result.id);
         }
       }
     };
 
-    // 3. Pequeño delay de ejecución para evitar el "scroll fight"
     const timeoutId = setTimeout(() => {
       requestAnimationFrame(handlePagination);
     }, 100);
 
     return () => clearTimeout(timeoutId);
 
-    // Solo se dispara si cambian los IDs de los bloques en ESTA página
-    // o si el número de página cambia. Ignora el texto que se escribe dentro.
+    // Es vital que blockIds esté aquí para que el efecto se repita
+    // hasta que no quede nadie desbordado
   }, [blockIds, pageNumber, moveToNextPage, pageContentRef]);
 };
