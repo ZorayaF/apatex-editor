@@ -1,4 +1,4 @@
-// src/features/editor/components/inspector/tabs/SourceLibrary.jsx
+import React, { useState } from "react";
 import {
   Stack,
   TextInput,
@@ -9,8 +9,17 @@ import {
   Badge,
   ScrollArea,
   Tooltip,
+  Popover,
+  Button,
+  Radio,
+  Divider,
 } from "@mantine/core";
-import { IconSearch, IconPencil, IconQuote } from "@tabler/icons-react";
+import {
+  IconSearch,
+  IconPencil,
+  IconQuote,
+  IconCheck,
+} from "@tabler/icons-react";
 import { useStore } from "@store";
 import { notifications } from "@mantine/notifications";
 
@@ -23,29 +32,36 @@ export const SourceLibrary = () => {
     lastCaretOffset,
   } = useStore();
 
-  const handleInsert = (e, sourceId) => {
-    // Evitamos que el clic en la barra lateral le robe el foco al editor
-    e.preventDefault();
+  // Estados locales para la configuración de la cita actual
+  const [openedPopover, setOpenedPopover] = useState(null); // Guarda el ID de la fuente abierta
+  const [citeConfig, setCiteConfig] = useState({
+    type: "parenthetical",
+    page: "",
+  });
 
-    // 1. Verificación de seguridad: ¿Hay un bloque seleccionado?
+  const handleConfirmInsert = (sourceId) => {
     if (!selectedBlockId) {
       notifications.show({
-        title: "Selecciona un párrafo",
-        message: "Haz clic en el texto donde quieras poner la cita primero.",
-        color: "blue",
+        title: "Error de ubicación",
+        message: "Haz clic en el párrafo donde quieras insertar la cita.",
+        color: "red",
       });
       return;
     }
 
-    // 2. Insertamos la cita usando el ID de la fuente y la posición guardada
-    // Usamos lastCaretOffset || 0 por si acaso el valor es null
-    insertCitation(selectedBlockId, sourceId, lastCaretOffset || 0);
+    // Enviamos la configuración (tipo y página) al Store
+    insertCitation(selectedBlockId, sourceId, lastCaretOffset || 0, citeConfig);
 
     notifications.show({
-      message: "Cita insertada correctamente",
+      message: "Cita añadida al texto",
       color: "green",
+      icon: <IconCheck size={16} />,
       autoClose: 2000,
     });
+
+    // Limpiamos y cerramos
+    setOpenedPopover(null);
+    setCiteConfig({ type: "parenthetical", page: "" });
   };
 
   return (
@@ -79,20 +95,93 @@ export const SourceLibrary = () => {
                     </Badge>
 
                     <Group gap={4}>
-                      <Tooltip
-                        label="Insertar cita (Autor, Año)"
+                      {/* --- POPOVER DE CONFIGURACIÓN DE CITA --- */}
+                      <Popover
+                        opened={openedPopover === source.id}
+                        onClose={() => setOpenedPopover(null)} // Cambiado de onChange para mayor estabilidad
                         position="left"
+                        withArrow
+                        shadow="md"
+                        width={220}
+                        trapFocus={false} // <--- IMPORTANTE: Permite que el teclado funcione sin pelear con el editor
                       >
-                        <ActionIcon
-                          variant="light"
-                          color="blue"
-                          size="sm"
-                          // Importante: onMouseDown previene la pérdida de foco mejor que onClick
-                          onMouseDown={(e) => handleInsert(e, source.id)}
-                        >
-                          <IconQuote size={14} />
-                        </ActionIcon>
-                      </Tooltip>
+                        <Popover.Target>
+                          <Tooltip label="Configurar e insertar cita">
+                            <ActionIcon
+                              variant="light"
+                              color="blue"
+                              size="sm"
+                              onClick={() => {
+                                // Si ya estaba abierto este, lo cerramos. Si no, abrimos este.
+                                setOpenedPopover(
+                                  openedPopover === source.id
+                                    ? null
+                                    : source.id,
+                                );
+                              }}
+                            >
+                              <IconQuote size={14} />
+                            </ActionIcon>
+                          </Tooltip>
+                        </Popover.Target>
+
+                        {/* QUITAMOS el onMouseDown={(e) => e.preventDefault()} de aquí */}
+                        <Popover.Dropdown>
+                          <Stack gap="xs">
+                            <Text size="xs" fw={700} c="dimmed">
+                              FORMATO APA
+                            </Text>
+
+                            <Radio.Group
+                              value={citeConfig.type}
+                              onChange={(val) =>
+                                setCiteConfig({ ...citeConfig, type: val })
+                              }
+                              label="Estilo de cita"
+                              size="xs"
+                            >
+                              <Stack gap={4} mt={5}>
+                                <Radio
+                                  value="parenthetical"
+                                  label="Parentética (Autor, Año)"
+                                  size="xs"
+                                />
+                                <Radio
+                                  value="narrative"
+                                  label="Narrativa Autor (Año)"
+                                  size="xs"
+                                />
+                              </Stack>
+                            </Radio.Group>
+
+                            <Divider />
+
+                            <TextInput
+                              label="Página (Opcional)"
+                              placeholder="ej. 31"
+                              size="xs"
+                              value={citeConfig.page}
+                              // Ahora sí podrás escribir aquí
+                              onChange={(e) =>
+                                setCiteConfig({
+                                  ...citeConfig,
+                                  page: e.target.value,
+                                })
+                              }
+                              autoFocus // Para que puedas escribir apenas abras el modal
+                            />
+
+                            <Button
+                              size="xs"
+                              fullWidth
+                              mt="xs"
+                              onClick={() => handleConfirmInsert(source.id)}
+                            >
+                              Insertar Cita
+                            </Button>
+                          </Stack>
+                        </Popover.Dropdown>
+                      </Popover>
 
                       <ActionIcon
                         variant="subtle"
@@ -108,7 +197,6 @@ export const SourceLibrary = () => {
                   <Text size="sm" fw={600} lineClamp={1}>
                     {source.title || "Sin título"}
                   </Text>
-
                   <Text size="xs" c="dimmed">
                     {source.author
                       ? `${source.author} (${source.year || "s.f."})`

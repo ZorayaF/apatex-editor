@@ -214,26 +214,43 @@ export const createContentSlice = (set, get) => ({
 
   clearFocus: () => set({ focusedChapterId: null }),
 
-  insertCitation: (blockId, sourceId, visualOffset) =>
+  insertCitation: (
+    blockId,
+    sourceId,
+    visualOffset,
+    config = { type: "parenthetical", page: "" },
+  ) =>
     set((state) => {
       const block = state.blocks.find((b) => b.id === blockId);
       if (!block) return state;
 
-      const marker = `((ref:${sourceId}))`;
+      // 1. CREAMOS EL MARCADOR COMPLETO
+      // Ahora guardamos el ID, el tipo (narrativa/parentética) y la página
+      const marker = `((ref:${sourceId}|type:${config.type}|page:${config.page}))`;
       const content = block.content || "";
 
-      let visualCount = 0;
+      // 2. LÓGICA DE MAPEO (Ajustada para el nuevo formato de marcador)
       let logicalIndex = 0;
-      const regex = /\(\(ref:[\w-]+\)\)/g;
+      const regex = /\(\(ref:[\w-]+\|type:\w+\|page:.*?\)\)/g; // Regex actualizada
 
       let match;
       const markers = [];
       while ((match = regex.exec(content)) !== null) {
-        const refId = match[0].match(/ref:([\w-]+)/)[1];
+        const parts = match[0].replace("((", "").replace("))", "").split("|");
+        const refId = parts[0].split(":")[1];
+        const type = parts[1].split(":")[1];
+        const page = parts[2].split(":")[1];
+
         const source = state.sources.find((s) => s.id === refId);
-        const visualText = source
-          ? `(${source.author}, ${source.year})`
-          : "(...)";
+
+        // Calculamos cuánto mide esta cita visualmente para el mapeo
+        const authors = (source?.author || "Anónimo").split(",")[0];
+        const year = source?.year || "s.f.";
+        const p = page ? `, p. ${page}` : "";
+        const visualText =
+          type === "narrative"
+            ? `${authors} (${year}${p})`
+            : `(${authors}, ${year}${p})`;
 
         markers.push({
           start: match.index,
@@ -242,6 +259,7 @@ export const createContentSlice = (set, get) => ({
         });
       }
 
+      // --- (El resto de la lógica de cálculo de finalLogicalIndex sigue igual) ---
       let finalLogicalIndex = content.length;
       let currentVisualPos = 0;
       let lastMarkerEnd = 0;
@@ -254,7 +272,6 @@ export const createContentSlice = (set, get) => ({
         }
         currentVisualPos += textBeforeLength + m.visualLength;
         lastMarkerEnd = m.end;
-
         if (visualOffset <= currentVisualPos) {
           finalLogicalIndex = m.end;
           break;
