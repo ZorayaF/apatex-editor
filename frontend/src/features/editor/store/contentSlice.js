@@ -1,3 +1,4 @@
+// src/store/slices/contentSlice.js
 import {
   calculateSplit,
   calculateNewBlockStructure,
@@ -13,6 +14,9 @@ export const createContentSlice = (set, get) => ({
   selectedBlockId: null,
   focusedChapterId: null,
 
+  // --- NUEVO ESTADO PARA CITAS ---
+  lastCaretOffset: 0, // <--- Aquí guardamos la "memoria" del cursor
+
   // --- NAVEGACIÓN ---
   setActivePage: (index) => set({ activePageIndex: index }),
 
@@ -24,12 +28,14 @@ export const createContentSlice = (set, get) => ({
         : state.activePageIndex,
     })),
 
+  // --- NUEVA ACCIÓN: SOLUCIONA EL ERROR DE CONSOLA ---
+  setLastCaretOffset: (offset) => set({ lastCaretOffset: offset }),
+
   // --- ACCIONES (Delegando al Engine) ---
   addBlock: (type = "paragraph") =>
     set((state) => {
       const newId = crypto.randomUUID();
 
-      // 1. Usamos tu motor actual para calcular la posición y estructura básica
       const { newBlock, newPages, newActiveIndex } = calculateNewBlockStructure(
         {
           type,
@@ -38,11 +44,9 @@ export const createContentSlice = (set, get) => ({
         },
       );
 
-      // 2. Si es una TABLA, le inyectamos la estructura APA por defecto
       if (type === "table") {
-        newBlock.title = "Título de la tabla"; // En cursiva según APA
-        newBlock.note = "Nota."; // Tamaño 10 según APA
-        // Matriz inicial 3x3 (Fila 0 es el encabezado)
+        newBlock.title = "Título de la tabla";
+        newBlock.note = "Nota.";
         newBlock.data = [
           ["Encabezado 1", "Encabezado 2", "Encabezado 3"],
           ["", "", ""],
@@ -50,7 +54,6 @@ export const createContentSlice = (set, get) => ({
         ];
       }
 
-      // 3. Verificamos si es un objeto complejo para activar el Inspector
       const isComplex = ["table", "figure"].includes(type);
 
       return {
@@ -58,7 +61,6 @@ export const createContentSlice = (set, get) => ({
         pages: newPages,
         activePageIndex: newActiveIndex,
         selectedBlockId: newId,
-        // Abrimos el inspector y movemos a la pestaña de diseño automáticamente
         ...(isComplex && {
           isInspectorOpen: true,
           activeTab: "properties",
@@ -196,7 +198,6 @@ export const createContentSlice = (set, get) => ({
     get().setSelectedSourceId(newId);
   },
 
-  // --- ESTA ES LA QUE FALTABA PARA QUE EL FORMULARIO FUNCIONE ---
   updateSource: (id, updates) =>
     set((state) => ({
       sources: state.sources.map((s) =>
@@ -208,8 +209,74 @@ export const createContentSlice = (set, get) => ({
     set((state) => ({
       sources: state.sources.filter((s) => s.id !== id),
     })),
+
   setFocusedChapterId: (id) => set({ focusedChapterId: id }),
 
-  // Limpiar el enfoque para ver todo el documento
   clearFocus: () => set({ focusedChapterId: null }),
+
+  insertCitation: (blockId, sourceId, visualOffset) =>
+    set((state) => {
+      const block = state.blocks.find((b) => b.id === blockId);
+      if (!block) return state;
+
+      const marker = `((ref:${sourceId}))`;
+      const content = block.content || "";
+
+      let visualCount = 0;
+      let logicalIndex = 0;
+      const regex = /\(\(ref:[\w-]+\)\)/g;
+
+      let match;
+      const markers = [];
+      while ((match = regex.exec(content)) !== null) {
+        const refId = match[0].match(/ref:([\w-]+)/)[1];
+        const source = state.sources.find((s) => s.id === refId);
+        const visualText = source
+          ? `(${source.author}, ${source.year})`
+          : "(...)";
+
+        markers.push({
+          start: match.index,
+          end: match.index + match[0].length,
+          visualLength: visualText.length,
+        });
+      }
+
+      let finalLogicalIndex = content.length;
+      let currentVisualPos = 0;
+      let lastMarkerEnd = 0;
+
+      for (const m of markers) {
+        const textBeforeLength = m.start - lastMarkerEnd;
+        if (visualOffset <= currentVisualPos + textBeforeLength) {
+          finalLogicalIndex = lastMarkerEnd + (visualOffset - currentVisualPos);
+          break;
+        }
+        currentVisualPos += textBeforeLength + m.visualLength;
+        lastMarkerEnd = m.end;
+
+        if (visualOffset <= currentVisualPos) {
+          finalLogicalIndex = m.end;
+          break;
+        }
+      }
+
+      if (finalLogicalIndex === content.length && markers.length > 0) {
+        const remainingVisual = visualOffset - currentVisualPos;
+        finalLogicalIndex = lastMarkerEnd + remainingVisual;
+      } else if (markers.length === 0) {
+        finalLogicalIndex = visualOffset;
+      }
+
+      const newContent =
+        content.slice(0, finalLogicalIndex) +
+        marker +
+        content.slice(finalLogicalIndex);
+
+      return {
+        blocks: state.blocks.map((b) =>
+          b.id === blockId ? { ...b, content: newContent } : b,
+        ),
+      };
+    }),
 });

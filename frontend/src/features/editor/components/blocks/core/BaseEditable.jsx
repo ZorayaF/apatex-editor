@@ -21,7 +21,7 @@ export const BaseEditable = ({
   const caret = useCaret(textRef);
   const { selectedBlockId, handlePasteText } = useStore();
 
-  // 1. Conectar lógica de sincronización (Pasiva)
+  // 1. Conectar lógica de sincronización (Pasiva: Store -> DOM)
   useBlockSync({
     id,
     textRef,
@@ -32,14 +32,17 @@ export const BaseEditable = ({
     setAtEnd: caret.setAtEnd,
   });
 
-  // 2. Conectar lógica de eventos (Activa)
-  const { handleInput, handleKeyDown, handleFocus } = useBlockHandlers({
-    id,
-    type,
-    textRef,
-    isTyping,
-    caret,
-  });
+  // 2. Conectar lógica de eventos (Activa: DOM -> Store)
+  // Añadimos handleKeyUp y handleClick para el rastreo del cursor
+  const { handleInput, handleKeyDown, handleFocus, handleKeyUp, handleClick } =
+    useBlockHandlers({
+      id,
+      type,
+      textRef,
+      isTyping,
+      caret,
+      content,
+    });
 
   // 3. Estilos calculados
   const blockStyle = DOCUMENT_THEME.blocks[type] || {};
@@ -79,6 +82,11 @@ export const BaseEditable = ({
         onInput={handleInput}
         onKeyDown={handleKeyDown}
         onFocus={handleFocus}
+        // --- NUEVOS HANDLERS PARA CITAS ---
+        onKeyUp={handleKeyUp} // Rastrea posición al usar flechas
+        onClick={handleClick} // Rastrea posición al hacer clic
+        // ----------------------------------
+
         onPaste={(e) => {
           e.preventDefault();
           handlePasteText(e.clipboardData.getData("text/plain"));

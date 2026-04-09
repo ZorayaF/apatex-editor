@@ -1,7 +1,7 @@
 import React from "react";
 import { TextInput, NumberInput, Stack } from "@mantine/core";
-import { REFERENCE_FIELDS } from "../../../../logic/references/fieldDefinitions";
-import { InspectorField } from "../../InspectorField";
+import { REFERENCE_FIELDS } from "@editor/logic/references/fieldDefinitions";
+import { InspectorField } from "@inspector/InspectorField";
 
 export const DynamicReferenceForm = ({ schema, data, onChange }) => {
   // Los campos base que SIEMPRE están en la raíz del objeto
