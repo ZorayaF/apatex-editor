@@ -30,6 +30,7 @@ import { BibliographyView } from "../views/BibliographyView"; // Asegúrate de c
 // Store y Estilos
 import { useStore } from "@store";
 import "../../styles/editor.css";
+import { ProjectStructure } from "../views/ProjectStructure";
 
 export const EditorShell = () => {
   const [activeTab, setActiveTab] = useState("redaccion");
@@ -108,10 +109,10 @@ export const EditorShell = () => {
                 >
                   Redacción
                 </Tabs.Tab>
+                {/* QUITAMOS EL disabled AQUÍ */}
                 <Tabs.Tab
                   value="estructura"
                   leftSection={<IconLayoutBoard size={16} />}
-                  disabled
                 >
                   Estructura
                 </Tabs.Tab>
@@ -189,11 +190,9 @@ export const EditorShell = () => {
             </Box>
           ) : activeTab === "referencias" ? (
             <BibliographyView />
-          ) : (
-            <Box p="xl">
-              <Text>Estructura del Proyecto (Próximamente)</Text>
-            </Box>
-          )}
+          ) : activeTab === "estructura" ? ( // <--- AGREGAMOS ESTA CONDICIÓN
+            <ProjectStructure />
+          ) : null}
         </ScrollArea>
       </AppShell.Main>
 
