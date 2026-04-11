@@ -113,3 +113,33 @@ function getInitial(name) {
   const firstLetter = name.trim().charAt(0).toUpperCase();
   return firstLetter ? `${firstLetter}.` : "";
 }
+
+// src/store/selectors/referenceSelectors.js
+
+/**
+ * Escanea todos los bloques del documento y devuelve
+ * un array con los IDs únicos de las fuentes citadas.
+ */
+export const getUsedSourceIds = (blocks) => {
+  const usedIds = new Set();
+
+  // Regex para encontrar el ID dentro de nuestro marcador complejo
+  // Busca lo que hay entre "ref:" y el primer "|" o ")"
+  const citationRegex = /\(\(ref:([\w-]+)/g;
+
+  blocks.forEach((block) => {
+    // Solo escaneamos si el bloque tiene contenido de texto
+    if (block.content) {
+      let match;
+      // Reiniciamos el índice de la regex por seguridad
+      citationRegex.lastIndex = 0;
+
+      while ((match = citationRegex.exec(block.content)) !== null) {
+        // match[1] es el ID capturado por el grupo ([\w-]+)
+        usedIds.add(match[1]);
+      }
+    }
+  });
+
+  return Array.from(usedIds);
+};
