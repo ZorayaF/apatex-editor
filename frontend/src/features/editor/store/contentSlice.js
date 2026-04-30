@@ -4,8 +4,8 @@ import {
   calculateNewBlockStructure,
   calculatePasteStructure,
   calculateMerge,
-} from "../logic/engine/insertionEngine";
-import { cleanAndSplitText } from "../logic/engine/parser";
+} from "@logic/engine/insertionEngine";
+import { cleanAndSplitText } from "@logic/engine/parser";
 
 export const createContentSlice = (set, get) => ({
   blocks: [],

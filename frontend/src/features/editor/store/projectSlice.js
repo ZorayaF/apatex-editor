@@ -12,34 +12,40 @@ const initialState = {
   programa: "",
   ubicacion: "Tunja",
   anio: new Date().getFullYear(),
+  preliminares: {
+    aceptacion: {
+      enabled: true,
+      ciudad: "Tunja",
+      fecha: "",
+      jurados: ["", ""],
+    },
+    reglamento: { enabled: true },
+    dedicatoria: { enabled: false, content: "" },
+    agradecimientos: { enabled: false, content: "" },
+    glosario: { enabled: false, terms: [] }, // <--- IMPORTANTE: que sea [] y no undefined
+    resumen: { enabled: true, content: "", palabrasClave: "" },
+    abstract: { enabled: true, content: "", keywords: "" },
+  },
 };
 
 export const createProjectSlice = (set) => ({
   projectMetadata: initialState,
 
-  // Versión robusta de actualización
   setProjectMetadata: (path, value) =>
     set((state) => {
-      // Si el path tiene un punto (ej: "director.nombre")
-      if (path.includes(".")) {
-        const [parent, child] = path.split(".");
-        return {
-          projectMetadata: {
-            ...state.projectMetadata,
-            [parent]: {
-              ...state.projectMetadata[parent],
-              [child]: value,
-            },
-          },
-        };
+      const keys = path.split(".");
+      const newMetadata = { ...state.projectMetadata };
+      let current = newMetadata;
+
+      // Navegamos por el objeto hasta el penúltimo nivel
+      for (let i = 0; i < keys.length - 1; i++) {
+        current[keys[i]] = { ...current[keys[i]] };
+        current = current[keys[i]];
       }
 
-      // Si es un campo de primer nivel (ej: "tituloProyecto")
-      return {
-        projectMetadata: {
-          ...state.projectMetadata,
-          [path]: value,
-        },
-      };
+      // Asignamos el valor en el último nivel
+      current[keys[keys.length - 1]] = value;
+
+      return { projectMetadata: newMetadata };
     }),
 });

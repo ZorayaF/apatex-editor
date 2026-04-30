@@ -1,4 +1,15 @@
 /* src/features/editor/styles/editor.css */
+:root {
+  /* Valores estándar de APA 7 */
+  --apa-font: "Times New Roman", Times, serif;
+  --apa-line-height: 1.5;
+  --apa-size: 12pt;
+
+  /* Colores de la interfaz (puedes usarlos abajo) */
+  --editor-blue: #228be6;
+  --editor-bg-selected: rgba(34, 139, 230, 0.05);
+  --editor-border-hover: #e9ecef;
+}
 
 .apa-table-container,
 .editable-cell {

@@ -1,5 +1,5 @@
 import React from "react";
-import { EditorShell } from "@editor/components/layout/EditorShell";
+import { EditorShell } from "@editor/layout/EditorShell";
 
 const EditorPage = () => {
   return <EditorShell />;

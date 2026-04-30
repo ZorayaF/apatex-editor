@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import { useStore } from "@store";
-import { formatRunInHeading } from "@editor/logic/engine/formatting";
+import { formatRunInHeading } from "@logic/engine/formatting";
 
 export const useBlockHandlers = ({
   id,

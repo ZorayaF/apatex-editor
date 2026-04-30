@@ -2,7 +2,7 @@
 import { useEffect } from "react";
 import { useStore } from "@store";
 import { notifications } from "@mantine/notifications";
-import { analyzeOverflow } from "../logic/engine/paginationEngine";
+import { analyzeOverflow } from "@logic/engine/paginationEngine";
 
 export const usePagePagination = (pageContentRef, blockIds, pageNumber) => {
   const moveToNextPage = useStore((s) => s.moveToNextPage);

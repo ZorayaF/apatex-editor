@@ -1,8 +1,8 @@
 // src/features/editor/hooks/useBlockSync.js
 import { useEffect } from "react";
 import { useStore } from "@store"; // <--- 1. Necesitamos las fuentes del Store
-import { formatRunInHeading } from "../logic/engine/formatting";
-import { parseCitations } from "../logic/engine/citationEngine"; // <--- 2. El traductor de citas
+import { formatRunInHeading } from "@logic/engine/formatting";
+import { parseCitations } from "@logic/engine/citationEngine"; // <--- 2. El traductor de citas
 
 export const useBlockSync = ({
   id,
