@@ -73,6 +73,12 @@ export const StructureSidebar = ({
                 active={activeSection === "referencias"}
                 onClick={() => setActiveSection("referencias")}
               />
+              <NavItem
+                label="Introducción"
+                icon={<IconNotes size={18} />}
+                active={activeSection === "introduccion"}
+                onClick={() => setActiveSection("introduccion")}
+              />
             </Stack>
           </Box>
 

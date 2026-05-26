@@ -21,7 +21,13 @@ export const StructurePreview = ({ activeSection, metadata }) => {
 
   // Verificamos si la sección actual está habilitada (si es opcional)
   const isEnabled = () => {
-    const alwaysEnabled = ["portada", "referencias", "aceptacion", "toc"];
+    const alwaysEnabled = [
+      "portada",
+      "referencias",
+      "aceptacion",
+      "toc",
+      "introduccion",
+    ];
     if (alwaysEnabled.includes(activeSection)) return true;
     return prelim[activeSection]?.enabled;
   };
@@ -89,6 +95,10 @@ export const StructurePreview = ({ activeSection, metadata }) => {
 
       case "referencias":
         return <BibliographyPreview />;
+      case "introduccion":
+        return (
+          <SimplePagePreview type="introduccion" data={prelim.introduccion} />
+        );
 
       case "dedicatoria":
         return (

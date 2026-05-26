@@ -1,14 +1,15 @@
 // src/features/editor/components/config/preview/SimplePagePreview.jsx
-import React from "react";
 import { Box, Text } from "@mantine/core";
 import { APA_CONFIG, cmToPx } from "@core/utils/measurements";
 
 export const SimplePagePreview = ({ type, data }) => {
   const { paper, margins, typography } = APA_CONFIG;
 
-  // Definimos qué secciones NO deben mostrar el título superior
   const sectionsWithoutTitle = ["dedicatoria", "reglamento"];
   const shouldHideTitle = sectionsWithoutTitle.includes(type);
+
+  // REGLA APA: Sangría de primera línea para la introducción
+  const isIntroduccion = type === "introduccion";
 
   const pageStyle = {
     width: `${cmToPx(paper.width)}px`,
@@ -24,10 +25,6 @@ export const SimplePagePreview = ({ type, data }) => {
 
   return (
     <Box style={pageStyle}>
-      {/* 
-          TÍTULO: Solo se muestra si la sección no está 
-          en nuestra "lista negra" (Agradecimientos sí lo muestra).
-      */}
       {!shouldHideTitle && (
         <Text
           ta="center"
@@ -39,8 +36,17 @@ export const SimplePagePreview = ({ type, data }) => {
         </Text>
       )}
 
-      {/* Contenido Normal */}
-      <Text style={{ textAlign: "justify", whiteSpace: "pre-wrap" }}>
+      {/* 
+          TEXTO CON SANGRÍA: 
+          Si es introducción, aplicamos textIndent de 1.27cm (0.5 pulgadas) 
+      */}
+      <Text
+        style={{
+          textAlign: "justify",
+          whiteSpace: "pre-wrap",
+          textIndent: isIntroduccion ? "1.27cm" : "0",
+        }}
+      >
         {data?.content || `[Contenido de la sección ${type}]`}
       </Text>
     </Box>

@@ -19,6 +19,7 @@ import { LegalForm } from "@config/forms/LegalForm";
 import { OptionalForm } from "@config/forms/OptionalForm";
 import { GlossaryForm } from "@config/forms/GlossaryForm";
 import { AnnexesForm } from "@config/forms/AnnexesForm";
+import { IntroductionForm } from "@config/forms/IntroductionForm";
 
 export const ConfigurationView = () => {
   const { projectMetadata, setProjectMetadata } = useStore();
@@ -40,6 +41,8 @@ export const ConfigurationView = () => {
         return <GlossaryForm />;
       case "anexos":
         return <AnnexesForm />;
+      case "introduccion":
+        return <IntroductionForm />;
 
       case "referencias":
         return (
