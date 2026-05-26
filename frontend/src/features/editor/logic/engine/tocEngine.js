@@ -2,7 +2,20 @@
 import { calculateDocumentMap } from "./documentLayoutEngine";
 
 export const generateAllLists = (blocks, pages, metadata) => {
-  const docMap = calculateDocumentMap(metadata);
+  let docMap = {
+    introduccionPage: 5,
+    editorStartPage: 6,
+  };
+  try {
+    const calculated = calculateDocumentMap(metadata);
+    if (calculated) docMap = calculated;
+  } catch (e) {
+    console.warn(
+      "No se pudo calcular el mapa dinámico de páginas, usando fallback.",
+      e,
+    );
+  }
+
   const prelim = metadata?.preliminares || {};
 
   const lists = {
@@ -12,91 +25,82 @@ export const generateAllLists = (blocks, pages, metadata) => {
     anexos: [],
   };
 
-  // ==========================================
-  // 1. CONSTRUCCIÓN ÍNDICE DE CONTENIDO
-  // ==========================================
-  // Secciones preliminares requeridas
-  lists.contenido.push({ text: "RESUMEN", level: "h1", page: docMap.resumen });
+  // 1. CONSTRUCCIÓN ÍNDICE DE CONTENIDO (Secciones preliminares)
   lists.contenido.push({
-    text: "ABSTRACT",
+    text: "Introducción",
     level: "h1",
-    page: docMap.abstract,
+    page: docMap.introduccionPage || 5,
   });
 
-  // Secciones preliminares opcionales (Solo si están activas)
-  if (prelim.dedicatoria?.enabled) {
-    lists.contenido.push({
-      text: "DEDICATORIA",
-      level: "h1",
-      page: docMap.dedicatoria,
-    });
-  }
-  if (prelim.agradecimientos?.enabled) {
-    lists.contenido.push({
-      text: "AGRADECIMIENTOS",
-      level: "h1",
-      page: docMap.agradecimientos,
-    });
-  }
-  if (prelim.glosario?.enabled) {
-    lists.contenido.push({
-      text: "GLOSARIO",
-      level: "h1",
-      page: docMap.glosario,
-    });
-  }
+  // 🔹 CONTADORES PARA LA NUMERACIÓN SIMPLE Y CONSECUTIVA
+  let contadorTablas = 0;
+  let contadorFiguras = 0;
 
-  // Escaneo dinámico en las páginas del editor (H1, H2, H3, Tablas y Figuras)
-  pages.forEach((page, index) => {
-    const realPageNumber = docMap.editorStartPage + index;
+  // 2. ESCANEO DINÁMICO DE BLOQUES EN LAS PÁGINAS DEL EDITOR
+  if (pages && Array.isArray(pages)) {
+    pages.forEach((page, index) => {
+      const startPage = docMap.editorStartPage || 6;
+      const realPageNumber = startPage + index;
 
-    page.blockIds.forEach((blockId) => {
-      const block = blocks.find((b) => b.id === blockId);
-      if (!block) return;
+      if (page.blockIds && Array.isArray(page.blockIds)) {
+        page.blockIds.forEach((blockId) => {
+          const block = blocks?.find((b) => b.id === blockId);
+          if (!block) return;
 
-      // Títulos del documento
-      if (["h1", "h2", "h3"].includes(block.type)) {
-        lists.contenido.push({
-          text: block.content || "Sin título",
-          level: block.type,
-          page: realPageNumber,
-        });
-      }
+          // Capítulos y subtítulos (h1, h2, h3)
+          if (["h1", "h2", "h3"].includes(block.type)) {
+            lists.contenido.push({
+              text: block.content || "Sin título",
+              level: block.type,
+              page: realPageNumber,
+            });
+          }
 
-      // Extracción automática para la Lista de Tablas
-      if (block.type === "tableBlock") {
-        lists.tablas.push({
-          label: `Tabla ${block.number || lists.tablas.length + 1}`,
-          title: block.title || "Sin título de tabla",
-          page: realPageNumber,
-        });
-      }
+          // ✅ EXTRACCIÓN PREMISA PARA TABLAS
+          // Mapeamos el tipo exacto que definas en tu BlockRegistry (asumo 'tableBlock' o 'table')
+          if (block.type === "tableBlock" || block.type === "table") {
+            contadorTablas++;
+            lists.tablas.push({
+              label: `Tabla ${contadorTablas}`,
+              title: block.title || "Sin título de tabla", // Leemos la prop 'title' directa del bloque
+              page: realPageNumber,
+            });
+          }
 
-      // Extracción automática para la Lista de Figuras
-      if (block.type === "figureBlock") {
-        lists.figuras.push({
-          label: `Figura ${block.number || lists.figuras.length + 1}`,
-          title: block.title || "Sin título de figura",
-          page: realPageNumber,
+          // ✅ EXTRACCIÓN PREMISA PARA FIGURAS
+          // Mapeamos el tipo exacto que definas en tu BlockRegistry (asumo 'figureBlock' o 'figure')
+          if (block.type === "figureBlock" || block.type === "figure") {
+            contadorFiguras++;
+            lists.figuras.push({
+              label: `Figura ${contadorFiguras}`,
+              title: block.title || "Sin título de figura", // Leemos la prop 'title' directa del bloque
+              page: realPageNumber,
+            });
+          }
         });
       }
     });
-  });
+  }
 
-  // Mapeo dinámico del arreglo de anexos si la sección está encendida
-  if (prelim.anexos?.enabled && prelim.anexos?.items) {
-    // Agregamos la sección general en el índice de contenido
+  // 3. BLOQUE FINAL DE ANEXOS
+  if (
+    prelim.anexos?.enabled &&
+    prelim.anexos?.items &&
+    prelim.anexos.items.length > 0
+  ) {
+    const baseAnexosPage = docMap.anexosStartPage || 20;
+
     lists.contenido.push({
-      text: "ANEXOS",
+      text: "Anexos",
       level: "h1",
-      page: docMap.anexosStartPage,
+      page: baseAnexosPage,
     });
 
-    prelim.anexos.items.forEach((anexo) => {
+    prelim.anexos.items.forEach((anexo, idx) => {
       lists.anexos.push({
-        label: `Anexo ${anexo.id}`,
+        label: `Anexo ${anexo.id || String.fromCharCode(65 + idx)}`,
         title: anexo.title || "Sin título",
-        page: docMap.anexosStartPage + 1 + prelim.anexos.items.indexOf(anexo),
+        page: baseAnexosPage + 1 + idx,
       });
     });
   }

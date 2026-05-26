@@ -19,6 +19,7 @@ import { LegalForm } from "@config/forms/LegalForm";
 import { OptionalForm } from "@config/forms/OptionalForm";
 import { GlossaryForm } from "@config/forms/GlossaryForm";
 import { AnnexesForm } from "@config/forms/AnnexesForm";
+import { TOCForm } from "@config/forms/TOCForm";
 
 export const ConfigurationView = () => {
   const { projectMetadata, setProjectMetadata } = useStore();
@@ -64,6 +65,8 @@ export const ConfigurationView = () => {
 
       case "reglamento":
         return <LegalForm />;
+      case "toc":
+        return <TOCForm />;
 
       default:
         return <Text c="dimmed">Próximamente...</Text>;
