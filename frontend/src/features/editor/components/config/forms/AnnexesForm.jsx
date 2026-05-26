@@ -13,12 +13,16 @@ import {
   Box,
   Select,
   Checkbox,
+  FileButton,
+  Table,
 } from "@mantine/core";
 import {
   IconPlus,
   IconTrash,
   IconArrowUp,
   IconArrowDown,
+  IconUpload,
+  IconMinus,
 } from "@tabler/icons-react";
 import { useStore } from "@store";
 
@@ -26,20 +30,24 @@ export const AnnexesForm = () => {
   const { projectMetadata, setProjectMetadata } = useStore();
   const annexes = projectMetadata.preliminares.anexos?.items || [];
 
-  // Estado local para controlar el formulario de nuevo anexo
+  // Estado base del anexo inicializado con la estructura exacta que necesitan tus sub-formularios
   const [newAnnex, setNewAnnex] = useState({
     title: "",
     description: "",
     type: "text",
     contentText: "",
-    contentImage: { fileUrl: "", hasSource: false, sourceText: "" },
-    contentLinks: [], // Array de objetos { label: "", url: "" }
+    // Simula las propiedades nativas de tu FigureBlock
+    contentImage: { fileUrl: "", isLocal: false, width: 100 },
+    // Simula la matriz bidimensional que espera tu TableBlock (ej: 2 filas x 3 columnas iniciales)
+    contentTable: [
+      ["Criterio", "Frecuencia", "Porcentaje"],
+      ["", "", ""],
+    ],
+    contentLinks: [],
   });
 
-  // Estado local para agregar links individuales a la lista temporal
   const [tempLink, setTempLink] = useState({ label: "", url: "" });
 
-  // Función para convertir el índice numérico en letras (0 -> A, 1 -> B, 26 -> AA)
   const generateLetterId = (index) => {
     let label = "";
     let temp = index;
@@ -51,7 +59,6 @@ export const AnnexesForm = () => {
   };
 
   const updateAnnexesStore = (newList) => {
-    // Re-calculamos los IDs alfabéticos de todos los anexos según su posición actual
     const updatedList = newList.map((item, idx) => ({
       ...item,
       id: generateLetterId(idx),
@@ -60,17 +67,19 @@ export const AnnexesForm = () => {
   };
 
   const addAnnex = () => {
-    if (!newAnnex.title) return; // El título es obligatorio
-
+    if (!newAnnex.title) return;
     updateAnnexesStore([...annexes, newAnnex]);
 
-    // Resetear el estado
     setNewAnnex({
       title: "",
       description: "",
       type: "text",
       contentText: "",
-      contentImage: { fileUrl: "", hasSource: false, sourceText: "" },
+      contentImage: { fileUrl: "", isLocal: false, width: 100 },
+      contentTable: [
+        ["Criterio", "Frecuencia", "Porcentaje"],
+        ["", "", ""],
+      ],
       contentLinks: [],
     });
     setTempLink({ label: "", url: "" });
@@ -80,40 +89,81 @@ export const AnnexesForm = () => {
     updateAnnexesStore(annexes.filter((_, i) => i !== index));
   };
 
-  // Funciones para reordenar los anexos (esencial si cambian el orden en el texto)
   const moveAnnex = (index, direction) => {
     const targetIndex = direction === "up" ? index - 1 : index + 1;
     if (targetIndex < 0 || targetIndex >= annexes.length) return;
-
     const updated = [...annexes];
     const temp = updated[index];
     updated[index] = updated[targetIndex];
     updated[targetIndex] = temp;
-
     updateAnnexesStore(updated);
   };
 
-  const addLinkToTempList = () => {
-    if (!tempLink.url) return;
+  // --- REUTILIZACIÓN DE LA LÓGICA DE CARGA DE FIGURAS ---
+  const handleImageUpload = (file) => {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      setNewAnnex({
+        ...newAnnex,
+        contentImage: {
+          ...newAnnex.contentImage,
+          fileUrl: e.target.result,
+          isLocal: true,
+        },
+      });
+    };
+    reader.readAsDataURL(file);
+  };
+
+  // --- REUTILIZACIÓN DE LA LÓGICA ESTRUCTURAL DE TABLAS ---
+  const addRow = () => {
+    const newRow = new Array(newAnnex.contentTable[0].length).fill("");
     setNewAnnex({
       ...newAnnex,
-      contentLinks: [...newAnnex.contentLinks, tempLink],
+      contentTable: [...newAnnex.contentTable, newRow],
     });
-    setTempLink({ label: "", url: "" });
+  };
+
+  const removeRow = () => {
+    if (newAnnex.contentTable.length <= 1) return;
+    setNewAnnex({
+      ...newAnnex,
+      contentTable: newAnnex.contentTable.slice(0, -1),
+    });
+  };
+
+  const addColumn = () => {
+    const newData = newAnnex.contentTable.map((row) => [...row, ""]);
+    setNewAnnex({ ...newAnnex, contentTable: newData });
+  };
+
+  const removeColumn = () => {
+    if (newAnnex.contentTable[0].length <= 1) return;
+    const newData = newAnnex.contentTable.map((row) => row.slice(0, -1));
+    setNewAnnex({ ...newAnnex, contentTable: newData });
+  };
+
+  const handleCellChange = (rowIndex, colIndex, val) => {
+    const updatedTable = newAnnex.contentTable.map((row, rIdx) =>
+      row.map((cell, cIdx) =>
+        rIdx === rowIndex && cIdx === colIndex ? val : cell,
+      ),
+    );
+    setNewAnnex({ ...newAnnex, contentTable: updatedTable });
   };
 
   return (
     <Stack gap="xl">
       <Paper withBorder p="md" bg="gray.0" radius="md">
         <Text fw={700} size="sm" mb="md">
-          Añadir Nuevo Anexo (Siguiente Letra:{" "}
-          {generateLetterId(annexes.length)})
+          Añadir Nuevo Anexo ({generateLetterId(annexes.length)})
         </Text>
 
         <Stack gap="sm">
           <TextInput
             label="Título del Anexo"
-            placeholder="Ej: Resultado proceso de investigación"
+            placeholder="Ej: Matriz de variables o Infografía técnica"
             required
             value={newAnnex.title}
             onChange={(e) =>
@@ -122,8 +172,8 @@ export const AnnexesForm = () => {
           />
 
           <Textarea
-            label="Descripción o Introducción (Opcional)"
-            placeholder="En la siguiente tabla se presentan los anexos pertinentes..."
+            label="Descripción / Nota APA (Opcional)"
+            placeholder="Nota: Tomado de..."
             autosize
             minRows={2}
             value={newAnnex.description}
@@ -138,7 +188,7 @@ export const AnnexesForm = () => {
               { value: "text", label: "Texto Plano / Redacción" },
               { value: "links", label: "Lista de Enlaces (Links)" },
               { value: "image", label: "Ilustración / Imagen / Infografía" },
-              { value: "table", label: "Tabla de Datos (Muestra)" },
+              { value: "table", label: "Tabla de Datos Dinámica" },
             ]}
             value={newAnnex.type}
             onChange={(val) =>
@@ -146,26 +196,48 @@ export const AnnexesForm = () => {
             }
           />
 
-          {/* RENDERIZADO CONDICIONAL SEGÚN EL TIPO SELECCIONADO */}
-          {newAnnex.type === "text" && (
-            <Textarea
-              label="Cuerpo del Texto"
-              placeholder="Escribe o pega el contenido textual aquí..."
-              minRows={4}
-              autosize
-              value={newAnnex.contentText}
-              onChange={(e) =>
-                setNewAnnex({ ...newAnnex, contentText: e.target.value })
-              }
-            />
-          )}
-
+          {/* 🖼️ INTERFAZ REUTILIZADA: DISEÑO DE ORIGEN DE FIGURA */}
           {newAnnex.type === "image" && (
             <Stack gap="xs">
+              {!newAnnex.contentImage.isLocal ? (
+                <FileButton onChange={handleImageUpload} accept="image/*">
+                  {(props) => (
+                    <Button
+                      {...props}
+                      variant="light"
+                      leftSection={<IconUpload size={16} />}
+                    >
+                      Subir imagen desde el equipo
+                    </Button>
+                  )}
+                </FileButton>
+              ) : (
+                <Button
+                  variant="outline"
+                  color="red"
+                  leftSection={<IconTrash size={16} />}
+                  onClick={() =>
+                    setNewAnnex({
+                      ...newAnnex,
+                      contentImage: { fileUrl: "", isLocal: false, width: 100 },
+                    })
+                  }
+                >
+                  Quitar archivo local
+                </Button>
+              )}
+
+              <Divider label="o enlace externo" labelPosition="center" />
+
               <TextInput
-                label="URL de la Imagen"
-                placeholder="Inserta el enlace directo de tu imagen (JPG, PNG)..."
-                value={newAnnex.contentImage.fileUrl}
+                label="URL Externa"
+                placeholder="https://..."
+                disabled={newAnnex.contentImage.isLocal}
+                value={
+                  newAnnex.contentImage.isLocal
+                    ? "Archivo local cargado"
+                    : newAnnex.contentImage.fileUrl
+                }
                 onChange={(e) =>
                   setNewAnnex({
                     ...newAnnex,
@@ -176,47 +248,91 @@ export const AnnexesForm = () => {
                   })
                 }
               />
-              <Checkbox
-                label="¿Este elemento fue tomado de otra fuente? (No es autoría propia)"
-                checked={newAnnex.contentImage.hasSource}
-                onChange={(e) =>
-                  setNewAnnex({
-                    ...newAnnex,
-                    contentImage: {
-                      ...newAnnex.contentImage,
-                      hasSource: e.currentTarget.checked,
-                    },
-                  })
-                }
-              />
-              {newAnnex.contentImage.hasSource && (
-                <TextInput
-                  label="Fuente Bibliográfica"
-                  placeholder="Ej: Ministerio de Salud (2024)"
-                  value={newAnnex.contentImage.sourceText}
-                  onChange={(e) =>
-                    setNewAnnex({
-                      ...newAnnex,
-                      contentImage: {
-                        ...newAnnex.contentImage,
-                        sourceText: e.target.value,
-                      },
-                    })
-                  }
-                />
-              )}
             </Stack>
           )}
 
+          {/* 📊 INTERFAZ REUTILIZADA: GESTIÓN DE MATRIZ DE TABLAS */}
+          {newAnnex.type === "table" && (
+            <Stack gap="md">
+              <Group grow>
+                <Group gap={5}>
+                  <Text size="xs" fw={500} c="dimmed" w="100%">
+                    Filas
+                  </Text>
+                  <ActionIcon variant="light" color="red" onClick={removeRow}>
+                    <IconMinus size={14} />
+                  </ActionIcon>
+                  <Text size="sm" fw={700} ta="center" w={20}>
+                    {newAnnex.contentTable.length}
+                  </Text>
+                  <ActionIcon variant="light" color="blue" onClick={addRow}>
+                    <IconPlus size={14} />
+                  </ActionIcon>
+                </Group>
+
+                <Group gap={5}>
+                  <Text size="xs" fw={500} c="dimmed" w="100%">
+                    Columnas
+                  </Text>
+                  <ActionIcon
+                    variant="light"
+                    color="red"
+                    onClick={removeColumn}
+                  >
+                    <IconMinus size={14} />
+                  </ActionIcon>
+                  <Text size="sm" fw={700} ta="center" w={20}>
+                    {newAnnex.contentTable[0].length}
+                  </Text>
+                  <ActionIcon variant="light" color="blue" onClick={addColumn}>
+                    <IconPlus size={14} />
+                  </ActionIcon>
+                </Group>
+              </Group>
+
+              {/* Pequeña matriz editable interactiva dentro del formulario */}
+              <Box style={{ overflowX: "auto" }}>
+                <Table
+                  variant="unstyled"
+                  style={{ border: "1px solid #dee2e6" }}
+                >
+                  <Table.Tbody>
+                    {newAnnex.contentTable.map((row, rIdx) => (
+                      <Table.Tr key={rIdx}>
+                        {row.map((cell, cIdx) => (
+                          <Table.Td key={cIdx} p={2}>
+                            <TextInput
+                              size="xs"
+                              variant="unstyled"
+                              style={{
+                                border: "1px solid #e0e0e0",
+                                padding: "2px",
+                                backgroundColor:
+                                  rIdx === 0 ? "#f8f9fa" : "white",
+                                fontWeight: rIdx === 0 ? "bold" : "normal",
+                              }}
+                              value={cell}
+                              onChange={(e) =>
+                                handleCellChange(rIdx, cIdx, e.target.value)
+                              }
+                            />
+                          </Table.Td>
+                        ))}
+                      </Table.Tr>
+                    ))}
+                  </Table.Tbody>
+                </Table>
+              </Box>
+            </Stack>
+          )}
+
+          {/* 🔗 INTERFAZ: ENLACES */}
           {newAnnex.type === "links" && (
             <Paper withBorder p="xs" bg="white">
-              <Text size="xs" fw={700} mb="xs">
-                Construir Lista de Enlaces:
-              </Text>
               <Group align="flex-end" mb="xs">
                 <TextInput
-                  label="Nombre del Enlace"
-                  placeholder="Ej: Entrevista A"
+                  label="Nombre"
+                  placeholder="Entrevista A"
                   style={{ flex: 1 }}
                   value={tempLink.label}
                   onChange={(e) =>
@@ -232,33 +348,39 @@ export const AnnexesForm = () => {
                     setTempLink({ ...tempLink, url: e.target.value })
                   }
                 />
-                <Button variant="light" onClick={addLinkToTempList}>
-                  Agregar Link
+                <Button
+                  variant="light"
+                  onClick={() =>
+                    (tempLink.url &&
+                      setNewAnnex({
+                        ...newAnnex,
+                        contentLinks: [...newAnnex.contentLinks, tempLink],
+                      })) ||
+                    setTempLink({ label: "", url: "" })
+                  }
+                >
+                  Añadir
                 </Button>
               </Group>
-
-              {/* Visualización temporal de links en cola */}
               {newAnnex.contentLinks.map((l, i) => (
                 <Text key={i} size="xs" c="blue.7" fw={600}>
-                  • {l.label || l.url} ({l.url})
+                  • {l.label || l.url}
                 </Text>
               ))}
             </Paper>
           )}
 
-          {newAnnex.type === "table" && (
-            <Paper
-              p="xs"
-              withBorder
-              bg="yellow.0"
-              style={{ borderStyle: "dashed" }}
-            >
-              <Text size="xs" c="yellow.9" fw={600}>
-                Nota: La estructura de la tabla se genera bajo el estándar
-                estructural de muestras universitarias. Podrás poblar sus filas
-                desde las celdas del bloque editor principal.
-              </Text>
-            </Paper>
+          {/* 🔤 INTERFAZ: TEXTO */}
+          {newAnnex.type === "text" && (
+            <Textarea
+              label="Cuerpo del Texto"
+              placeholder="Redacte el anexo..."
+              minRows={4}
+              value={newAnnex.contentText}
+              onChange={(e) =>
+                setNewAnnex({ ...newAnnex, contentText: e.target.value })
+              }
+            />
           )}
 
           <Button
@@ -273,34 +395,24 @@ export const AnnexesForm = () => {
         </Stack>
       </Paper>
 
-      <Divider
-        label={`Anexos creados en el documento (${annexes.length})`}
-        labelPosition="center"
-      />
-
-      {/* LISTADO DE ANEXOS AGREGADOS CON CONTROL DE ORDEN */}
+      {/* Listado inferior con botones de orden (idéntico al anterior) */}
       <Stack gap="sm">
         {annexes.map((item, index) => (
           <Paper key={item.id || index} withBorder p="sm" shadow="xs">
-            <Group align="center" justify="space-between" wrap="nowrap">
-              <Box style={{ flex: 1 }}>
+            <Group align="center" justify="space-between">
+              <Box>
                 <Text fw={700} c="blue.8" size="sm">
                   Anexo {item.id}. {item.title}
                 </Text>
                 <Text
                   size="xs"
                   c="dimmed"
-                  style={{ textTransform: "capitalize" }}
+                  style={{ textTransform: "uppercase" }}
                 >
-                  Tipo: {item.type}{" "}
-                  {item.description
-                    ? `| ${item.description.substring(0, 40)}...`
-                    : ""}
+                  Tipo: {item.type}
                 </Text>
               </Box>
-
               <Group gap={4}>
-                {/* Botones de ordenamiento secuencial */}
                 <ActionIcon
                   variant="subtle"
                   color="gray"
@@ -317,8 +429,6 @@ export const AnnexesForm = () => {
                 >
                   <IconArrowDown size={16} />
                 </ActionIcon>
-
-                {/* Botón de eliminación */}
                 <ActionIcon
                   color="red"
                   variant="subtle"
