@@ -1,4 +1,3 @@
-import React from "react";
 import {
   Stack,
   Text,
@@ -6,9 +5,7 @@ import {
   Box,
   Group,
   Switch,
-  ThemeIcon,
   ScrollArea,
-  Divider,
 } from "@mantine/core";
 import {
   IconFileCheck,
@@ -19,6 +16,7 @@ import {
   IconVocabulary,
   IconGavel,
   IconCircleCheckFilled,
+  IconPaperclip,
 } from "@tabler/icons-react";
 
 export const StructureSidebar = ({
@@ -105,6 +103,16 @@ export const StructureSidebar = ({
                 }
                 onClick={() => setActiveSection("glosario")}
               />
+              <NavItemToggle
+                label="Anexos / Apéndices"
+                icon={<IconPaperclip size={18} />}
+                active={activeSection === "anexos"}
+                enabled={prelim.anexos?.enabled}
+                onToggle={(val) =>
+                  onToggleSection("preliminares.anexos.enabled", val)
+                }
+                onClick={() => setActiveSection("anexos")}
+              />
             </Stack>
           </Box>
 
@@ -166,12 +174,13 @@ const NavItemToggle = ({ label, icon, active, enabled, onToggle, onClick }) => (
       leftSection={icon}
       active={active}
       onClick={onClick}
+      disabled={!enabled && !active} // Bloquea clics si está desactivado y no activo
       variant="filled"
       color="blue"
       style={{
         borderRadius: "6px 0 0 6px",
         flex: 1,
-        opacity: enabled ? 1 : 0.6, // Efecto visual si está apagado
+        opacity: enabled ? 1 : 0.6,
       }}
     />
     <Box

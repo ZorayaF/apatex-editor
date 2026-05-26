@@ -1,6 +1,7 @@
 import React from "react";
 import { Box, Text, Center, Stack, ThemeIcon, Divider } from "@mantine/core";
 import { IconEyeOff } from "@tabler/icons-react";
+import { APA_CONFIG, cmToPx } from "@core/utils/measurements";
 
 // Importamos los componentes de hoja
 import { TitlePagePreview } from "./TitlePagePreview";
@@ -10,10 +11,13 @@ import { GlossaryPagePreview } from "./GlossaryPagePreview";
 import { TableOfContents } from "./TableOfContents";
 import { BibliographyPreview } from "./BibliographyPreview";
 import { SimplePagePreview } from "./SimplePagePreview";
+import { AnnexPagePreview } from "./AnnexPagePreview";
 
 export const StructurePreview = ({ activeSection, metadata }) => {
   const prelim = metadata?.preliminares || {};
   const projectTitle = metadata.portada?.titulo || "TÍTULO DEL PROYECTO";
+
+  const listaAnexos = prelim.anexos?.items || [];
 
   // Verificamos si la sección actual está habilitada (si es opcional)
   const isEnabled = () => {
@@ -114,6 +118,55 @@ export const StructurePreview = ({ activeSection, metadata }) => {
                 "“Únicamente el graduando es responsable de las ideas expuestas en el presente trabajo”. (Lineamientos constitucionales, legales e institucionales que rigen la propiedad intelectual).",
             }}
           />
+        );
+      case "anexos":
+        return (
+          <Stack gap="xl">
+            {listaAnexos.length === 0 ? (
+              <SimplePagePreview
+                type="anexos"
+                data={{
+                  content:
+                    "[Aún no has agregado ningún anexo al listado dinámico.]",
+                }}
+              />
+            ) : (
+              <>
+                {/* 1. PÁGINA ANTECEDENTE / DIVISORIA DE ANEXOS */}
+                <Box
+                  style={{
+                    width: `${cmToPx(APA_CONFIG.paper.width)}px`,
+                    height: `${cmToPx(APA_CONFIG.paper.height)}px`,
+                    backgroundColor: "white",
+                    boxSizing: "border-box",
+                    fontFamily: APA_CONFIG.typography.family,
+                    fontSize: `${APA_CONFIG.typography.size}pt`,
+                    boxShadow: "0 4px 10px rgba(0,0,0,0.1)",
+                    display: "flex",
+                    alignItems: "center", // Centrado Vertical
+                    justifyContent: "center", // Centrado Horizontal
+                    fontWeight: "bold",
+                  }}
+                >
+                  <Text size="24pt" fw="bold">
+                    Anexos
+                  </Text>
+                </Box>
+
+                {/* 2. MAPEADO DE LOS ANEXOS INDIVIDUALES */}
+                {listaAnexos.map((anexo, index) => (
+                  <React.Fragment key={anexo.id || index}>
+                    <Divider
+                      label={`Salto de página hacia el Anexo ${anexo.id}`}
+                      labelPosition="center"
+                      color="gray.4"
+                    />
+                    <AnnexPagePreview item={anexo} />
+                  </React.Fragment>
+                ))}
+              </>
+            )}
+          </Stack>
         );
 
       default:
