@@ -1,0 +1,1 @@
+export { SimplePagePreview } from './SimplePagePreview';

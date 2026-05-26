@@ -1,0 +1,67 @@
+/* CONFIGURACIÓN DE TÍTULOS Y CABECERAS INTERNAS */
+.listTitle {
+  font-family: var(--font-apa);
+  font-size: var(--font-size-base); /* 12pt */
+  font-weight: bold;
+  text-align: center;
+  margin-top: 0;
+  margin-bottom: 8px;
+}
+
+.pageIndicatorGroup {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 16px;
+}
+
+.pageIndicatorText {
+  font-family: var(--font-apa);
+  font-size: 11pt;
+  margin: 0 2px 0 0;
+}
+
+/* FILAS DINÁMICAS DE LOS ÍNDICES (TOC ROWS) */
+.tocRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 8px;
+  width: 100%;
+}
+
+.tocText {
+  font-family: var(--font-apa);
+  font-size: 11pt;
+  font-weight: normal;
+  color: var(--color-text-dark);
+  margin: 0;
+  max-width: 80%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* LÍNEA DE RELLENO CON PUNTOS (DOT LEADER) NATIVA */
+.dotLeader {
+  flex-grow: 1;
+  border-bottom: 2px dotted var(--color-border-dashed);
+  height: 14px;
+  min-width: 20px;
+}
+
+.tocPageNumber {
+  font-family: var(--font-apa);
+  font-size: 11pt;
+  font-weight: normal;
+  color: var(--color-text-dark);
+  margin: 0;
+}
+
+/* TEXTO DE FALLBACK CUANDO LA LISTA ESTÁ VACÍA */
+.emptyNotice {
+  text-align: center;
+  color: #868e96;
+  font-style: italic;
+  font-size: 11pt;
+  margin-top: 32px;
+}

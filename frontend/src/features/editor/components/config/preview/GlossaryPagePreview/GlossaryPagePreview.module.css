@@ -1,0 +1,38 @@
+/* TÍTULO DEL GLOSARIO */
+.glossaryTitle {
+  font-family: var(--font-apa);
+  font-size: var(--font-size-base); /* 12pt */
+  font-weight: bold;
+  text-align: center;
+  margin-top: 0;
+  margin-bottom: 24px;
+}
+
+/* BLOQUES DE TÉRMINOS CON SANGRÍA NORMAL APA */
+.termDefinitionBlock {
+  text-align: justify;
+  margin: 0;
+  font-family: var(--font-apa);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-apa);
+  color: var(--color-text-dark);
+
+  /* Sangría reglamentaria estándar en la primera línea de cada bloque */
+  text-indent: var(--indent-apa); /* 1.27cm */
+}
+
+/* El término va en Negrita y Cursiva */
+.termLabel {
+  font-weight: bold;
+  font-style: italic;
+}
+
+/* TEXTO FALLBACK SI NO EXISTEN TÉRMINOS */
+.emptyNotice {
+  text-align: center;
+  color: #666666;
+  font-style: italic;
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-apa);
+  margin-top: 40px;
+}

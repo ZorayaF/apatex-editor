@@ -1,0 +1,33 @@
+.citationBadge {
+  cursor: pointer;
+  display: inline-block;
+  vertical-align: baseline;
+
+  /* Sincronización tipográfica con el texto circundante */
+  font-family: var(--font-apa);
+  font-size: inherit; /* Hereda los 12pt del párrafo de forma nativa */
+  font-weight: normal;
+  text-transform: none; /* Bloquea las mayúsculas automáticas de Mantine */
+
+  /* Identidad visual del editor centralizada */
+  color: var(--color-primary-focus);
+  background-color: var(--color-bg-selected);
+
+  /* Paddings milimétricos para que parezca un elemento clickeable limpio */
+  padding: 0 6px;
+  margin: 0 2px;
+  border-radius: 4px;
+  transition:
+    background-color 0.15s ease,
+    transform 0.1s ease;
+}
+
+/* Efecto hover al pasar el mouse por encima dentro del texto */
+.citationBadge:hover {
+  background-color: rgba(34, 139, 230, 0.15);
+}
+
+/* Efecto activo al darle click */
+.citationBadge:active {
+  transform: scale(0.96);
+}

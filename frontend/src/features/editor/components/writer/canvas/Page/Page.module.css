@@ -1,0 +1,64 @@
+.pageSheet {
+  background-color: var(--color-bg-white);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-sizing: border-box;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  transition: outline 0.15s ease;
+  width: var(--page-width);
+  height: var(--page-height);
+  min-height: var(--page-height);
+  max-height: var(--page-height);
+  padding: var(--margin-top) var(--margin-right) var(--margin-bottom)
+    var(--margin-left);
+}
+
+/* Estado inactivo: borde gris de la variable central */
+.pageSheet:not(.isActive) {
+  outline: 1px solid var(--color-border-light);
+}
+
+/* Estado activo: foco azul del editor centralizado */
+.pageSheet.isActive {
+  outline: 2px solid var(--color-primary-focus);
+}
+
+/* ZONA RÍGIDA DEL ENCABEZADO APA (RUNNING HEAD) */
+.pageHeader {
+  position: absolute;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-sizing: border-box;
+  pointer-events: none;
+  font-family: var(--font-family);
+  font-size: var(--font-size);
+}
+
+.runningHead {
+  font-weight: bold;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 75%;
+}
+
+.pageNumber {
+  font-size: var(--font-size);
+}
+
+/* Clases de control de color para el número según foco */
+.pageNumber:not(.isActiveNumber) {
+  color: var(--color-border-dashed);
+  font-weight: normal;
+}
+
+.pageNumber.isActiveNumber {
+  color: var(--color-primary-focus);
+  font-weight: bold;
+}

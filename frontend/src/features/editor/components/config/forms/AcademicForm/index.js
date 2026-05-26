@@ -1,0 +1,1 @@
+export { AcademicForm } from './AcademicForm';

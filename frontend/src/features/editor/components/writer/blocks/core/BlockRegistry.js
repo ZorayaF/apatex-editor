@@ -1,8 +1,8 @@
 import { BaseEditable } from "./BaseEditable";
-import { ReferenceBlock } from "../complex/ReferenceBlock";
-import { CitationInline } from "../complex/CitationInline.jsx";
-import { TableBlock } from "../complex/TableBlock";
-import { FigureBlock } from "../complex/FigureBlock";
+import { ReferenceBlock } from "@writer/blocks/complex/ReferenceBlock";
+import { CitationInline } from "@writer/blocks/complex/CitationInline";
+import { TableBlock } from "@writer/blocks/complex/TableBlock";
+import { FigureBlock } from "@writer/blocks/complex/FigureBlock";
 
 export const BLOCK_COMPONENTS = {
   h1: BaseEditable,

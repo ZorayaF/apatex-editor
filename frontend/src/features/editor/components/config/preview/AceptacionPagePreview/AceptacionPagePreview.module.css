@@ -1,0 +1,33 @@
+.titleText {
+  text-align: right;
+  font-weight: bold;
+  margin-top: 40px;
+  margin-bottom: 100px;
+  font-size: 12pt;
+}
+
+.signatureStack {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0;
+  margin-top: 50px;
+}
+
+.signatureLine {
+  border-top: 1px solid #000000;
+  width: 300px;
+  margin-top: 60px;
+  text-align: center;
+}
+
+.signatureLabel {
+  font-size: 10pt;
+  margin-top: 5px;
+}
+
+.footerBox {
+  position: absolute;
+  bottom: 0; /* Se alinea relativo al contenedor útil ya recortado por el layout */
+  left: 0;
+}

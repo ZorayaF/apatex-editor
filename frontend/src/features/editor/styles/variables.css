@@ -1,0 +1,19 @@
+/* src/features/editor/styles/variables.css */
+
+:root {
+  /* Tipografía Académica */
+  --font-apa: "Times New Roman", Times, serif;
+  --font-size-base: 12pt;
+  --font-size-note: 10pt;
+  --line-height-apa: 1.5;
+  --line-height-note: 1.3;
+
+  /* Colores de la Interfaz (UI) y Estados Cohesivos */
+  --color-text-dark: #000000;
+  --color-primary-blue: #228be6; /* El azul institucional del editor */
+  --color-primary-focus: #228be6; /* Foco de celdas y páginas activas */
+  --color-border-light: #e0e0e0; /* Bordes de páginas inactivas */
+  --color-border-dashed: #cccccc; /* Líneas indicadoras e informativas */
+  --color-bg-hover-cell: rgba(0, 0, 0, 0.03); /* Hover sutil en celdas */
+  --color-bg-white: #ffffff;
+}

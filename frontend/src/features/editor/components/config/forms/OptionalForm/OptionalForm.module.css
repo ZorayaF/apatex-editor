@@ -1,0 +1,6 @@
+/* CONTROL DINÁMICO DEL TÍTULO DE LA SECCIÓN PRELIMINAR */
+.fieldsetLegend {
+  font-weight: 700;
+  text-transform: capitalize; /* Fuerza mayúscula inicial automáticamente */
+  color: var(--color-text-dark);
+}

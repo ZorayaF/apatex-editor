@@ -1,0 +1,70 @@
+/* CONTENEDOR DE DISTRIBUCIÓN VERTICAL ESTRICTA APA */
+.titlePageContainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  font-family: var(--font-apa);
+  font-size: var(--font-size-base); /* 12pt */
+  line-height: 1.8;
+  font-weight: bold; /* Toda la hoja en negrita estricta */
+  box-sizing: border-box;
+}
+
+/* BLOQUE SUPERIOR: TÍTULO DEL PROYECTO */
+.projectTitle {
+  font-size: var(--font-size-base);
+  font-weight: bold;
+  white-space: pre-wrap;
+  margin: 0;
+  width: 100%;
+}
+
+/* BLOQUE CENTRAL: AUTORES Y OBJETIVO ACADÉMICO */
+.centerBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+}
+
+.authorsText {
+  font-size: var(--font-size-base);
+  font-weight: bold;
+  white-space: pre-wrap;
+  margin: 0;
+}
+
+.targetDegreeBox {
+  margin-top: 24px;
+}
+
+.targetDegreeText {
+  font-weight: bold;
+  margin: 0;
+}
+
+.directorBox {
+  margin-top: 24px;
+}
+
+.directorText {
+  font-weight: bold;
+  margin: 0;
+}
+
+/* BLOQUE INFERIOR: METADATOS INSTITUCIONALES */
+.institutionalFooter {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+}
+
+.footerLine {
+  font-weight: bold;
+  margin: 0;
+}

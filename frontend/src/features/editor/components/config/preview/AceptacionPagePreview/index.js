@@ -1,0 +1,1 @@
+export { AceptacionPagePreview } from './AceptacionPagePreview';

@@ -1,0 +1,63 @@
+.figureContainer {
+  width: 100%;
+  box-sizing: border-box;
+  padding-top: 16px;
+  padding-bottom: 16px;
+}
+
+/* METADATOS APA */
+.metaLabel {
+  font-family: var(--font-apa);
+  font-size: var(--font-size-base);
+  font-weight: bold;
+  color: var(--color-text-dark);
+  margin: 0;
+}
+
+.metaTitle {
+  font-family: var(--font-apa);
+  font-size: var(--font-size-base);
+  font-style: italic;
+  color: var(--color-text-dark);
+  margin: 0 0 12px 0;
+}
+
+/* CONTENEDOR DE LA IMAGEN */
+.imageWrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 8px;
+}
+
+.responsiveImg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  border-radius: 2px;
+  /* El ancho se manipula en vivo con la variable inyectada */
+  width: var(--fig-width, 100%);
+  transition: width 0.2s ease;
+}
+
+/* CAJA DE FALLBACK (SKELETON CUANDO NO HAY ARCHIVO) */
+.placeholderBox {
+  height: 150px;
+  width: 100%;
+  background-color: var(--color-bg-hover-cell);
+  border: 1px dashed var(--color-border-dashed);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* NOTA AL PIE DE LA FIGURA */
+.figureNote {
+  font-family: var(--font-apa);
+  font-size: var(--font-size-note);
+  line-height: var(--line-height-note);
+  color: var(--color-text-dark);
+  text-align: left;
+  margin-top: 8px;
+}

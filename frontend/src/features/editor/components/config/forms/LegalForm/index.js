@@ -1,0 +1,1 @@
+export { LegalForm } from './LegalForm';

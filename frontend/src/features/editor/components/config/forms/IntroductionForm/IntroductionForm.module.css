@@ -1,0 +1,23 @@
+/* CAJA DE DIRECTRIZ INSTITUCIONAL */
+.directivePaper {
+  background-color: var(--color-bg-selected);
+  border: 1px dashed var(--color-primary-focus);
+  padding: 16px;
+  border-radius: 8px;
+  box-sizing: border-box;
+}
+
+.directiveLabel {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--color-primary-focus);
+  margin: 0 0 6px 0;
+  letter-spacing: 0.5px;
+}
+
+.directiveText {
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--color-text-dark);
+  margin: 0;
+}

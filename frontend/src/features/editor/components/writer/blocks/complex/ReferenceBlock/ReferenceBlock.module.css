@@ -1,0 +1,34 @@
+.referenceContainer {
+  width: 100%;
+  box-sizing: border-box;
+  cursor: pointer;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+  text-align: justify;
+
+  /* MAGIA DE LA SANGRÍA FRANCESA CENTRALIZADA */
+  padding-left: var(--indent-apa); /* Espacio total a la izquierda */
+  text-indent: calc(
+    var(--indent-apa) * -1
+  ); /* Empuja la primera línea hacia atrás */
+}
+
+/* Consumo de la fuente y el interlineado académico global */
+.referenceText {
+  font-family: var(--font-apa);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-apa);
+  color: var(--color-text-dark);
+  margin: 0;
+}
+
+/* ESTADOS DINÁMICOS SEGÚN ENFOQUE (UI) */
+.referenceContainer:not(.isActive) {
+  background-color: transparent;
+}
+
+.referenceContainer.isActive {
+  background-color: var(--color-bg-selected);
+}

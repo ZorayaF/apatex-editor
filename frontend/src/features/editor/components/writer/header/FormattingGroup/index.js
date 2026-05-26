@@ -1,0 +1,1 @@
+export { FormattingGroup } from './FormattingGroup';

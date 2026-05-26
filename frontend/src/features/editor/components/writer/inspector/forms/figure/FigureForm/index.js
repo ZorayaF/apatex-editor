@@ -1,0 +1,1 @@
+export { FigureForm } from './FigureForm';

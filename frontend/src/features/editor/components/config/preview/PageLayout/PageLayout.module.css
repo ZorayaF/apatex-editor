@@ -1,0 +1,53 @@
+.pageSheet {
+  background-color: var(--color-bg-white);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-sizing: border-box;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  margin-bottom: 30px;
+  width: var(--page-width);
+  height: var(--page-height);
+  min-height: var(--page-height);
+  max-height: var(--page-height);
+}
+
+/*  ENCABEZADO RIGIDO APA: Flota libre de forma absoluta usando los límites reales de la hoja */
+.pageHeader {
+  position: absolute;
+  left: var(--margin-left);
+  right: var(--margin-right);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-sizing: border-box;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.runningHead {
+  font-weight: bold;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 75%;
+  font-size: 10pt;
+}
+
+.pageNumber {
+  font-size: 12pt;
+  color: var(--color-text-dark);
+}
+
+.pageContent {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  box-sizing: border-box;
+  padding-top: var(--margin-top);
+  padding-bottom: var(--margin-bottom);
+  padding-left: var(--margin-left);
+  padding-right: var(--margin-right);
+}

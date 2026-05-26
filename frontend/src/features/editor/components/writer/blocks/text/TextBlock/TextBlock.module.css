@@ -1,0 +1,12 @@
+.paragraph {
+  font-family: var(--font-apa);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-apa);
+  color: var(--color-text-dark);
+  text-indent: var(--indent-apa);
+  text-align: left;
+  margin: 0;
+  padding: 4px 0;
+  width: 100%;
+  outline: none;
+}

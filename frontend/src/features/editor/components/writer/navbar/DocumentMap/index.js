@@ -1,0 +1,1 @@
+export { DocumentMap } from './DocumentMap';

@@ -1,0 +1,65 @@
+/* CONTENEDOR DE CREACIÓN PRINCIPAL */
+.creatorPaper {
+  background-color: var(--color-bg-hover-cell);
+  border: 1px solid var(--color-border-light);
+  padding: 16px;
+  border-radius: 8px;
+  box-sizing: border-box;
+}
+
+/* MINI-MATRIZ EDITABLE INTERACTIVA */
+.matrixTable {
+  border: 1px solid var(--color-border-light);
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.matrixInput {
+  border: 1px solid var(--color-border-light) !important;
+  padding: 2px !important;
+  transition: background-color 0.15s ease;
+}
+
+/* Fila de cabecera de la mini-tabla */
+.matrixHeaderRow {
+  background-color: var(--color-bg-hover-cell);
+  font-weight: bold;
+}
+
+.matrixDataRow {
+  background-color: var(--color-bg-white);
+  font-weight: normal;
+}
+
+/* PANEL DE ENLACES */
+.linksContainer {
+  border: 1px solid var(--color-border-light);
+  padding: 12px;
+  background-color: var(--color-bg-white);
+  border-radius: 4px;
+}
+
+.linkItemText {
+  color: var(--color-primary-focus);
+  font-weight: 600;
+  margin: 4px 0;
+}
+
+/* LISTADO DE ANEXOS HISTÓRICOS (INFERIOR) */
+.annexItemCard {
+  border: 1px solid var(--color-border-light);
+  padding: 12px;
+  border-radius: 6px;
+  background-color: var(--color-bg-white);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: transform 0.15s ease;
+}
+
+.annexItemCard:hover {
+  transform: translateY(-1px);
+}
+
+.annexTitleText {
+  font-weight: 700;
+  color: var(--color-primary-focus);
+}

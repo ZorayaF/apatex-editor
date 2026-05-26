@@ -1,0 +1,26 @@
+.titleBase {
+  font-family: var(--font-apa);
+  color: var(--color-text-dark);
+  line-height: var(--line-height-apa);
+  outline: none;
+  width: 100%;
+  margin: 0;
+  padding: 4px 0;
+}
+
+.h1 {
+  font-size: var(--font-size-base);
+  font-weight: bold;
+  text-align: center;
+}
+.h2 {
+  font-size: var(--font-size-base);
+  font-weight: bold;
+  text-align: left;
+}
+.h3 {
+  font-size: var(--font-size-base);
+  font-weight: bold;
+  font-style: italic;
+  text-align: left;
+}

@@ -1,0 +1,1 @@
+export { AcademicGroup } from './AcademicGroup';

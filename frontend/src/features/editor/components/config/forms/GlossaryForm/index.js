@@ -1,0 +1,1 @@
+export { GlossaryForm } from './GlossaryForm';

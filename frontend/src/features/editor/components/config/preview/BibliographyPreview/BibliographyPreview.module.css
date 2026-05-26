@@ -1,0 +1,35 @@
+/* src/features/editor/components/config/preview/BibliographyPreview/BibliographyPreview.module.css */
+
+/* TÍTULO PRINCIPAL DE LA PÁGINA */
+.bibliographyTitle {
+  font-family: var(--font-apa);
+  font-size: var(--font-size-base); /* 12pt */
+  font-weight: bold;
+  text-align: center;
+  margin-top: 0;
+  margin-bottom: 2em; /* Espacio reglamentario antes de la primera referencia */
+}
+
+/* ELEMENTOS DE LA LISTA CON SANGRÍA FRANCESA */
+.referenceItem {
+  text-align: justify;
+  margin: 0;
+  font-family: var(--font-apa);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-apa);
+  color: var(--color-text-dark);
+
+  /* Magia de la sangría francesa usando variables globales unificadas */
+  padding-left: var(--indent-apa); /* 1.27cm */
+  text-indent: calc(var(--indent-apa) * -1); /* -1.27cm */
+}
+
+/* TEXTO FALLBACK CUANDO NO HAY CITAS */
+.emptyNotice {
+  text-align: center;
+  color: #666666;
+  font-style: italic;
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-apa);
+  margin-top: 40px;
+}

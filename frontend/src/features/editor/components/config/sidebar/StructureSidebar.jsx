@@ -117,7 +117,7 @@ export const StructureSidebar = ({
                 onClick={() => setActiveSection("glosario")}
               />
               <NavItemToggle
-                label="Anexos / Apéndices"
+                label="Anexos"
                 icon={<IconPaperclip size={18} />}
                 active={activeSection === "anexos"}
                 enabled={prelim.anexos?.enabled}

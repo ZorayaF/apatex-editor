@@ -1,0 +1,70 @@
+.tableContainer {
+  width: 100%;
+  box-sizing: border-box;
+  cursor: pointer;
+}
+
+.tableContainer :global(.editable-cell) {
+  font-family: var(--font-apa);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-apa);
+  color: var(--color-text-dark);
+  min-width: 120px;
+  min-height: 1.5em;
+  padding: 12px;
+  outline: none;
+  cursor: text;
+  transition:
+    background-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.tableContainer :global(.editable-cell:focus) {
+  background-color: var(--color-bg-white);
+  box-shadow: 0 0 0 2px var(--color-primary-focus);
+  position: relative;
+  z-index: 5;
+}
+
+.tableContainer :global(.editable-cell:hover:not(:focus)) {
+  background-color: var(--color-bg-hover-cell);
+}
+
+/* ESTILIZACIÓN APA ESTÁNDAR: Líneas horizontales estrictas sin bordes verticales */
+.apaTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 8px;
+  margin-bottom: 8px;
+}
+
+/* Borde superior e inferior del bloque de cabecera */
+.apaTable thead tr {
+  border-top: 2px solid var(--color-text-dark);
+  border-bottom: 1px solid var(--color-text-dark);
+}
+
+/* Borde inferior de cierre de la última fila de datos */
+.apaTable tbody tr:last-child {
+  border-bottom: 2px solid var(--color-text-dark);
+}
+
+/* Texto de metadatos */
+.metaLabel {
+  font-weight: bold;
+  font-size: var(--font-size-base);
+  margin: 0;
+}
+
+.metaTitle {
+  font-style: italic;
+  font-size: var(--font-size-base);
+  margin: 0 0 16px 0;
+}
+
+.tableNote {
+  font-size: var(--font-size-note);
+  text-align: left;
+  margin-top: 8px;
+  line-height: var(--line-height-note);
+}
