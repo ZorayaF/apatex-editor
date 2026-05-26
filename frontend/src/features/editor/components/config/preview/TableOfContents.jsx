@@ -1,4 +1,5 @@
 // src/features/editor/components/config/preview/TableOfContents.jsx
+import React from "react";
 import { Box, Text, Group, Stack, Divider } from "@mantine/core";
 import { useStore } from "@store";
 import { generateAllLists } from "@logic/engine/tocEngine";
@@ -8,7 +9,6 @@ export const TableOfContents = () => {
   const { blocks, pages, projectMetadata } = useStore();
   const { margins, paper, typography } = APA_CONFIG;
 
-  // Obtenemos las 4 listas procesadas por el motor
   const allLists = generateAllLists(blocks, pages, projectMetadata);
 
   const getIndent = (level) => {
@@ -18,12 +18,13 @@ export const TableOfContents = () => {
     return 0;
   };
 
-  // Plantilla de Hoja Estándar para reutilizar la estructura física
-  const SheetWrapper = ({ title, children }) => (
+  // ✅ Añadimos la propiedad "id" a la plantilla de la hoja física
+  const SheetWrapper = ({ title, id, children }) => (
     <Box
+      id={id} // <-- Identificador clave para el anclaje de scroll
       style={{
         width: `${cmToPx(paper.width)}px`,
-        height: `${cmToPx(paper.height)}px`, // Alto fijo por hoja
+        height: `${cmToPx(paper.height)}px`,
         backgroundColor: "white",
         padding: `${cmToPx(margins.top)}px ${cmToPx(margins.right)}px ${cmToPx(margins.bottom)}px ${cmToPx(margins.left)}px`,
         fontFamily: typography.family,
@@ -31,50 +32,40 @@ export const TableOfContents = () => {
         boxShadow: "0 4px 10px rgba(0,0,0,0.1)",
         display: "flex",
         flexDirection: "column",
+        // Suaviza la transición cuando recibe foco
+        transition: "outline 0.3s ease",
       }}
     >
-      <Text
-        ta="center"
-        fw="bold"
-        size="12pt"
-        mb={40}
-        style={{ textTransform: "uppercase" }}
-      >
+      <Text ta="center" fw="bold" size="12pt" mb="sm">
         {title}
       </Text>
+
+      <Group justify="flex-end" mb="md">
+        <Text size="11pt" style={{ marginRight: "2px" }}>
+          Pág.
+        </Text>
+      </Group>
+
       <Stack gap="xs" style={{ flex: 1 }}>
         {children}
       </Stack>
     </Box>
   );
 
-  // Fila Estándar con puntos de relleno (Dot Leaders)
-  const ListRow = ({ text, page, isBold, indent = 0 }) => (
+  const ListRow = ({ text, page, indent = 0 }) => (
     <Group
       justify="space-between"
       wrap="nowrap"
       gap={4}
       style={{ paddingLeft: indent }}
     >
-      <Text
-        fw={isBold ? "bold" : "normal"}
-        size="11pt"
-        style={{
-          flexShrink: 0,
-          maxWidth: "80%",
-          textTransform: isBold ? "uppercase" : "none",
-        }}
-      >
+      <Text fw="normal" size="11pt" style={{ flexShrink: 0, maxWidth: "80%" }}>
         {text}
       </Text>
       <Box
         style={{ flexGrow: 1, borderBottom: "1px dotted #888", height: "14px" }}
       />
-      <Text
-        fw={isBold ? "bold" : "normal"}
-        size="11pt"
-        style={{ flexShrink: 0 }}
-      >
+      <Text fw="normal" size="11pt" style={{ flexShrink: 0 }}>
         {page}
       </Text>
     </Group>
@@ -82,14 +73,13 @@ export const TableOfContents = () => {
 
   return (
     <Stack gap="xl">
-      {/* 📜 LISTA 1: CONTENIDO GENERAL (Siempre Visible) */}
-      <SheetWrapper title="Contenido">
+      {/* 📜 LISTA 1: CONTENIDO GENERAL */}
+      <SheetWrapper title="Contenido" id="toc-sheet-contenido">
         {allLists.contenido.map((entry, index) => (
           <ListRow
             key={index}
             text={entry.text}
             page={entry.page}
-            isBold={entry.level === "h1"}
             indent={getIndent(entry.level)}
           />
         ))}
@@ -100,7 +90,7 @@ export const TableOfContents = () => {
         )}
       </SheetWrapper>
 
-      {/* 📊 LISTA 2: LISTA DE TABLAS (Opcional, si existen en el editor) */}
+      {/* 📊 LISTA 2: LISTA DE TABLAS */}
       {allLists.tablas.length > 0 && (
         <>
           <Divider
@@ -108,20 +98,19 @@ export const TableOfContents = () => {
             labelPosition="center"
             color="gray.4"
           />
-          <SheetWrapper title="Lista de Tablas">
+          <SheetWrapper title="Lista de Tablas" id="toc-sheet-tablas">
             {allLists.tablas.map((table, index) => (
               <ListRow
                 key={index}
                 text={`${table.label}. ${table.title}`}
                 page={table.page}
-                isBold={false}
               />
             ))}
           </SheetWrapper>
         </>
       )}
 
-      {/* 🖼️ LISTA 3: LISTA DE FIGURAS (Opcional, si existen en el editor) */}
+      {/* 🖼️ LISTA 3: LISTA DE FIGURAS */}
       {allLists.figuras.length > 0 && (
         <>
           <Divider
@@ -129,20 +118,19 @@ export const TableOfContents = () => {
             labelPosition="center"
             color="gray.4"
           />
-          <SheetWrapper title="Lista de Figuras">
+          <SheetWrapper title="Lista de Figuras" id="toc-sheet-figuras">
             {allLists.figuras.map((fig, index) => (
               <ListRow
                 key={index}
                 text={`${fig.label}. ${fig.title}`}
                 page={fig.page}
-                isBold={false}
               />
             ))}
           </SheetWrapper>
         </>
       )}
 
-      {/* 📎 LISTA 4: LISTA DE ANEXOS (Opcional, si la sección está encendida y tiene ítems) */}
+      {/* 📎 LISTA 4: LISTA DE ANEXOS */}
       {allLists.anexos.length > 0 && (
         <>
           <Divider
@@ -150,13 +138,12 @@ export const TableOfContents = () => {
             labelPosition="center"
             color="gray.4"
           />
-          <SheetWrapper title="Lista de Anexos">
+          <SheetWrapper title="Lista de Anexos" id="toc-sheet-anexos">
             {allLists.anexos.map((anexo, index) => (
               <ListRow
                 key={index}
                 text={`${anexo.label}. ${anexo.title}`}
                 page={anexo.page}
-                isBold={false}
               />
             ))}
           </SheetWrapper>
