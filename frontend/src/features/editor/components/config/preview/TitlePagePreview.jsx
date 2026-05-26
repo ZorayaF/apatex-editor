@@ -1,10 +1,30 @@
 // src/features/editor/components/config/preview/TitlePagePreview.jsx
-import React from "react";
 import { Box, Text, Stack } from "@mantine/core";
 import { APA_CONFIG, cmToPx } from "@core/utils/measurements";
 
 export const TitlePagePreview = ({ isContraportada, data }) => {
   const { paper, margins, typography } = APA_CONFIG;
+
+  // Extraemos las propiedades mapeando la raíz de projectMetadata y el subobjeto de portada
+  const titulo = data?.portada?.titulo || "Título del proyecto";
+  const institucion = data?.institucion || "Universidad de Boyacá";
+  const facultad = data?.facultad || "Facultad de Ciencias e Ingeniería";
+  const programa = data?.programa || "Programa académico";
+  const ubicacion = data?.ubicacion || "Tunja";
+  const anio = data?.anio || "2026";
+
+  // Formateo de Directores (Nombre + Grado Académico)
+  const directorNombre = data?.director?.nombre;
+  const directorGrado = data?.director?.titulo;
+  const directorCompleto = directorNombre
+    ? `${directorGrado ? directorGrado + ". " : ""}${directorNombre}`
+    : "Nombre del director";
+
+  // Formateo de Autores (Ya que viajan como array en el TagsInput)
+  const listaAutores =
+    Array.isArray(data?.autores) && data.autores.length > 0
+      ? data.autores.join("\n")
+      : "Nombre del autor";
 
   const pageStyle = {
     width: `${cmToPx(paper.width)}px`,
@@ -18,23 +38,35 @@ export const TitlePagePreview = ({ isContraportada, data }) => {
     justifyContent: "space-between",
     textAlign: "center",
     boxShadow: "0 4px 10px rgba(0,0,0,0.1)",
-    lineHeight: 1.5,
-    // ✅ APLICAMOS NEGRITA A TODA LA HOJA
-    fontWeight: "bold",
+    lineHeight: 1.8,
+    fontWeight: "bold", // Toda la hoja en negrita estricta
     fontSize: `${typography.size}pt`,
   };
 
   return (
     <Box style={pageStyle}>
       {/* 1. TÍTULO DEL PROYECTO */}
-      <Text style={{ fontWeight: "inherit", fontSize: "inherit" }}>
-        {data?.titulo || "Título del proyecto"}
+      <Text
+        style={{
+          fontWeight: "inherit",
+          fontSize: "inherit",
+          whiteSpace: "pre-wrap",
+        }}
+      >
+        {titulo}
       </Text>
 
-      {/* 2. BLOQUE CENTRAL: Autores y objetivo */}
+      {/* 2. BLOQUE CENTRAL: Autores y objetivo institucional */}
       <Stack gap="xl">
-        <Text style={{ fontWeight: "inherit", fontSize: "inherit" }}>
-          {data?.autor || "Nombre del autor"}
+        {/* Renderiza los autores respetando los saltos de línea si son varios */}
+        <Text
+          style={{
+            fontWeight: "inherit",
+            fontSize: "inherit",
+            whiteSpace: "pre-wrap",
+          }}
+        >
+          {listaAutores}
         </Text>
 
         {isContraportada && (
@@ -43,33 +75,25 @@ export const TitlePagePreview = ({ isContraportada, data }) => {
               Trabajo de grado para optar al título de
             </Text>
             <Text style={{ fontWeight: "inherit" }}>
-              {data?.programa || "Programa académico"}
+              {data?.gradoObjetivo ||
+                "Título al que opta (Ej: Ingeniero de Sistemas)"}
             </Text>
 
-            <Box mt="lg">
+            <Box mt="xl">
               <Text style={{ fontWeight: "inherit" }}>Director:</Text>
-              <Text style={{ fontWeight: "inherit" }}>
-                {data?.director || "Nombre del director"}
-              </Text>
+              <Text style={{ fontWeight: "inherit" }}>{directorCompleto}</Text>
             </Box>
           </Box>
         )}
       </Stack>
 
-      {/* 3. BLOQUE INFERIOR: Institución, Facultad y Fecha */}
-      <Stack gap={4}>
-        <Text style={{ fontWeight: "inherit" }}>
-          {data?.institucion || "Universidad de Boyacá"}
-        </Text>
-        <Text style={{ fontWeight: "inherit" }}>
-          {data?.facultad || "Facultad de Ciencias e Ingeniería"}
-        </Text>
-        <Text style={{ fontWeight: "inherit" }}>
-          {data?.programa || "Programa de Ingeniería de Sistemas"}
-        </Text>
-        <Text style={{ fontWeight: "inherit" }}>
-          {data?.ciudad || "Tunja"}, {data?.año || "2026"}
-        </Text>
+      {/* 3. BLOQUE INFERIOR: Institución, Facultad, Programa, Ubicación y Año */}
+      <Stack gap={2}>
+        <Text style={{ fontWeight: "inherit" }}>{institucion}</Text>
+        <Text style={{ fontWeight: "inherit" }}>{facultad}</Text>
+        <Text style={{ fontWeight: "inherit" }}>{programa}</Text>
+        <Text style={{ fontWeight: "inherit" }}>{ubicacion}</Text>
+        <Text style={{ fontWeight: "inherit" }}>{anio}</Text>
       </Stack>
     </Box>
   );

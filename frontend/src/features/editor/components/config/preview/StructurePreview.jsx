@@ -51,16 +51,14 @@ export const StructurePreview = ({ activeSection, metadata }) => {
             <Text size="xs" fw={700} ta="center">
               PORTADA (Pág. 1)
             </Text>
-            {/* Pasamos la data de la portada aquí 👇 */}
-            <TitlePagePreview isContraportada={false} data={metadata.portada} />
+            <TitlePagePreview isContraportada={false} data={metadata} />
 
             <Divider label="Siguiente página" labelPosition="center" />
 
             <Text size="xs" fw={700} ta="center">
               CONTRAPORTADA (Pág. 2)
             </Text>
-            {/* Y aquí también 👇 */}
-            <TitlePagePreview isContraportada={true} data={metadata.portada} />
+            <TitlePagePreview isContraportada={true} data={metadata} />
           </Stack>
         );
 
