@@ -17,6 +17,7 @@ import {
   IconGavel,
   IconCircleCheckFilled,
   IconPaperclip,
+  IconListDetails,
 } from "@tabler/icons-react";
 
 export const StructureSidebar = ({
@@ -47,6 +48,12 @@ export const StructureSidebar = ({
                 icon={<IconFileCheck size={18} />}
                 active={activeSection === "portada"}
                 onClick={() => setActiveSection("portada")}
+              />
+              <NavItem
+                label="Tabla de Contenido"
+                icon={<IconListDetails size={18} />}
+                active={activeSection === "toc"}
+                onClick={() => setActiveSection("toc")}
               />
               <NavItem
                 label="Resumen"
