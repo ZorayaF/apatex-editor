@@ -33,7 +33,6 @@ export const BaseEditable = ({
   });
 
   // 2. Conectar lógica de eventos (Activa: DOM -> Store)
-  // Añadimos handleKeyUp y handleClick para el rastreo del cursor
   const { handleInput, handleKeyDown, handleFocus, handleKeyUp, handleClick } =
     useBlockHandlers({
       id,
@@ -82,10 +81,12 @@ export const BaseEditable = ({
         onInput={handleInput}
         onKeyDown={handleKeyDown}
         onFocus={handleFocus}
-        // --- NUEVOS HANDLERS PARA CITAS ---
-        onKeyUp={handleKeyUp} // Rastrea posición al usar flechas
-        onClick={handleClick} // Rastrea posición al hacer clic
-        // ----------------------------------
+        onKeyUp={handleKeyUp}
+        onClick={handleClick}
+        // --- LA RED DE SEGURIDAD ---
+        // Si el usuario cambia de pestaña, forzamos un último guardado
+        onBlur={handleInput}
+        // ---------------------------
 
         onPaste={(e) => {
           e.preventDefault();

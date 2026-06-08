@@ -2,8 +2,9 @@ import { PageLayout } from "../PageLayout/PageLayout";
 import classes from "./TitlePagePreview.module.css";
 
 export const TitlePagePreview = ({ isContraportada, data, metadata }) => {
-  // Extraemos las propiedades mapeando la raíz de data (projectMetadata)
-  const titulo = data?.portada?.titulo || "Título del proyecto";
+  // 1. EL CAMBIO CRÍTICO: Ahora leemos el título directamente desde la raíz
+  const titulo = data?.tituloProyecto || "Título del proyecto";
+
   const institucion = data?.institucion || "Universidad de Boyacá";
   const facultad = data?.facultad || "Facultad de Ciencias e Ingeniería";
   const programa = data?.programa || "Programa académico";

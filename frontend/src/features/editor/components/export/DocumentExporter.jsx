@@ -4,39 +4,46 @@ import { AceptacionPagePreview } from "@config/preview/AceptacionPagePreview";
 import { TableOfContents } from "@config/preview/TableOfContents";
 import { PageLayout } from "@config/preview/PageLayout/PageLayout";
 import { BibliographyPreview } from "@config/preview/BibliographyPreview";
-// Import your block renderer here (whatever component maps a block array to UI)
-import { Canvas } from "@writer/canvas/Canvas";
+
+// 1. Importamos ConnectedBlock en lugar de CanvasPageContent
+import { ConnectedBlock } from "@writer/canvas/ConnectedBlock";
 
 export const DocumentExporter = () => {
+  // 2. Ya no necesitamos 'blocks' aquí, ConnectedBlock se encarga de eso
   const { pages, projectMetadata, preliminares } = useStore();
 
   return (
     <div className="print-only-container">
-      {/* 1. PORTADA */}
+      {/* --- SECCIÓN 1: PRELIMINARES --- */}
       <TitlePagePreview metadata={projectMetadata} />
 
-      {/* 2. PRELIMINARES (Condicionales) */}
       {preliminares?.aceptacion?.enabled && (
         <AceptacionPagePreview metadata={projectMetadata} />
       )}
-      {/* Añade dedicatoria, agradecimientos, etc. aquí de la misma forma */}
 
-      {/* 3. ÍNDICES */}
+      {/* Aquí puedes añadir Dedicatoria, Agradecimientos, Resumen, etc. */}
+
       <TableOfContents />
 
-      {/* 4. CUERPO PRINCIPAL DEL DOCUMENTO (Usando tu estado global ya paginado) */}
+      {/* --- SECCIÓN 2: CUERPO DEL DOCUMENTO (Redacción Real) --- */}
       {pages.map((page) => (
         <PageLayout
           key={page.id}
           pageNumber={page.pageNumber}
           metadata={projectMetadata}
         >
-          {/* Este componente renderiza los bloques de texto, tablas, figuras de esa página específica */}
-          <Canvas blocks={page.blocks} />
+          {/* Iteramos directamente sobre los IDs renderizando ConnectedBlocks */}
+          <div style={{ pointerEvents: "none" }}>
+            {" "}
+            {/* pointerEvents none evita que se pueda editar en el PDF */}
+            {page.blockIds.map((id) => (
+              <ConnectedBlock key={id} blockId={id} />
+            ))}
+          </div>
         </PageLayout>
       ))}
 
-      {/* 5. REFERENCIAS */}
+      {/* --- SECCIÓN 3: REFERENCIAS --- */}
       <BibliographyPreview />
     </div>
   );

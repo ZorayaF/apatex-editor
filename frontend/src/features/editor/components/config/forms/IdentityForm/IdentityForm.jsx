@@ -1,4 +1,4 @@
-// src/features/editor/components/config/forms/IdentityForm/IdentityForm.jsx
+import { useState, useEffect } from "react";
 import {
   Stack,
   TextInput,
@@ -47,29 +47,84 @@ const ESTRUCTURA_UNIBOYACA = {
 export const IdentityForm = () => {
   const { projectMetadata, setProjectMetadata } = useStore();
 
-  // Extraemos dinámicamente las facultades del diccionario
   const facultades = Object.keys(ESTRUCTURA_UNIBOYACA);
-
-  // Filtramos los programas según la facultad activa en el Store de forma segura
   const programasDisponibles = projectMetadata?.facultad
     ? ESTRUCTURA_UNIBOYACA[projectMetadata.facultad] || []
     : [];
 
+  // --- 1. ESTADO LOCAL (Súper rápido, 0 lag) ---
+  const [localTitle, setLocalTitle] = useState(
+    projectMetadata?.tituloProyecto || "",
+  );
+  const [localShortTitle, setLocalShortTitle] = useState(
+    projectMetadata?.tituloAbreviado || "",
+  );
+
+  // --- 2. SINCRONIZACIÓN SILENCIOSA (Debounce) ---
+  // Espera a que el usuario deje de teclear por 500ms antes de avisarle a Zustand
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      if (localTitle !== projectMetadata?.tituloProyecto) {
+        setProjectMetadata("tituloProyecto", localTitle);
+      }
+      if (localShortTitle !== projectMetadata?.tituloAbreviado) {
+        setProjectMetadata("tituloAbreviado", localShortTitle);
+      }
+    }, 500);
+
+    return () => clearTimeout(timeoutId);
+  }, [localTitle, localShortTitle, projectMetadata, setProjectMetadata]);
+
+  // --- 3. MANEJADORES LOCALES ---
+  const handleTitleChange = (e) => {
+    const newTitle = e.target.value;
+
+    // Actualizamos la UI al instante
+    setLocalTitle(newTitle);
+
+    // Auto-generamos el corto localmente
+    const autoRunningHead = newTitle.substring(0, 50).toUpperCase();
+    setLocalShortTitle(autoRunningHead);
+  };
+
+  const handleShortTitleChange = (e) => {
+    setLocalShortTitle(e.target.value.toUpperCase());
+  };
+
+  // Forzar guardado si el usuario hace clic fuera del input (OnBlur)
+  const handleBlur = () => {
+    if (localTitle !== projectMetadata?.tituloProyecto)
+      setProjectMetadata("tituloProyecto", localTitle);
+    if (localShortTitle !== projectMetadata?.tituloAbreviado)
+      setProjectMetadata("tituloAbreviado", localShortTitle);
+  };
+
   return (
     <Stack gap="xl">
-      {/* 1. INFORMACIÓN GENERAL DEL PROYECTO ACADÉMICO */}
       <Fieldset
         legend={<Text fw={700}>Información del Proyecto</Text>}
         variant="unstyled"
       >
         <Stack gap="md">
+          {/* TÍTULO COMPLETO CONECTADO AL ESTADO LOCAL */}
           <TextInput
             label="Título del Proyecto"
             placeholder="Escriba el título completo..."
-            value={projectMetadata?.portada?.titulo || ""}
-            onChange={(e) =>
-              setProjectMetadata("portada.titulo", e.target.value)
-            }
+            value={localTitle}
+            onChange={handleTitleChange}
+            onBlur={handleBlur}
+          />
+
+          {/* TÍTULO ABREVIADO CONECTADO AL ESTADO LOCAL */}
+          <TextInput
+            label="Título Abreviado (Running Head)"
+            description="Aparecerá en el encabezado de las páginas. Máximo 50 caracteres."
+            placeholder="TÍTULO ABREVIADO..."
+            maxLength={50}
+            styles={{ input: { textTransform: "uppercase" } }}
+            value={localShortTitle}
+            onChange={handleShortTitleChange}
+            onBlur={handleBlur}
           />
 
           <TagsInput
@@ -118,7 +173,6 @@ export const IdentityForm = () => {
 
       <Divider label="Dirección de Tesis" labelPosition="center" />
 
-      {/* 2. DATOS DE DIRECCIÓN / ASESORÍA */}
       <Fieldset variant="unstyled">
         <Grid align="flex-end">
           <Grid.Col span={8}>
@@ -146,7 +200,6 @@ export const IdentityForm = () => {
 
       <Divider label="Datos Institucionales" labelPosition="center" />
 
-      {/* 3. ESTRUCTURA ACADÉMICA VINCULADA */}
       <Fieldset variant="unstyled">
         <Stack gap="md">
           <TextInput
@@ -155,7 +208,6 @@ export const IdentityForm = () => {
             onChange={(e) => setProjectMetadata("institucion", e.target.value)}
           />
 
-          {/* SELECTOR DE FACULTAD */}
           <Select
             label="Facultad"
             placeholder="Seleccione la facultad"
@@ -164,12 +216,10 @@ export const IdentityForm = () => {
             value={projectMetadata?.facultad || null}
             onChange={(val) => {
               setProjectMetadata("facultad", val);
-              // Resetear programa de forma reactiva si muta la facultad de origen
               setProjectMetadata("programa", "");
             }}
           />
 
-          {/* SELECTOR DE PROGRAMA DEPENDIENTE */}
           <Select
             label="Programa"
             placeholder={

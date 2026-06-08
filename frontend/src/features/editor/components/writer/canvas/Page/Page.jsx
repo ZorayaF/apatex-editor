@@ -9,97 +9,84 @@ import {
 } from "@core/utils/measurements";
 import { usePagePagination } from "@hooks/usePagePagination";
 import { ConnectedBlock } from "../ConnectedBlock";
-import { calculateDocumentMap } from "@logic/engine/documentLayoutEngine";
 import classes from "./Page.module.css";
 
-export const Page = memo(({ pageId, pageNumber, allowedBlockIds }) => {
-  const pageContentRef = useRef(null);
-  const { margins, typography } = APA_CONFIG;
+// 1. RECIBIMOS EL TÍTULO Y EL OFFSET DE PÁGINA COMO PROPS
+export const Page = memo(
+  ({ pageId, pageNumber, allowedBlockIds, editorStartPage, runningTitle }) => {
+    const pageContentRef = useRef(null);
+    const { margins, typography } = APA_CONFIG;
 
-  // 1. OBTENEMOS METADATOS Y CALCULAMOS EL OFFSET GLOBAL
-  const projectMetadata = useStore((s) => s.projectMetadata);
+    // 2. YA NO CALCULAMOS EL MAPA DEL DOCUMENTO AQUÍ. Solo sumamos el prop.
+    const realPageNumber = pageNumber + (editorStartPage - 1);
 
-  const docMap = useMemo(
-    () => calculateDocumentMap(projectMetadata),
-    [projectMetadata],
-  );
+    const page = useStore((s) => s.pages.find((p) => p.id === pageId));
+    const rawBlockIds = page?.blockIds || [];
 
-  // 2. CÁLCULO DEL NÚMERO REAL
-  const realPageNumber = pageNumber + (docMap.editorStartPage - 1);
+    const visibleBlockIds = useMemo(() => {
+      if (!allowedBlockIds) return rawBlockIds;
+      return rawBlockIds.filter((id) => allowedBlockIds.has(id));
+    }, [rawBlockIds, allowedBlockIds]);
 
-  // Extracción del título abreviado desde la metadata
-  const runningTitle =
-    projectMetadata?.portada?.tituloAbreviado || "TÍTULO DEL TRABAJO";
+    const isActive = useStore((s) => s.activePageIndex === pageNumber - 1);
+    const { setActivePage, setSelectedBlockId } = useStore();
 
-  const page = useStore((s) => s.pages.find((p) => p.id === pageId));
-  const rawBlockIds = page?.blockIds || [];
+    usePagePagination(pageContentRef, rawBlockIds, pageNumber);
 
-  const visibleBlockIds = useMemo(() => {
-    if (!allowedBlockIds) return rawBlockIds;
-    return rawBlockIds.filter((id) => allowedBlockIds.has(id));
-  }, [rawBlockIds, allowedBlockIds]);
+    const handlePageClick = (e) => {
+      if (e.target === e.currentTarget) {
+        setActivePage(pageNumber - 1);
+        setSelectedBlockId(null);
+      }
+    };
 
-  const isActive = useStore((s) => s.activePageIndex === pageNumber - 1);
-  const { setActivePage, setSelectedBlockId } = useStore();
+    const pageVariables = {
+      "--page-width": `${PAGE_WIDTH_PX}px`,
+      "--page-height": `${PAGE_HEIGHT_PX}px`,
+      "--margin-top": `${cmToPx(margins.top)}px`,
+      "--margin-bottom": `${cmToPx(margins.bottom)}px`,
+      "--margin-left": `${cmToPx(margins.left)}px`,
+      "--margin-right": `${cmToPx(margins.right)}px`,
+      "--font-family": typography.family,
+      "--font-size": `${typography.size}pt`,
+    };
 
-  usePagePagination(pageContentRef, rawBlockIds, pageNumber);
-
-  const handlePageClick = (e) => {
-    if (e.target === e.currentTarget) {
-      setActivePage(pageNumber - 1);
-      setSelectedBlockId(null);
-    }
-  };
-
-  // Mapeo unificado de constantes métricas a propiedades custom de CSS
-  const pageVariables = {
-    "--page-width": `${PAGE_WIDTH_PX}px`,
-    "--page-height": `${PAGE_HEIGHT_PX}px`,
-    "--margin-top": `${cmToPx(margins.top)}px`,
-    "--margin-bottom": `${cmToPx(margins.bottom)}px`,
-    "--margin-left": `${cmToPx(margins.left)}px`,
-    "--margin-right": `${cmToPx(margins.right)}px`,
-    "--font-family": typography.family,
-    "--font-size": `${typography.size}pt`,
-  };
-
-  return (
-    <div
-      className={`${classes.pageSheet} ${isActive ? classes.isActive : ""}`}
-      onClick={handlePageClick}
-      style={pageVariables}
-    >
-      {/*  NUEVO ENCABEZADO REGLAMENTARIO INTEGRADO UP */}
+    return (
       <div
-        className={classes.pageHeader}
-        style={{
-          // Ubicado exactamente en la mitad del margen superior (1.27 cm de la cima)
-          top: `${cmToPx(margins.top / 2)}px`,
-          paddingLeft: "var(--margin-left)",
-          paddingRight: "var(--margin-right)",
-        }}
+        className={`${classes.pageSheet} ${isActive ? classes.isActive : ""}`}
+        onClick={handlePageClick}
+        style={pageVariables}
       >
-        <span className={classes.runningHead}>{runningTitle}</span>
-        <span
-          className={`${classes.pageNumber} ${
-            isActive ? classes.isActiveNumber : ""
-          }`}
+        <div
+          className={classes.pageHeader}
+          style={{
+            top: `${cmToPx(margins.top / 2)}px`,
+            paddingLeft: "var(--margin-left)",
+            paddingRight: "var(--margin-right)",
+          }}
         >
-          {realPageNumber}
-        </span>
-      </div>
-
-      {/* CUERPO DE CONTENIDO PRINCIPAL */}
-      <Box
-        ref={pageContentRef}
-        style={{ height: "100%", position: "relative" }}
-      >
-        <div style={{ pointerEvents: "auto" }}>
-          {visibleBlockIds.map((id) => (
-            <ConnectedBlock key={id} blockId={id} />
-          ))}
+          {/* 3. RENDERIZAMOS EL PROP DIRECTAMENTE */}
+          <span className={classes.runningHead}>{runningTitle}</span>
+          <span
+            className={`${classes.pageNumber} ${
+              isActive ? classes.isActiveNumber : ""
+            }`}
+          >
+            {realPageNumber}
+          </span>
         </div>
-      </Box>
-    </div>
-  );
-});
+
+        <Box
+          ref={pageContentRef}
+          style={{ height: "100%", position: "relative" }}
+        >
+          <div style={{ pointerEvents: "auto" }}>
+            {visibleBlockIds.map((id) => (
+              <ConnectedBlock key={id} blockId={id} />
+            ))}
+          </div>
+        </Box>
+      </div>
+    );
+  },
+);

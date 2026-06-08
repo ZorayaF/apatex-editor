@@ -16,7 +16,7 @@ function createWindow() {
   });
 
   // Load your Vite dev server or production build
-  // mainWindow.loadURL('http://localhost:5173');
+  mainWindow.loadURL("http://localhost:5173");
 }
 
 app.whenReady().then(createWindow);
@@ -24,34 +24,27 @@ app.whenReady().then(createWindow);
 // ==========================================
 // THE NATIVE PDF EXPORT ENGINE
 // ==========================================
-ipcMain.on("generate-pdf", async (event, documentName) => {
+ipcMain.handle("save-project", async (event, projectData) => {
   const win = BrowserWindow.fromWebContents(event.sender);
 
-  // 1. Let the user choose where to save the file
+  // 1. Abrir la ventana nativa de "Guardar como"
   const { canceled, filePath } = await dialog.showSaveDialog(win, {
-    title: "Guardar Documento APA 7",
-    defaultPath: `${documentName || "Documento_APA"}.pdf`,
-    filters: [{ name: "PDF Documents", extensions: ["pdf"] }],
+    title: "Guardar Proyecto APATEX",
+    defaultPath: "Mi_Tesis.apatex",
+    filters: [
+      { name: "Documento APATEX", extensions: ["apatex"] }, // ¡Aquí creamos tu extensión!
+    ],
   });
 
-  if (canceled || !filePath) return;
+  if (canceled || !filePath) return { success: false };
 
   try {
-    // 2. Generate the PDF natively via Chromium
-    const pdfData = await win.webContents.printToPDF({
-      printBackground: true,
-      margins: { marginType: "default" }, // Uses your CSS @page margins
-      pageSize: "Letter",
-      preferCSSPageSize: true, // Respects your @page CSS commands
-    });
+    // 2. Convertir los datos a texto y guardarlos en el disco duro
+    fs.writeFileSync(filePath, JSON.stringify(projectData, null, 2), "utf-8");
 
-    // 3. Write the file to the hard drive
-    fs.writeFileSync(filePath, pdfData);
-
-    // Tell React it worked
-    event.sender.send("pdf-status", { success: true, path: filePath });
+    return { success: true, filePath: filePath };
   } catch (error) {
-    console.error("Error generating PDF: ", error);
-    event.sender.send("pdf-status", { success: false, error: error.message });
+    console.error("Error saving file: ", error);
+    return { success: false, error: error.message };
   }
 });
