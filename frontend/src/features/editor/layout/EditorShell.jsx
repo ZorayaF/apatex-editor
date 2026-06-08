@@ -18,6 +18,7 @@ import "@editor/styles/editor.css";
 
 import { ConfigurationView } from "@editor/views/ConfigurationView";
 import { WritingView } from "@editor/views/WritingView";
+import { ExportView } from "@editor/views/ExportView";
 
 export const EditorShell = () => {
   // Empezamos en Configurar para que el usuario defina su identidad primero
@@ -118,19 +119,14 @@ export const EditorShell = () => {
           style={{
             height: "calc(100vh - 60px)",
             overflow: "hidden",
-            display: "flex", // <-- Añadido
-            flexDirection: "column", // <-- Añadido
+            display: "flex",
+            flexDirection: "column",
           }}
         >
           {activeTab === "configurar" && <ConfigurationView />}
           {activeTab === "redaccion" && <WritingView />}
-          {activeTab === "exportar" && (
-            <Box p="xl">
-              <Text c="dimmed">
-                Módulo de Exportación listo para programar.
-              </Text>
-            </Box>
-          )}
+
+          {activeTab === "exportar" && <ExportView />}
         </Box>
       </AppShell.Main>
 

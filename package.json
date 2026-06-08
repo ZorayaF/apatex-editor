@@ -2,7 +2,7 @@
   "name": "apatex-ub",
   "version": "1.0.0",
   "description": "Validador APA Universidad de Boyacá",
-  "main": "index.js",
+  "main": "main.js",
   "scripts": {
     "start": "electron ."
   },
