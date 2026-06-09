@@ -4,7 +4,8 @@ import { generateAllLists } from "@logic/engine/tocEngine";
 import { PageLayout } from "../PageLayout/PageLayout";
 import classes from "./TableOfContents.module.css";
 
-export const TableOfContents = () => {
+// 1. RECIBIMOS startPage DESDE EL EXPORTADOR
+export const TableOfContents = ({ startPage }) => {
   const { blocks, pages, projectMetadata } = useStore();
 
   const allLists = generateAllLists(blocks, pages, projectMetadata);
@@ -16,12 +17,23 @@ export const TableOfContents = () => {
     return "0px";
   };
 
-  // Capturamos las páginas dinámicas calculadas para cada hoja de índice en el docMap
-  const tocPages = projectMetadata?._docMap?.indices || {
-    contenido: "v",
-    tablas: "vi",
-    figuras: "vii",
-    anexos: "viii",
+  // 2. LÓGICA INTELIGENTE EN CASCADA:
+  // Si tenemos 'startPage' (modo exportación), incrementamos el número por cada lista.
+  // Si no, caemos en la configuración romana por defecto del docMap.
+  let currentExportPage = startPage;
+  const docIndices = projectMetadata?._docMap?.indices || {};
+
+  const tocPages = {
+    contenido: currentExportPage
+      ? currentExportPage++
+      : docIndices.contenido || "v",
+    tablas: currentExportPage ? currentExportPage++ : docIndices.tablas || "vi",
+    figuras: currentExportPage
+      ? currentExportPage++
+      : docIndices.figuras || "vii",
+    anexos: currentExportPage
+      ? currentExportPage++
+      : docIndices.anexos || "viii",
   };
 
   // Sub-componente interno atómico para renderizar las filas con relleno de puntos nativo

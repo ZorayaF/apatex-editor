@@ -1,0 +1,88 @@
+/* DocumentExporter.module.css */
+
+.exportCanvas {
+  background-color: #ffffff;
+  /* Desactiva clics, selecciones y focos en toda la vista de exportación */
+  pointer-events: none !important;
+  user-select: none !important;
+}
+
+/* =========================================================
+   SANITIZACIÓN VISUAL EXTREMA
+   ========================================================= */
+
+.exportCanvas * {
+  cursor: default !important;
+  caret-color: transparent !important;
+  -webkit-user-modify: read-only !important;
+  text-decoration: none !important;
+}
+
+.exportCanvas :global(.is-selected) {
+  border-color: transparent !important;
+  background-color: transparent !important;
+}
+
+.exportCanvas :global(.editor-block-wrapper:hover) {
+  border-color: transparent !important;
+  background-color: transparent !important;
+}
+
+.exportCanvas :global(.editable-cell) {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* =========================================================
+   VISTA DE PANTALLA: Solo el "escritorio" gris
+   ========================================================= */
+@media screen {
+  .exportCanvas {
+    display: block !important;
+    background-color: transparent !important; /* Cristal transparente */
+    padding: 40px 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+}
+
+/* =========================================================
+   VISTA DE IMPRESIÓN (PDF)
+   ========================================================= */
+/* =========================================================
+   VISTA DE IMPRESIÓN (PDF): LA CURA DEFINITIVA PARA LA PAGINACIÓN
+   ========================================================= */
+@media print {
+  /* 1. DESTRUIMOS TODAS LAS RESTRICCIONES DEL FRAMEWORK MANTINE */
+  :global(html),
+  :global(body),
+  :global(#root),
+  :global(.mantine-AppShell-root),
+  :global(.mantine-AppShell-main),
+  :global(.mantine-ScrollArea-root),
+  :global(.mantine-ScrollArea-viewport) {
+    display: block !important;
+    position: static !important;
+    height: auto !important;
+    min-height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background-color: white !important;
+  }
+
+  /* 2. LIMPIAMOS NUESTRO LIENZO */
+  .exportCanvas {
+    display: block !important;
+    background-color: white !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* 3. ELIMINAMOS EL "DOCK" Y CUALQUIER MARGEN FANTASMA DEL NAVEGADOR */
+  @page {
+    margin: 0 !important;
+    size: letter; /* Fuerza el PDF al tamaño carta físico */
+  }
+}

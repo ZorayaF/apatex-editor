@@ -14,13 +14,13 @@ export const PageLayout = ({
 }) => {
   const { margins, typography } = APA_CONFIG;
 
-  // El encabezado abreviado no debe exceder los 50 caracteres según el estándar
-  const rawTitle =
-    metadata?.portada?.tituloAbreviado ||
-    metadata?.tituloProyecto ||
-    "TÍTULO DEL PROYECTO";
+  // --- LA CORRECCIÓN CRÍTICA ---
+  // Igualamos la lógica con el Canvas: Leemos directo de la raíz.
+  // Ya no cortamos con "...", dejamos que el CSS Flexbox se encargue de eso si es muy ancho.
   const shortTitle =
-    rawTitle.length > 50 ? rawTitle.substring(0, 47) + "..." : rawTitle;
+    metadata?.tituloAbreviado ||
+    metadata?.tituloProyecto?.substring(0, 50).toUpperCase() ||
+    "TÍTULO DEL PROYECTO";
 
   // Inyectamos las variables CSS de forma limpia en el contenedor raíz
   const pageVariables = {
@@ -39,7 +39,7 @@ export const PageLayout = ({
       {!hideHeader && (
         <div
           className={classes.pageHeader}
-          style={{ top: `${cmToPx(margins.top / 2)}px` }} // Exactamente en la mitad del margen superior (1.25 cm)
+          style={{ top: `${cmToPx(margins.top / 2)}px` }} // Exactamente en la mitad del margen superior (1.27 cm)
         >
           <span className={classes.runningHead}>{shortTitle}</span>
           <span className={classes.pageNumber}>{pageNumber}</span>

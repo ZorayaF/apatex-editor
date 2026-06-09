@@ -3,10 +3,11 @@ import { renderSourceAPA } from "@logic/engine/bibliographyRenderer";
 import { PageLayout } from "../PageLayout/PageLayout";
 import classes from "./BibliographyPreview.module.css";
 
-export const BibliographyPreview = ({ metadata }) => {
+// 1. Añadimos pageNumber a los props recibidos
+export const BibliographyPreview = ({ metadata, pageNumber }) => {
   const { blocks, sources } = useStore();
 
-  // 1. Lógica algorítmica de escaneo de referencias citadas (Inalterada y robusta)
+  // Lógica algorítmica de escaneo de referencias citadas (Inalterada y robusta)
   const usedIds = Array.from(
     new Set(
       blocks.flatMap((b) => {
@@ -20,11 +21,12 @@ export const BibliographyPreview = ({ metadata }) => {
     .filter((s) => usedIds.includes(s.id))
     .sort((a, b) => (a.author || "").localeCompare(b.author || ""));
 
-  // Capturamos el número dinámico asignado a la sección de referencias en el mapa del documento
-  const pageNumber = metadata?._docMap?.referencias || "R";
+  // 2. LÓGICA INTELIGENTE: Usamos el prop de exportación, o el fallback del docMap/"R"
+  const finalPageNumber = pageNumber || metadata?._docMap?.referencias || "R";
 
   return (
-    <PageLayout metadata={metadata} pageNumber={pageNumber}>
+    // 3. Pasamos el finalPageNumber al PageLayout
+    <PageLayout metadata={metadata} pageNumber={finalPageNumber}>
       {/* TÍTULO EN NEGRITA Y CENTRADO */}
       <h1 className={classes.bibliographyTitle}>Referencias</h1>
 

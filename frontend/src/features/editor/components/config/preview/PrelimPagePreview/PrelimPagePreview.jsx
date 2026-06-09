@@ -6,6 +6,7 @@ export const PrelimPagePreview = ({
   data,
   projectTitle,
   metadata,
+  pageNumber, // 1. RECIBIMOS EL PROP
 }) => {
   const isSpanish = type === "resumen";
 
@@ -14,11 +15,13 @@ export const PrelimPagePreview = ({
     ? projectTitle
     : data?.title || "ENGLISH TITLE REQUIRED";
 
-  // Capturamos el número dinámico de página del docMap según la sección (ej: iii, iv)
-  const pageNumber = metadata?._docMap?.preliminares?.[type] || "iii";
+  // 2. LÓGICA INTELIGENTE: Usamos el prop de exportación, o el fallback del docMap/"iii"
+  const finalPageNumber =
+    pageNumber || metadata?._docMap?.preliminares?.[type] || "iii";
 
   return (
-    <PageLayout metadata={metadata} pageNumber={pageNumber}>
+    // 3. PASAMOS EL NÚMERO FINAL AL PAGELAYOUT
+    <PageLayout metadata={metadata} pageNumber={finalPageNumber}>
       {/* 1. NOMBRE DE LA SECCIÓN (Resumen / Abstract) */}
       <h1 className={classes.sectionHeader}>{type}</h1>
 

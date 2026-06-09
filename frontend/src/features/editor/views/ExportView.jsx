@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Group, Box, Button, Stack, Title, Text, Center } from "@mantine/core";
+import { Group, Box, Button, Stack, Title, Text } from "@mantine/core";
 import { IconFileTypePdf } from "@tabler/icons-react";
 import { DocumentExporter } from "../components/export/DocumentExporter";
 
@@ -8,6 +8,12 @@ export const ExportView = () => {
 
   const handleExportPDF = () => {
     setIsExporting(true);
+
+    // FIX: Quitamos el foco (blur) de cualquier bloque de texto activo.
+    // Esto mata el cursor parpadeante y el subrayado rojo de Chrome instantáneamente.
+    if (document.activeElement) {
+      document.activeElement.blur();
+    }
 
     // Damos un pequeño respiro para asegurar que React renderizó todo
     setTimeout(() => {
@@ -23,9 +29,15 @@ export const ExportView = () => {
   };
 
   return (
-    <Stack h="100%" style={{ overflowY: "auto" }} bg="gray.1">
+    // Quitamos bg="gray.1" de aquí para que DocumentExporter controle su fondo transparente
+    <Stack h="100%" gap={0} style={{ overflowY: "auto" }}>
       {/* 1. LA BARRA DE ACCIÓN (Esto no saldrá en el PDF gracias al CSS) */}
-      <Box p="md" bg="white" className="no-print">
+      <Box
+        p="md"
+        bg="white"
+        className="no-print"
+        style={{ borderBottom: "1px solid #e9ecef", flexShrink: 0 }}
+      >
         <Group justify="space-between">
           <div>
             <Title order={3}>Exportar Documento</Title>
@@ -44,19 +56,11 @@ export const ExportView = () => {
         </Group>
       </Box>
 
-      {/* 2. EL COMPILADOR DEL DOCUMENTO (Lo que realmente se imprime) */}
-      <Center p="xl" className="print-canvas-wrapper">
-        <Box
-          style={{
-            width: "8.5in", // Tamaño exacto Carta para simular el PDF
-            backgroundColor: "white",
-            boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-          }}
-          className="print-only-container"
-        >
-          <DocumentExporter />
-        </Box>
-      </Center>
+      {/* 2. EL COMPILADOR DEL DOCUMENTO */}
+      {/* Liberamos a DocumentExporter. Ya no está atrapado en un Box de 8.5in */}
+      <Box className="print-only-container" style={{ flexGrow: 1 }}>
+        <DocumentExporter />
+      </Box>
     </Stack>
   );
 };

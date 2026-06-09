@@ -1,12 +1,14 @@
 import { PageLayout } from "../PageLayout/PageLayout";
 import classes from "./GlossaryPagePreview.module.css";
 
-export const GlossaryPagePreview = ({ terms = [], metadata }) => {
-  // Capturamos el número dinámico de página asignado al glosario en el docMap o dejamos un fallback romano
-  const pageNumber = metadata?._docMap?.glosario || "G";
+// 1. Recibimos pageNumber en los props
+export const GlossaryPagePreview = ({ terms = [], metadata, pageNumber }) => {
+  // 2. Lógica Inteligente: prop > docMap > fallback "G"
+  const finalPageNumber = pageNumber || metadata?._docMap?.glosario || "G";
 
   return (
-    <PageLayout metadata={metadata} pageNumber={pageNumber}>
+    // 3. Pasamos finalPageNumber
+    <PageLayout metadata={metadata} pageNumber={finalPageNumber}>
       {/* TÍTULO EN NEGRITA Y CENTRADO */}
       <h1 className={classes.glossaryTitle}>Glosario</h1>
 

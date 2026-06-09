@@ -1,44 +1,58 @@
+/* =========================================================
+   VISTA DE IMPRESIÓN: Convertir a formato PDF limpio
+   ========================================================= */
 .pageSheet {
-  background-color: var(--color-bg-white);
+  /* 1. BLANCO PURO Y ABSOLUTO PARA EL PAPEL */
+  background-color: #ffffff !important;
+
   position: relative;
   display: flex;
   flex-direction: column;
   overflow: hidden;
   box-sizing: border-box;
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-  margin-bottom: 30px;
+
+  /* 2. SEPARACIÓN FÍSICA CLARA ENTRE HOJAS (40px de cristal transparente) */
+  margin: 0 auto 40px auto !important;
+
+  /* 3. SOMBRA DE DOCUMENTO REAL (Más profunda para crear efecto 3D) */
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12) !important;
+  border: 1px solid #ced4da !important;
+
   width: var(--page-width);
   height: var(--page-height);
   min-height: var(--page-height);
   max-height: var(--page-height);
 }
 
-/*  ENCABEZADO RIGIDO APA: Flota libre de forma absoluta usando los límites reales de la hoja */
+/* ENCABEZADO RIGIDO APA: Flota libre de forma absoluta usando los límites reales de la hoja */
 .pageHeader {
   position: absolute;
-  left: var(--margin-left);
-  right: var(--margin-right);
+  left: 0;
+  right: 0;
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start; /* Evita que se aplaste verticalmente */
+  width: 100%;
+  padding-left: var(--margin-left);
+  padding-right: var(--margin-right);
   box-sizing: border-box;
-  pointer-events: none;
-  z-index: 10;
 }
 
 .runningHead {
-  font-weight: bold;
+  font-weight: normal;
   text-transform: uppercase;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 75%;
-  font-size: 10pt;
+
+  /* LA CLAVE PARA QUE NO SE CORTE POR DEBAJO */
+  line-height: 1.5;
+  padding-bottom: 0.25rem;
 }
 
 .pageNumber {
-  font-size: 12pt;
-  color: var(--color-text-dark);
+  flex-shrink: 0;
 }
 
 .pageContent {
@@ -50,4 +64,28 @@
   padding-bottom: var(--margin-bottom);
   padding-left: var(--margin-left);
   padding-right: var(--margin-right);
+}
+
+/* =========================================================
+   VISTA DE IMPRESIÓN (PDF): Destruye la decoración de pantalla
+   ========================================================= */
+@media print {
+  .pageSheet {
+    display: block !important;
+    position: relative !important;
+    overflow: hidden !important;
+
+    margin: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
+    background-color: white !important;
+
+    page-break-after: always !important;
+    break-after: page !important;
+
+    width: 8.5in !important;
+    height: 11in !important;
+    min-height: 11in !important;
+    max-height: 11in !important;
+  }
 }

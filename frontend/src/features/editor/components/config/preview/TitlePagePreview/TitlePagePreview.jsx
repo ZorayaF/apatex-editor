@@ -1,8 +1,17 @@
 import { PageLayout } from "../PageLayout/PageLayout";
 import classes from "./TitlePagePreview.module.css";
 
-export const TitlePagePreview = ({ isContraportada, data, metadata }) => {
-  // 1. EL CAMBIO CRÍTICO: Ahora leemos el título directamente desde la raíz
+// 1. Añadimos pageNumber a los props
+export const TitlePagePreview = ({
+  isContraportada,
+  data,
+  metadata,
+  pageNumber,
+}) => {
+  // 2. LÓGICA INTELIGENTE: Si recibe un número lo usa, si no, es la página 1 por defecto.
+  const finalPageNumber = pageNumber || 1;
+
+  // EL CAMBIO CRÍTICO: Ahora leemos el título directamente desde la raíz
   const titulo = data?.tituloProyecto || "Título del proyecto";
 
   const institucion = data?.institucion || "Universidad de Boyacá";
@@ -25,7 +34,12 @@ export const TitlePagePreview = ({ isContraportada, data, metadata }) => {
       : "Nombre del autor";
 
   return (
-    <PageLayout metadata={metadata} hideHeader={true} pageNumber="">
+    // 3. Pasamos el finalPageNumber al PageLayout
+    <PageLayout
+      metadata={metadata}
+      hideHeader={true}
+      pageNumber={finalPageNumber}
+    >
       <div className={classes.titlePageContainer}>
         {/* 1. TÍTULO DEL PROYECTO (BLOQUE SUPERIOR) */}
         <h1 className={classes.projectTitle}>{titulo}</h1>

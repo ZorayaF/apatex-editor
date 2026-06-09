@@ -1,12 +1,16 @@
 import { PageLayout } from "../PageLayout/PageLayout";
 import classes from "./AceptacionPagePreview.module.css";
 
-export const AceptacionPagePreview = ({ metadata }) => {
+// 1. Añadimos pageNumber a los props
+export const AceptacionPagePreview = ({ metadata, pageNumber }) => {
   const { aceptacion } = metadata?.preliminares || {};
-  const docMap = metadata?._docMap || { aceptacion: "ii" }; // Suponiendo fallback dinámico o inyectado
+  const docMap = metadata?._docMap || { aceptacion: "ii" };
+
+  // 2. Usamos pageNumber si existe, si no caemos en el docMap
+  const finalPageNumber = pageNumber || docMap.aceptacion;
 
   return (
-    <PageLayout metadata={metadata} pageNumber={docMap.aceptacion}>
+    <PageLayout metadata={metadata} pageNumber={finalPageNumber}>
       {/* TÍTULO DE LA PÁGINA */}
       <p className={classes.titleText}>Nota de aceptación:</p>
 

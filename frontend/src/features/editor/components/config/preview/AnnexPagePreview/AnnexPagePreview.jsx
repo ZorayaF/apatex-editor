@@ -1,13 +1,14 @@
-// src/features/editor/components/config/preview/AnnexPagePreview/AnnexPagePreview.jsx
 import { Anchor, Stack } from "@mantine/core";
 import { PageLayout } from "../PageLayout/PageLayout";
 import classes from "./AnnexPagePreview.module.css";
 
-export const AnnexPagePreview = ({ item, metadata }) => {
+// 1. Añadimos pageNumber a los props recibidos
+export const AnnexPagePreview = ({ item, metadata, pageNumber }) => {
   const isCenteredType = ["image", "table", "links"].includes(item?.type);
 
-  // Capturamos el mapa de paginación del Store o asignamos un fallback
-  const pageNumber = metadata?._docMap?.anexos?.[item?.id] || "x";
+  // 2. LÓGICA INTELIGENTE: Usamos el prop de exportación, o el fallback del docMap/"x"
+  const finalPageNumber =
+    pageNumber || metadata?._docMap?.anexos?.[item?.id] || "x";
 
   const renderAnnexBody = () => {
     switch (item?.type) {
@@ -79,7 +80,8 @@ export const AnnexPagePreview = ({ item, metadata }) => {
   };
 
   return (
-    <PageLayout metadata={metadata} pageNumber={pageNumber}>
+    // 3. Pasamos el finalPageNumber al PageLayout
+    <PageLayout metadata={metadata} pageNumber={finalPageNumber}>
       <div
         className={`${classes.contentContainer} ${
           isCenteredType ? classes.centeredContent : classes.startContent
