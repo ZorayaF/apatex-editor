@@ -29,8 +29,16 @@ const initialState = {
 };
 
 export const createProjectSlice = (set) => ({
+  // 1. EL NUEVO ESTADO: Guarda la ruta del archivo actual (null si es un proyecto nuevo)
+  currentFilePath: null,
+
+  // 2. LA NUEVA ACCIÓN: Permite a Electron actualizar la ruta después de guardar o abrir
+  setCurrentFilePath: (path) => set({ currentFilePath: path }),
+
+  // 3. TU ESTADO ORIGINAL: Los datos del documento APA
   projectMetadata: initialState,
 
+  // 4. TU LÓGICA ORIGINAL INTACTA
   setProjectMetadata: (path, value) =>
     set((state) => {
       const keys = path.split(".");

@@ -18,6 +18,7 @@ import {
   IconLayoutBoard,
   IconDownload,
   IconDeviceFloppy, // Ícono de guardado
+  IconFolderOpen,
 } from "@tabler/icons-react";
 
 import { useStore } from "@store";
@@ -34,35 +35,85 @@ export const EditorShell = () => {
   const [activeTab, setActiveTab] = useState("configurar");
   const [isSaving, setIsSaving] = useState(false); // Estado de carga del guardado
 
-  const { isNavbarOpen, setNavbarOpen, isInspectorOpen, setInspectorOpen } =
-    useStore();
+  const [loadKey, setLoadKey] = useState(0);
+  const {
+    isNavbarOpen,
+    setNavbarOpen,
+    isInspectorOpen,
+    setInspectorOpen,
+    currentFilePath,
+    setCurrentFilePath,
+  } = useStore();
 
   const isWritingMode = activeTab === "redaccion";
 
   // --- LÓGICA DE GUARDADO GLOBAL ---
-  const handleSaveProject = async () => {
+  const handleSaveProject = async (isSaveAs = false) => {
     setIsSaving(true);
-
     const currentState = useStore.getState();
+
+    // Empaquetamos los datos Y las instrucciones de guardado
     const payload = {
-      blocks: currentState.blocks,
-      pages: currentState.pages,
-      projectMetadata: currentState.projectMetadata,
-      sources: currentState.sources,
+      projectData: {
+        blocks: currentState.blocks,
+        pages: currentState.pages,
+        projectMetadata: currentState.projectMetadata,
+        sources: currentState.sources,
+      },
+      filePath: currentState.currentFilePath, // Si es null, Electron pedirá la ruta
+      isSaveAs: isSaveAs, // Si es true, Electron forzará la ventana de diálogo
     };
 
     if (window.electronAPI) {
       const response = await window.electronAPI.saveProject(payload);
 
       if (response.success) {
+        // Actualizamos el store con la ruta (por si era un archivo nuevo)
+        useStore.setState({ currentFilePath: response.filePath });
         notifications.show({
-          title: "Proyecto Guardado",
-          message: "Tu documento se guardó correctamente.",
+          title: "Guardado",
+          message: "Progreso asegurado.",
           color: "green",
         });
       } else if (response.error) {
         notifications.show({
-          title: "Error al guardar",
+          title: "Error",
+          message: response.error,
+          color: "red",
+        });
+      }
+    }
+    setIsSaving(false);
+  };
+  // --- LÓGICA DE APERTURA GLOBAL ---
+  const handleOpenProject = async () => {
+    if (window.electronAPI) {
+      const response = await window.electronAPI.openProject();
+
+      if (response.success && response.projectData) {
+        useStore.setState({
+          blocks: response.projectData.blocks || [],
+          pages: response.projectData.pages || [{ id: "p1", blockIds: [] }],
+          projectMetadata: response.projectData.projectMetadata,
+          sources: response.projectData.sources || [],
+          activePageIndex: 0,
+          selectedBlockId: null,
+          focusedChapterId: null,
+          currentFilePath: response.filePath,
+        });
+
+        // 2. NUEVO: Cambiamos la llave para obligar a React a repintar todo
+        setLoadKey((prev) => prev + 1);
+
+        notifications.show({
+          title: "Proyecto Cargado",
+          message: "Tu documento se ha cargado con éxito.",
+          color: "blue",
+          icon: <IconFolderOpen size={16} />,
+        });
+      } else if (response.error) {
+        notifications.show({
+          title: "Error al abrir",
           message: response.error,
           color: "red",
         });
@@ -70,12 +121,10 @@ export const EditorShell = () => {
     } else {
       notifications.show({
         title: "Modo Web",
-        message: "El guardado en disco solo funciona en la app de escritorio.",
+        message: "La carga de archivos nativos solo funciona en escritorio.",
         color: "orange",
       });
     }
-
-    setIsSaving(false);
   };
 
   return (
@@ -143,15 +192,38 @@ export const EditorShell = () => {
 
           {/* LADO DERECHO: Botón Guardar y Toggle del Inspector */}
           <Group gap="xs">
-            {/* NUEVO: Botón de Guardado Global */}
+            {/* NUEVO: Botón de Abrir */}
+            <Button
+              size="xs"
+              variant="subtle"
+              color="gray"
+              leftSection={<IconFolderOpen size={16} />}
+              onClick={handleOpenProject}
+            >
+              Abrir
+            </Button>
+
+            {/* GUARDAR NORMAL (Ctrl+S) */}
             <Button
               size="xs"
               variant="light"
+              color="blue"
               leftSection={<IconDeviceFloppy size={16} />}
               loading={isSaving}
-              onClick={handleSaveProject}
+              onClick={() => handleSaveProject(false)}
             >
               Guardar
+            </Button>
+
+            {/* GUARDAR COMO (Duplicar) */}
+            <Button
+              size="xs"
+              variant="subtle"
+              color="blue"
+              loading={isSaving}
+              onClick={() => handleSaveProject(true)}
+            >
+              Guardar como...
             </Button>
 
             {isWritingMode && (
@@ -177,6 +249,8 @@ export const EditorShell = () => {
 
       <AppShell.Main bg="gray.1">
         <Box
+          // 3. NUEVO: React destruirá este Box y su contenido cada vez que el loadKey cambie
+          key={loadKey}
           style={{
             height: "calc(100vh - 60px)",
             overflow: "hidden",
