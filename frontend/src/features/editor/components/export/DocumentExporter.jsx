@@ -1,4 +1,3 @@
-import React from "react";
 import { useStore } from "@store";
 
 // Importaciones
@@ -14,23 +13,32 @@ import { ConnectedBlock } from "@writer/canvas/ConnectedBlock";
 import classes from "./DocumentExporter.module.css";
 
 export const DocumentExporter = () => {
-  // 1. EXTRAEMOS DE LA RAÍZ (Corrección del error de estado)
+  // Extraemos los estados globales de la raíz del Store
   const {
     pages,
     projectMetadata,
     preliminares: storePreliminares,
   } = useStore();
 
-  // 2. BUSCAMOS LOS PRELIMINARES (Por si están en la raíz o dentro del metadata)
+  // Buscamos los preliminares estructurados
   const preliminares = storePreliminares || projectMetadata?.preliminares || {};
 
-  // INICIAMOS EL CONTADOR UNIVERSAL ÁRABE
+  // INICIAMOS EL CONTADOR UNIVERSAL ÁRABE (Inicia en 1)
   let globalPageCounter = 1;
 
   return (
     <div className={`print-only-container ${classes.exportCanvas}`}>
-      {/* 1. PORTADA */}
+      {/* 1. PORTADA (Página 1) */}
       <TitlePagePreview
+        isContraportada={false}
+        data={projectMetadata}
+        metadata={projectMetadata}
+        pageNumber={globalPageCounter++}
+      />
+
+      {/* 1b. CONTRAPORTADA (Página 2 - Incluye Grado Objetivo y Director) */}
+      <TitlePagePreview
+        isContraportada={true}
         data={projectMetadata}
         metadata={projectMetadata}
         pageNumber={globalPageCounter++}
@@ -43,8 +51,20 @@ export const DocumentExporter = () => {
           pageNumber={globalPageCounter++}
         />
       )}
+      {/* 2b. NOTA DE REGLAMENTO  */}
+      {preliminares.reglamento?.enabled && (
+        <SimplePagePreview
+          type="reglamento"
+          data={{
+            content:
+              "“Únicamente el graduando es responsable de las ideas expuestas en el presente trabajo”. (Lineamientos constitucionales, legales e institucionales que rigen la propiedad intelectual).",
+          }}
+          metadata={projectMetadata}
+          pageNumber={globalPageCounter++}
+        />
+      )}
 
-      {/* 3. DEDICATORIA (Corrección de props: type y data) */}
+      {/* 3. DEDICATORIA */}
       {preliminares.dedicatoria?.enabled && (
         <SimplePagePreview
           type="dedicatoria"
@@ -54,7 +74,7 @@ export const DocumentExporter = () => {
         />
       )}
 
-      {/* 4. AGRADECIMIENTOS (Corrección de props: type y data) */}
+      {/* 4. AGRADECIMIENTOS */}
       {preliminares.agradecimientos?.enabled && (
         <SimplePagePreview
           type="agradecimientos"
@@ -63,31 +83,9 @@ export const DocumentExporter = () => {
           pageNumber={globalPageCounter++}
         />
       )}
-
-      {/* 5. RESUMEN (Corrección de props: type, data y projectTitle) */}
-      {preliminares.resumen?.enabled && (
-        <PrelimPagePreview
-          type="resumen"
-          data={preliminares.resumen}
-          projectTitle={projectMetadata?.tituloProyecto}
-          metadata={projectMetadata}
-          pageNumber={globalPageCounter++}
-        />
-      )}
-
-      {/* 6. ABSTRACT (Corrección de props: type, data y projectTitle) */}
-      {preliminares.abstract?.enabled && (
-        <PrelimPagePreview
-          type="abstract"
-          data={preliminares.abstract}
-          projectTitle={projectMetadata?.tituloProyecto}
-          metadata={projectMetadata}
-          pageNumber={globalPageCounter++}
-        />
-      )}
-
-      {/* 7. TABLA DE CONTENIDO */}
+      {/* 7. TABLA DE CONTENIDO (Pasa el valor actual del contador como inicio) */}
       <TableOfContents startPage={globalPageCounter} />
+      {/* Sincronizamos el contador global simulando el avance por el layout interno del TOC */}
       <div style={{ display: "none" }}>{globalPageCounter++}</div>
 
       {/* 8. GLOSARIO */}
@@ -99,7 +97,38 @@ export const DocumentExporter = () => {
         />
       )}
 
-      {/* 9. CUERPO DEL DOCUMENTO */}
+      {/* 5. RESUMEN */}
+      {preliminares.resumen?.enabled && (
+        <PrelimPagePreview
+          type="resumen"
+          data={preliminares.resumen}
+          projectTitle={projectMetadata?.tituloProyecto}
+          metadata={projectMetadata}
+          pageNumber={globalPageCounter++}
+        />
+      )}
+
+      {/* 6. ABSTRACT */}
+      {preliminares.abstract?.enabled && (
+        <PrelimPagePreview
+          type="abstract"
+          data={preliminares.abstract}
+          projectTitle={projectMetadata?.tituloProyecto}
+          metadata={projectMetadata}
+          pageNumber={globalPageCounter++}
+        />
+      )}
+      {/* 8b. INTRODUCCIÓN (TU NUEVA PÁGINA) */}
+      {preliminares.introduccion?.content?.trim().length > 0 && (
+        <SimplePagePreview
+          type="introduccion"
+          data={preliminares.introduccion}
+          metadata={projectMetadata}
+          pageNumber={globalPageCounter++}
+        />
+      )}
+
+      {/* 9. CUERPO DEL DOCUMENTO (Páginas del Editor Canvas) */}
       {pages.map((page) => {
         const currentArabicPage = globalPageCounter++;
         return (
@@ -117,7 +146,7 @@ export const DocumentExporter = () => {
         );
       })}
 
-      {/* 10. REFERENCIAS */}
+      {/* 10. REFERENCIAS BIBLIOGRÁFICAS */}
       <BibliographyPreview
         metadata={projectMetadata}
         pageNumber={globalPageCounter++}

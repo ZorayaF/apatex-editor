@@ -9,13 +9,22 @@
   margin-bottom: 24px;
 }
 
+/* CONTENEDOR DE LOS PÁRRAFOS (Nuevo) */
+.textContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 0; /* APA exige que no haya espacio extra entre párrafos */
+}
+
 /* CUERPO DE REDACCIÓN FORMAL DE LA HOJA */
 .bodyText {
   font-family: var(--font-apa);
   font-size: var(--font-size-base);
   line-height: var(--line-height-apa);
   color: var(--color-text-dark);
+
   text-align: justify;
+
   white-space: pre-wrap;
   margin: 0;
 }

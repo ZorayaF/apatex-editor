@@ -24,9 +24,15 @@
 .tocRow {
   display: flex;
   justify-content: space-between;
-  align-items: flex-end;
+
+  /* CHANGE 1: Use baseline alignment to sync the text and the dots */
+  align-items: baseline;
+
   gap: 8px;
   width: 100%;
+
+  /* Ensure a consistent row height */
+  line-height: 1.5;
 }
 
 .tocText {
@@ -45,7 +51,14 @@
 .dotLeader {
   flex-grow: 1;
   border-bottom: 2px dotted var(--color-border-dashed);
-  height: 14px;
+
+  /* CHANGE 2: Remove the fixed height */
+  /* height: 14px;  <- REMOVE THIS */
+
+  /* CHANGE 3: Push the border up slightly relative to the baseline */
+  position: relative;
+  top: -4px; /* Adjust this value (e.g., -3px to -6px) to perfect the vertical alignment */
+
   min-width: 20px;
 }
 

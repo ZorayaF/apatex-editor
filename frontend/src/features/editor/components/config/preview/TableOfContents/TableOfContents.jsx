@@ -85,6 +85,7 @@ export const TableOfContents = ({ startPage }) => {
             labelPosition="center"
             color="gray.4"
             mb="xl"
+            className="no-print"
           />
           <PageLayout metadata={projectMetadata} pageNumber={tocPages.tablas}>
             <h1 className={classes.listTitle}>Lista de Tablas</h1>
@@ -113,6 +114,7 @@ export const TableOfContents = ({ startPage }) => {
             labelPosition="center"
             color="gray.4"
             mb="xl"
+            className="no-print"
           />
           <PageLayout metadata={projectMetadata} pageNumber={tocPages.figuras}>
             <h1 className={classes.listTitle}>Lista de Figuras</h1>
@@ -141,6 +143,7 @@ export const TableOfContents = ({ startPage }) => {
             labelPosition="center"
             color="gray.4"
             mb="xl"
+            className="no-print"
           />
           <PageLayout metadata={projectMetadata} pageNumber={tocPages.anexos}>
             <h1 className={classes.listTitle}>Lista de Anexos</h1>

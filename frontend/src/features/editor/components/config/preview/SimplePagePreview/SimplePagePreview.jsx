@@ -1,32 +1,56 @@
 import { PageLayout } from "../PageLayout/PageLayout";
 import classes from "./SimplePagePreview.module.css";
 
-// 1. Añadimos pageNumber a los props recibidos
 export const SimplePagePreview = ({ type, data, metadata, pageNumber }) => {
+  // Normalizamos el tipo eliminando tildes y pasándolo a minúsculas automáticamente
+  const normalizedType = type
+    ? type
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+    : "";
+
   const sectionsWithoutTitle = ["dedicatoria", "reglamento"];
-  const shouldHideTitle = sectionsWithoutTitle.includes(type);
+  const shouldHideTitle = sectionsWithoutTitle.includes(normalizedType);
 
-  // REGLA APA: Sangría de primera línea para la introducción
-  const isIntroduccion = type === "introduccion";
+  // Verificamos si esta sección exige sangría APA
+  const sectionsWithIndent = ["introduccion", "reglamento"];
+  const needsIndent = sectionsWithIndent.includes(normalizedType);
 
-  // 2. LÓGICA INTELIGENTE: Si recibe un pageNumber (del Exportador), lo usa.
-  // Si no, usa el docMap o el fallback "v" (para la vista de Configuración).
   const finalPageNumber =
-    pageNumber || metadata?._docMap?.preliminares?.[type] || "v";
+    pageNumber ||
+    metadata?._docMap?.preliminares?.[type] ||
+    metadata?._docMap?.preliminares?.[normalizedType] ||
+    "v";
 
-  // Construimos la clase del párrafo inyectando la sangría normal solo si es introducción
-  const bodyClassName = `${classes.bodyText} ${isIntroduccion ? classes.hasIndent : ""}`;
+  const displayTitle = type ? type.charAt(0).toUpperCase() + type.slice(1) : "";
+  const rawContent = data?.content || `[Contenido de la sección ${type}]`;
+
+  // Separamos el texto crudo en párrafos reales
+  const paragraphs = rawContent.split("\n").filter((p) => p.trim() !== "");
 
   return (
     <PageLayout metadata={metadata} pageNumber={finalPageNumber}>
-      {/* 1. NOMBRE DE LA SECCIÓN (Oculto dinámicamente si es dedicatoria o reglamento) */}
-      {!shouldHideTitle && <h1 className={classes.sectionTitle}>{type}</h1>}
+      {!shouldHideTitle && (
+        <h1 className={classes.sectionTitle}>{displayTitle}</h1>
+      )}
 
-      {/* 2. CUERPO DE TEXTO CON SANGRÍA DINÁMICA POR SOFTWARE */}
-      {/* Arreglado: Eliminado 'classes.' para usar la constante calculada */}
-      <p className={bodyClassName}>
-        {data?.content || `[Contenido de la sección ${type}]`}
-      </p>
+      <div className={classes.textContainer}>
+        {paragraphs.map((text, index) => (
+          <p
+            key={index}
+            className={classes.bodyText}
+            /* LA CURA DEFINITIVA: Forzamos la medida física directamente en el HTML */
+            style={{
+              textIndent: needsIndent ? "1.27cm" : "0",
+              marginTop: 0,
+              marginBottom: 0,
+            }}
+          >
+            {text}
+          </p>
+        ))}
+      </div>
     </PageLayout>
   );
 };
