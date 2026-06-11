@@ -174,24 +174,67 @@ export const IdentityForm = () => {
       <Divider label="Dirección de Tesis" labelPosition="center" />
 
       <Fieldset variant="unstyled">
+        {/* BLOQUE DEL DIRECTOR */}
         <Grid align="flex-end">
-          <Grid.Col span={8}>
+          <Grid.Col span={4}>
+            <Select
+              label="Cargo"
+              data={["Director", "Directora"]}
+              value={projectMetadata?.director?.rol || "Director"}
+              onChange={(value) => setProjectMetadata("director.rol", value)}
+              allowDeselect={false}
+            />
+          </Grid.Col>
+          <Grid.Col span={5}>
             <TextInput
-              label="Nombre del Director"
-              placeholder="Nombre del docente tutor..."
+              label="Nombre completo"
+              placeholder="Nombre del docente..."
               value={projectMetadata?.director?.nombre || ""}
               onChange={(e) =>
                 setProjectMetadata("director.nombre", e.target.value)
               }
             />
           </Grid.Col>
-          <Grid.Col span={4}>
+          <Grid.Col span={3}>
             <TextInput
-              label="Grado (Ej: Mg, PhD)"
-              placeholder="Título máximo"
+              label="Grado"
+              placeholder="Ej: Ph.D."
               value={projectMetadata?.director?.titulo || ""}
               onChange={(e) =>
                 setProjectMetadata("director.titulo", e.target.value)
+              }
+            />
+          </Grid.Col>
+        </Grid>
+
+        {/* BLOQUE DEL CODIRECTOR (OPCIONAL) */}
+        <Grid align="flex-end" mt="xl">
+          <Grid.Col span={4}>
+            <Select
+              label="Cargo (Opcional)"
+              data={["Codirector", "Codirectora"]}
+              value={projectMetadata?.codirector?.rol || "Codirector"}
+              onChange={(value) => setProjectMetadata("codirector.rol", value)}
+              allowDeselect={false}
+            />
+          </Grid.Col>
+          <Grid.Col span={5}>
+            <TextInput
+              label="Nombre completo"
+              placeholder="Si aplica..."
+              value={projectMetadata?.codirector?.nombre || ""}
+              onChange={(e) =>
+                setProjectMetadata("codirector.nombre", e.target.value)
+              }
+            />
+          </Grid.Col>
+          <Grid.Col span={3}>
+            <TextInput
+              label="Grado"
+              placeholder="Ej: Ph.D."
+              value={projectMetadata?.codirector?.titulo || ""}
+              onChange={(e) =>
+                setProjectMetadata("codirector.titulo", e.target.value)
               }
             />
           </Grid.Col>

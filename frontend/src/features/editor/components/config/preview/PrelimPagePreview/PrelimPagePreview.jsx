@@ -6,21 +6,27 @@ export const PrelimPagePreview = ({
   data,
   projectTitle,
   metadata,
-  pageNumber, // 1. RECIBIMOS EL PROP
+  pageNumber,
 }) => {
   const isSpanish = type === "resumen";
 
-  // LÓGICA DE SELECCIÓN DE TÍTULO (Mantenida y blindada con encadenamiento opcional)
+  // LÓGICA DE SELECCIÓN DE TÍTULO
   const displayProjectTitle = isSpanish
     ? projectTitle
     : data?.title || "ENGLISH TITLE REQUIRED";
 
-  // 2. LÓGICA INTELIGENTE: Usamos el prop de exportación, o el fallback del docMap/"iii"
+  // LÓGICA INTELIGENTE DE PAGINACIÓN
   const finalPageNumber =
     pageNumber || metadata?._docMap?.preliminares?.[type] || "iii";
 
+  // TRATAMIENTO DEL TEXTO: Separamos los saltos de línea físicos en párrafos HTML
+  const rawContent = data?.content || `[Contenido del ${type}]`;
+  const paragraphs = rawContent.split("\n").filter((p) => p.trim() !== "");
+
+  // TRATAMIENTO DE PALABRAS CLAVE: Extraemos el string según el idioma
+  const keywordsString = isSpanish ? data?.palabrasClave : data?.keywords;
+
   return (
-    // 3. PASAMOS EL NÚMERO FINAL AL PAGELAYOUT
     <PageLayout metadata={metadata} pageNumber={finalPageNumber}>
       {/* 1. NOMBRE DE LA SECCIÓN (Resumen / Abstract) */}
       <h1 className={classes.sectionHeader}>{type}</h1>
@@ -28,20 +34,31 @@ export const PrelimPagePreview = ({
       {/* 2. TÍTULO DEL PROYECTO (En el idioma correspondiente) */}
       <h2 className={classes.projectTitle}>{displayProjectTitle}</h2>
 
-      {/* 3. CONTENIDO DEL PÁRRAFO PRELIMINAR */}
-      <p className={classes.bodyText}>
-        {data?.content || `[Contenido del ${type}]`}
-      </p>
-
-      {/* 4. PALABRAS CLAVE / KEYWORDS */}
-      <div className={classes.keywordsBox}>
-        <span className={classes.keywordsLabel}>
-          {isSpanish ? "Palabras clave: " : "Keywords: "}
-        </span>
-        <span>
-          {isSpanish ? data?.palabrasClave || "" : data?.keywords || ""}
-        </span>
+      {/* 3. CONTENIDO DEL PÁRRAFO PRELIMINAR (Iterado para respetar saltos de línea) */}
+      <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
+        {paragraphs.map((text, index) => (
+          <p
+            key={index}
+            className={classes.bodyText}
+            style={{ marginTop: 0, marginBottom: 0 }}
+          >
+            {text}
+          </p>
+        ))}
       </div>
+
+      {/* 4. PALABRAS CLAVE / KEYWORDS (Renderizado condicional con sangría e itálica nativa) */}
+      {keywordsString && keywordsString.trim().length > 0 && (
+        <div
+          className={classes.keywordsBox}
+          style={{ marginTop: "1rem" }} // Sangría estricta APA
+        >
+          <span className={classes.keywordsLabel}>
+            {isSpanish ? "Palabras clave: " : "Keywords: "}
+          </span>
+          <span>{keywordsString}</span>
+        </div>
+      )}
     </PageLayout>
   );
 };

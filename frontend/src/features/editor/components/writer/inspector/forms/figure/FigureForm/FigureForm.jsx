@@ -11,12 +11,17 @@ import {
   Group,
   ActionIcon,
 } from "@mantine/core";
-import { IconUpload, IconLink, IconTrash } from "@tabler/icons-react";
+import {
+  IconUpload,
+  IconLink,
+  IconTrash,
+  IconPlaylistX,
+} from "@tabler/icons-react";
 import { useStore } from "@store";
 import { InspectorSection } from "@writer/inspector/InspectorSection";
 
 export const FigureForm = ({ blockData }) => {
-  const { updateBlock } = useStore();
+  const { updateBlock, removeBlock } = useStore();
 
   const handleChange = (field, value) => {
     updateBlock(blockData.id, { [field]: value });
@@ -116,6 +121,16 @@ export const FigureForm = ({ blockData }) => {
           minRows={2}
         />
       </InspectorSection>
+      <Divider />
+      <Button
+        variant="light"
+        color="red"
+        fullWidth
+        leftSection={<IconPlaylistX size={18} />}
+        onClick={() => removeBlock(blockData.id)} // Dispara la eliminación en el JSON
+      >
+        Eliminar Figura del Documento
+      </Button>
     </Stack>
   );
 };

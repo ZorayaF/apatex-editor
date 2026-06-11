@@ -6,7 +6,8 @@ import classes from "./TableOfContents.module.css";
 
 // 1. RECIBIMOS startPage DESDE EL EXPORTADOR
 export const TableOfContents = ({ startPage }) => {
-  const { blocks, pages, projectMetadata } = useStore();
+  // 1. AÑADIMOS 'sources' PARA SABER SI HAY REFERENCIAS CREADAS
+  const { blocks, pages, projectMetadata, sources } = useStore();
 
   const allLists = generateAllLists(blocks, pages, projectMetadata);
 
@@ -18,8 +19,6 @@ export const TableOfContents = ({ startPage }) => {
   };
 
   // 2. LÓGICA INTELIGENTE EN CASCADA:
-  // Si tenemos 'startPage' (modo exportación), incrementamos el número por cada lista.
-  // Si no, caemos en la configuración romana por defecto del docMap.
   let currentExportPage = startPage;
   const docIndices = projectMetadata?._docMap?.indices || {};
 
@@ -59,6 +58,7 @@ export const TableOfContents = ({ startPage }) => {
           </div>
 
           <Stack gap="xs" style={{ flex: 1 }}>
+            {/* Títulos del cuerpo del documento */}
             {allLists.contenido.map((entry, index) => (
               <ListRow
                 key={index}
@@ -67,12 +67,34 @@ export const TableOfContents = ({ startPage }) => {
                 level={entry.level}
               />
             ))}
-            {allLists.contenido.length === 0 && (
-              <p className={classes.emptyNotice}>
-                Los títulos aparecerán aquí automáticamente a medida que
-                redactes en el canvas.
-              </p>
+
+            {/* 2. INYECCIÓN MANUAL DE REFERENCIAS AL FINAL DEL CONTENIDO */}
+            {sources && sources.length > 0 && (
+              <ListRow
+                text="Referencias"
+                page={projectMetadata?._docMap?.referencias || "10"}
+                level="h1" // Pasamos "h1" para que getIndentPixels devuelva "0px"
+              />
             )}
+
+            {/* 3. INYECCIÓN MANUAL DE LA PÁGINA SEPARADORA DE ANEXOS */}
+            {projectMetadata?.preliminares?.anexos?.enabled &&
+              projectMetadata?.preliminares?.anexos?.items?.length > 0 && (
+                <ListRow
+                  text="Anexos"
+                  page={projectMetadata?._docMap?.anexos_separador || "12"}
+                  level="h1" // Pasamos "h1" para alinear al margen izquierdo
+                />
+              )}
+
+            {/* Actualizamos la regla del mensaje vacío para que considere las fuentes */}
+            {allLists.contenido.length === 0 &&
+              (!sources || sources.length === 0) && (
+                <p className={classes.emptyNotice}>
+                  Los títulos aparecerán aquí automáticamente a medida que
+                  redactes en el canvas.
+                </p>
+              )}
           </Stack>
         </PageLayout>
       </div>

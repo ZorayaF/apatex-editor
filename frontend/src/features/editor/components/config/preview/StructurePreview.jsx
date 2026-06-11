@@ -15,8 +15,7 @@ import { AnnexPagePreview } from "./AnnexPagePreview";
 
 export const StructurePreview = ({ activeSection, metadata }) => {
   const prelim = metadata?.preliminares || {};
-  const projectTitle = metadata.portada?.titulo || "TÍTULO DEL PROYECTO";
-
+  const projectTitle = metadata?.tituloProyecto || "TÍTULO DEL PROYECTO";
   const listaAnexos = prelim.anexos?.items || [];
 
   // Verificamos si la sección actual está habilitada (si es opcional)
@@ -53,7 +52,7 @@ export const StructurePreview = ({ activeSection, metadata }) => {
       );
     }
 
-    // Mapeo de secciones a componentes reales
+    // Mapeo de secciones a componentes reales (AHORA TODOS TIENEN METADATA)
     switch (activeSection) {
       case "portada":
         return (
@@ -61,14 +60,22 @@ export const StructurePreview = ({ activeSection, metadata }) => {
             <Text size="xs" fw={700} ta="center">
               PORTADA (Pág. 1)
             </Text>
-            <TitlePagePreview isContraportada={false} data={metadata} />
+            <TitlePagePreview
+              isContraportada={false}
+              data={metadata}
+              metadata={metadata}
+            />
 
             <Divider label="Siguiente página" labelPosition="center" />
 
             <Text size="xs" fw={700} ta="center">
               CONTRAPORTADA (Pág. 2)
             </Text>
-            <TitlePagePreview isContraportada={true} data={metadata} />
+            <TitlePagePreview
+              isContraportada={true}
+              data={metadata}
+              metadata={metadata}
+            />
           </Stack>
         );
 
@@ -81,6 +88,7 @@ export const StructurePreview = ({ activeSection, metadata }) => {
             type="resumen"
             data={prelim.resumen}
             projectTitle={projectTitle}
+            metadata={metadata}
           />
         );
 
@@ -90,19 +98,29 @@ export const StructurePreview = ({ activeSection, metadata }) => {
             type="abstract"
             data={prelim.abstract}
             projectTitle={projectTitle}
+            metadata={metadata}
           />
         );
 
       case "referencias":
-        return <BibliographyPreview />;
+        return <BibliographyPreview metadata={metadata} />;
+
       case "introduccion":
         return (
-          <SimplePagePreview type="introduccion" data={prelim.introduccion} />
+          <SimplePagePreview
+            type="introduccion"
+            data={prelim.introduccion}
+            metadata={metadata}
+          />
         );
 
       case "dedicatoria":
         return (
-          <SimplePagePreview type="dedicatoria" data={prelim.dedicatoria} />
+          <SimplePagePreview
+            type="dedicatoria"
+            data={prelim.dedicatoria}
+            metadata={metadata}
+          />
         );
 
       case "agradecimientos":
@@ -110,14 +128,20 @@ export const StructurePreview = ({ activeSection, metadata }) => {
           <SimplePagePreview
             type="agradecimientos"
             data={prelim.agradecimientos}
+            metadata={metadata}
           />
         );
 
       case "glosario":
-        return <GlossaryPagePreview terms={prelim.glosario?.terms} />;
+        return (
+          <GlossaryPagePreview
+            terms={prelim.glosario?.terms}
+            metadata={metadata}
+          />
+        );
 
       case "toc":
-        return <TableOfContents />;
+        return <TableOfContents metadata={metadata} />;
 
       case "reglamento":
         return (
@@ -127,8 +151,10 @@ export const StructurePreview = ({ activeSection, metadata }) => {
               content:
                 "“Únicamente el graduando es responsable de las ideas expuestas en el presente trabajo”. (Lineamientos constitucionales, legales e institucionales que rigen la propiedad intelectual).",
             }}
+            metadata={metadata}
           />
         );
+
       case "anexos":
         return (
           <Stack gap="xl">
@@ -139,6 +165,7 @@ export const StructurePreview = ({ activeSection, metadata }) => {
                   content:
                     "[Aún no has agregado ningún anexo al listado dinámico.]",
                 }}
+                metadata={metadata}
               />
             ) : (
               <>
@@ -153,12 +180,12 @@ export const StructurePreview = ({ activeSection, metadata }) => {
                     fontSize: `${APA_CONFIG.typography.size}pt`,
                     boxShadow: "0 4px 10px rgba(0,0,0,0.1)",
                     display: "flex",
-                    alignItems: "center", // Centrado Vertical
-                    justifyContent: "center", // Centrado Horizontal
-                    fontWeight: "bold",
+                    alignItems: "center",
+                    justifyContent: "center",
                   }}
                 >
-                  <Text size="24pt" fw="bold">
+                  {/* CAMBIAMOS size="24pt" POR size="12pt" */}
+                  <Text size="12pt" fw="bold">
                     Anexos
                   </Text>
                 </Box>
@@ -171,7 +198,7 @@ export const StructurePreview = ({ activeSection, metadata }) => {
                       labelPosition="center"
                       color="gray.4"
                     />
-                    <AnnexPagePreview item={anexo} />
+                    <AnnexPagePreview item={anexo} metadata={metadata} />
                   </React.Fragment>
                 ))}
               </>

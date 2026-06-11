@@ -7,6 +7,7 @@ import { SimplePagePreview } from "@config/preview/SimplePagePreview";
 import { PrelimPagePreview } from "@config/preview/PrelimPagePreview";
 import { GlossaryPagePreview } from "@config/preview/GlossaryPagePreview";
 import { TableOfContents } from "@config/preview/TableOfContents";
+import { AnnexPagePreview } from "@config/preview/AnnexPagePreview";
 import { PageLayout } from "@config/preview/PageLayout/PageLayout";
 import { BibliographyPreview } from "@config/preview/BibliographyPreview";
 import { ConnectedBlock } from "@writer/canvas/ConnectedBlock";
@@ -151,6 +152,37 @@ export const DocumentExporter = () => {
         metadata={projectMetadata}
         pageNumber={globalPageCounter++}
       />
+      {/* --- 9. SECCIÓN DE ANEXOS (Renderizado Dinámico) --- */}
+      {preliminares?.anexos?.enabled &&
+        preliminares?.anexos?.items?.length > 0 && (
+          <>
+            {/* 9.1 PÁGINA SEPARADORA DE ANEXOS (Con layout real para el PDF) */}
+            <PageLayout metadata={projectMetadata}>
+              <div
+                style={{
+                  display: "flex",
+                  height: "100%",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <div style={{ fontSize: "12pt", fontWeight: "bold" }}>
+                  Anexos
+                </div>
+              </div>
+            </PageLayout>
+
+            {/* 9.2 MAPEO DE TODAS LAS PÁGINAS DE ANEXOS CREADAS */}
+            {preliminares.anexos.items.map((anexo, index) => (
+              <AnnexPagePreview
+                key={anexo.id || index}
+                item={anexo}
+                metadata={projectMetadata}
+                // Si tienes un docMap configurado, se pasará automáticamente aquí
+              />
+            ))}
+          </>
+        )}
     </div>
   );
 };

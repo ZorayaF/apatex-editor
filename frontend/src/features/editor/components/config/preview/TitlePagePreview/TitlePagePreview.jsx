@@ -21,11 +21,16 @@ export const TitlePagePreview = ({
   const anio = data?.anio || "2026";
 
   // Formateo de Directores (Nombre + Grado Académico)
-  const directorNombre = data?.director?.nombre;
-  const directorGrado = data?.director?.titulo;
-  const directorCompleto = directorNombre
-    ? `${directorGrado ? directorGrado + ". " : ""}${directorNombre}`
-    : "Nombre del director";
+  const directorRol = data?.director?.rol || "Director"; // Por defecto dice Director
+  const directorNombre =
+    data?.director?.nombre?.trim() || "Nombre del director";
+  const directorGrado =
+    data?.director?.titulo?.trim() || "Título (Ph.D., Mg., etc.)";
+
+  // LÓGICA DEL CODIRECTOR
+  const codirectorRol = data?.codirector?.rol || "Codirector";
+  const codirectorNombre = data?.codirector?.nombre?.trim();
+  const codirectorGrado = data?.codirector?.titulo?.trim();
 
   // Formateo de Autores (Mapeando saltos de línea de forma nativa)
   const listaAutores =
@@ -57,10 +62,24 @@ export const TitlePagePreview = ({
                 {data?.gradoObjetivo ||
                   "Título al que opta (Ej: Ingeniero de Sistemas)"}
               </p>
-
               <div className={classes.directorBox}>
-                <p className={classes.directorText}>Director:</p>
-                <p className={classes.directorText}>{directorCompleto}</p>
+                {/* BLOQUE DEL DIRECTOR */}
+                <div>
+                  <p className={classes.directorText}>{directorRol}:</p>
+                  <p className={classes.directorText}>{directorNombre}</p>
+                  <p className={classes.directorText}>{directorGrado}</p>
+                </div>
+
+                {/* BLOQUE DEL CODIRECTOR (Renderizado Condicional) */}
+                {codirectorNombre && (
+                  <div style={{ marginTop: "1.5rem" }}>
+                    <p className={classes.directorText}>{codirectorRol}:</p>
+                    <p className={classes.directorText}>{codirectorNombre}</p>
+                    {codirectorGrado && (
+                      <p className={classes.directorText}>{codirectorGrado}</p>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           )}

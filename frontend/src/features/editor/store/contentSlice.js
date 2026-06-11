@@ -122,6 +122,31 @@ export const createContentSlice = (set, get) => ({
     set((state) => ({
       blocks: state.blocks.map((b) => (b.id === id ? { ...b, ...updates } : b)),
     })),
+  // --- FUNCIÓN PARA ELIMINAR UN BLOQUE ---
+  removeBlock: (id) =>
+    set((state) => {
+      // 1. Filtramos el bloque del arreglo principal
+      const newBlocks = state.blocks.filter((b) => b.id !== id);
+
+      // 2. Limpiamos su ID de cualquier página que lo contenga
+      const newPages = state.pages.map((page) => ({
+        ...page,
+        blockIds: page.blockIds.filter((blockId) => blockId !== id),
+      }));
+
+      // 3. Verificamos si el bloque eliminado era el que estaba seleccionado actualmente
+      const wasSelected = state.selectedBlockId === id;
+
+      return {
+        blocks: newBlocks,
+        pages: newPages,
+        // Si borramos el bloque que estábamos mirando, deseleccionamos todo y cerramos el inspector
+        ...(wasSelected && {
+          selectedBlockId: null,
+          isInspectorOpen: false,
+        }),
+      };
+    }),
 
   // --- PAGINACIÓN ---
   moveToNextPage: (blockId) =>

@@ -50,16 +50,18 @@
 /* LÍNEA DE RELLENO CON PUNTOS (DOT LEADER) NATIVA */
 .dotLeader {
   flex-grow: 1;
-  border-bottom: 2px dotted var(--color-border-dashed);
+  /* 1. Volvemos al borde seguro, asegurando que sea negro (black) */
+  border-bottom: 2px dotted black;
 
-  /* CHANGE 2: Remove the fixed height */
-  /* height: 14px;  <- REMOVE THIS */
-
-  /* CHANGE 3: Push the border up slightly relative to the baseline */
-  position: relative;
-  top: -4px; /* Adjust this value (e.g., -3px to -6px) to perfect the vertical alignment */
-
+  /* 2. Un margen a los lados para que no choque con los números o las letras */
+  margin: 0 4px;
   min-width: 20px;
+
+  /* 3. El ajuste milimétrico */
+  /* Como tu fila usa 'baseline', esto moverá la línea hacia arriba o abajo 
+     independientemente de la altura de la caja vacía. */
+  position: relative;
+  top: 1px; /* Juega con este valor (-2px, -4px, -6px) hasta que quede al ras de las letras */
 }
 
 .tocPageNumber {

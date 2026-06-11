@@ -16,12 +16,13 @@ import {
   IconTableExport,
   IconLayoutRows,
   IconLayoutColumns,
+  IconPlaylistX, // <--- ¡AQUÍ ESTÁ EL ÍCONO QUE FALTABA!
 } from "@tabler/icons-react";
 import { useStore } from "@store";
 import { InspectorSection } from "@writer/inspector/InspectorSection";
 
 export const TableForm = ({ blockData }) => {
-  const { updateBlock } = useStore();
+  const { updateBlock, removeBlock } = useStore();
 
   const handleMetadataChange = (field, value) => {
     updateBlock(blockData.id, { [field]: value });
@@ -115,6 +116,19 @@ export const TableForm = ({ blockData }) => {
               </Group>
             </Stack>
           </Group>
+
+          <Divider mt="md" mb="xs" />
+
+          {/* EL BOTÓN DESTRUCTOR CORREGIDO */}
+          <Button
+            variant="light"
+            color="red"
+            fullWidth
+            leftSection={<IconPlaylistX size={18} />}
+            onClick={() => removeBlock(blockData.id)}
+          >
+            Eliminar Tabla del Documento
+          </Button>
         </Stack>
       </InspectorSection>
 
