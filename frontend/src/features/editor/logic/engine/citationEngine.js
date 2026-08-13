@@ -21,24 +21,19 @@ const formatAuthorsAPA = (authorField) => {
 export const parseCitations = (content, sources) => {
   if (!content) return "";
 
-  // LA MAGIA: Nueva Expresión Regular que captura ID, Tipo y Página
   const regex = /\(\(ref:([\w-]+)\|type:(\w+)\|page:(.*?)\)\)/g;
 
   return content.replace(regex, (match, id, type, page) => {
-    // Buscamos la fuente en la base de datos de Zustand
     const source = sources?.find((s) => s.id === id);
 
-    // Si por alguna razón la fuente fue borrada, mostramos una alerta visual
     if (!source) {
       return `<span class="citationBadge" contenteditable="false" style="color: red;">[Fuente no encontrada]</span>`;
     }
 
-    // Extraemos los datos base
     const authorStr = source.author || "Anónimo";
     const year = source.year || "s.f.";
     const pageText = page ? `, p. ${page}` : "";
 
-    // Lógica APA básica para "Et al." (Si detecta comas o 'y', asume múltiples autores)
     const firstAuthor = authorStr.split(/,| y | & /)[0].trim();
     const isMultiple =
       authorStr.includes(",") ||
@@ -46,7 +41,6 @@ export const parseCitations = (content, sources) => {
       authorStr.includes(" & ");
     const displayAuthor = isMultiple ? `${firstAuthor} et al.` : firstAuthor;
 
-    // Armamos el texto visual según el tipo de cita
     let label = "";
     if (type === "narrative") {
       label = `${displayAuthor} (${year}${pageText})`;
@@ -54,14 +48,12 @@ export const parseCitations = (content, sources) => {
       label = `(${displayAuthor}, ${year}${pageText})`;
     }
 
-    // Retornamos la pastilla en formato HTML para que useBlockSync la inyecte.
-    // IMPORTANTE: contenteditable="false" evita que el usuario rompa el bloque al borrar
-    return `<a 
-      href="#ref-${id}" 
+    // CAMBIO AQUÍ: Cambiamos <a> por <span> y removemos href
+    return `<span 
       class="citationBadge" 
       contenteditable="false" 
       data-ref-id="${id}" 
-      style="user-select: all; text-decoration: none; color: inherit; cursor: pointer;"
-    >${label}</a>`;
+      style="user-select: all; text-decoration: none; color: inherit; cursor: default;"
+    >${label}</span>`;
   });
 };
