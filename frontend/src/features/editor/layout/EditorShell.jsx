@@ -21,8 +21,8 @@ import {
   IconFolderOpen,
 } from "@tabler/icons-react";
 
-import { useStore } from "@store";
-import { Inspector } from "@writer/inspector";
+import { useStore } from "../store";
+import { Inspector } from "@writer/inspector/index.jsx";
 import { DocumentMap } from "@writer/navbar/DocumentMap";
 import "@editor/styles/editor.css";
 

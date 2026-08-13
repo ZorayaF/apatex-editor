@@ -16,16 +16,23 @@ function createWindow() {
     },
   });
 
-  // Determinar si estamos en modo desarrollo (Vite) o producción (Build)
   const isDev = !app.isPackaged;
 
   if (isDev) {
-    // Desarrollo: Carga el servidor local de Vite
-    mainWindow.loadURL("http://localhost:5173");
-    // Opcional: Abrir las herramientas de desarrollador automáticamente
-    // mainWindow.webContents.openDevTools();
+    // Abrir DevTools automáticamente para diagnosticar
+    mainWindow.webContents.openDevTools();
+
+    // Si pasamos la variable NODE_ENV=production O si queremos probar el build compilado
+    if (process.env.TEST_BUILD === "true") {
+      mainWindow.loadFile(path.join(__dirname, "dist/index.html"));
+    } else {
+      mainWindow.loadURL("http://localhost:5173").catch(() => {
+        // Si el dev server no responde, cargar la carpeta dist/
+        mainWindow.loadFile(path.join(__dirname, "dist/index.html"));
+      });
+    }
   } else {
-    // Producción: Carga el archivo HTML compilado
+    // Producción real (instalador .exe/.AppImage)
     mainWindow.loadFile(path.join(__dirname, "dist/index.html"));
   }
 }

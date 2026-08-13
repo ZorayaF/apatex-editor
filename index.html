@@ -1,13 +1,14 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="es">
   <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>APATEX - UniBoyacá</title>
   </head>
-  <body style="background: #f0f0f0; font-family: sans-serif; text-align: center;">
-    <h1>Editor Inteligente APA</h1>
-    <p>Si ves esto, el entorno <b>WSL2 + Electron</b> funciona perfectamente.</p>
-    <hr>
-    <small>Universidad de Boyacá - Ingeniería de Software</small>
+  <body>
+    <div id="root"></div>
+
+    <!-- Apunta a donde esté tu main.jsx / index.jsx dentro de frontend -->
+    <script type="module" src="./frontend/src/main.jsx"></script>
   </body>
 </html>

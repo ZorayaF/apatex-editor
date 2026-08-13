@@ -64,10 +64,11 @@ export const BibliographyPreview = ({ metadata, pageNumber }) => {
           {sortedSources.map((source) => (
             <p
               key={source.id}
+              id={`ref-${source.id}`} // <--- ESTA ES LA ETIQUETA DE DESTINO
               className={classes.bodyText}
               style={{
                 paddingLeft: "1.27cm",
-                textIndent: "-1.27cm", // SANGRÍA FRANCESA (Hanging Indent)
+                textIndent: "-1.27cm",
                 margin: 0,
               }}
             >

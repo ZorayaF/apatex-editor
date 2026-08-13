@@ -1,0 +1,18 @@
+{
+	"nodes":[
+		{"id":"3552244ef759b474","type":"text","text":"# **[[Navbar]]**","x":-180,"y":-340,"width":1062,"height":60,"color":"6"},
+		{"id":"a9976e5cab3af261","type":"text","text":"## Configurar","x":-180,"y":-240,"width":393,"height":60,"color":"3"},
+		{"id":"a8dcf65fbadaebfa","type":"text","text":"[[1_Sidebar_Preliminares|Menú lateral]]","x":-180,"y":-160,"width":101,"height":148,"color":"3"},
+		{"id":"06bcd0e5250f6532","type":"text","text":"[[2_Centro_Formularios|Formularios]]","x":-59,"y":-160,"width":148,"height":148,"color":"3"},
+		{"id":"1f244c69643899b3","type":"text","text":"[[3_Derecha_Preview|Vista previa]]","x":109,"y":-160,"width":104,"height":148,"color":"3"},
+		{"id":"30251fba926d4571","type":"text","text":"## Redactar","x":240,"y":-240,"width":440,"height":60,"color":"2"},
+		{"id":"e6bcd118d019e6a7","type":"text","text":"[[2_Sidebar_Navegacion|Sidebar]]\n","x":242,"y":-86,"width":125,"height":74,"color":"2"},
+		{"id":"b658e0b9a3a0afa9","type":"text","text":"[[3_Centro_Paginas|Páginas]]","x":387,"y":-86,"width":125,"height":74,"color":"2"},
+		{"id":"917a9b3548ca8f9b","type":"text","text":"[[4_Derecha_Herramientas|Panel de herramientas]]","x":532,"y":-86,"width":148,"height":74,"color":"2"},
+		{"id":"cbc2d63800eb918e","type":"text","text":"## Exportar","x":720,"y":-240,"width":162,"height":60,"color":"4"},
+		{"id":"5d74690694e45f06","type":"text","text":"[[1_Barra_Bloques|Barra de bloques]]\n","x":242,"y":-160,"width":438,"height":60,"color":"2"},
+		{"id":"f134d5a21937a947","x":720,"y":-160,"width":162,"height":60,"color":"4","type":"text","text":"[[1_Top_Acciones|Acciones]]"},
+		{"id":"29062651e991960d","x":720,"y":-86,"width":162,"height":74,"color":"4","type":"text","text":"[[2_Centro_RenderFinal|Vista final]]"}
+	],
+	"edges":[]
+}

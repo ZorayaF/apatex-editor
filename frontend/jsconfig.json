@@ -2,15 +2,30 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@core/*": ["src/core/*"],
-      "@store/*": ["src/features/editor/store/*"], 
-      "@hooks/*": ["src/hooks/*"],
-      "@features/*": ["src/features/*"],
-      "@shared/*": ["src/shared/*"],
-      "@pages/*": ["src/pages/*"],
-      "@editor/*": ["src/features/editor/*"]
-    },
-    "jsx": "react-jsx"
+      "@core": ["frontend/src/core"],
+      "@core/*": ["frontend/src/core/*"],
+
+      "@editor": ["frontend/src/features/editor"],
+      "@editor/*": ["frontend/src/features/editor/*"],
+
+      "@store": ["frontend/src/features/editor/store"],
+      "@store/*": ["frontend/src/features/editor/store/*"],
+
+      "@hooks": ["frontend/src/features/editor/hooks"],
+      "@hooks/*": ["frontend/src/features/editor/hooks/*"],
+
+      "@config": ["frontend/src/features/editor/components/config"],
+      "@config/*": ["frontend/src/features/editor/components/config/*"],
+
+      "@writer": ["frontend/src/features/editor/components/writer"],
+      "@writer/*": ["frontend/src/features/editor/components/writer/*"],
+
+      "@logic": ["frontend/src/features/editor/logic"],
+      "@logic/*": ["frontend/src/features/editor/logic/*"],
+
+      "@pages": ["frontend/src/pages"],
+      "@pages/*": ["frontend/src/pages/*"]
+    }
   },
-  "exclude": ["node_modules", "dist"]
+  "exclude": ["node_modules", "dist", "release"]
 }

@@ -1,5 +1,7 @@
+// En frontend/src/pages/EditorPage.jsx
 import React from "react";
-import { EditorShell } from "@editor/layout/EditorShell";
+// Agrega las llaves { } alrededor de EditorShell:
+import { EditorShell } from "../features/editor/layout/EditorShell";
 
 const EditorPage = () => {
   return <EditorShell />;

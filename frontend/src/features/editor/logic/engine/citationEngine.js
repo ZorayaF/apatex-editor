@@ -56,6 +56,12 @@ export const parseCitations = (content, sources) => {
 
     // Retornamos la pastilla en formato HTML para que useBlockSync la inyecte.
     // IMPORTANTE: contenteditable="false" evita que el usuario rompa el bloque al borrar
-    return `<span class="citationBadge" contenteditable="false" data-ref-id="${id}" style="user-select: all;">${label}</span>`;
+    return `<a 
+      href="#ref-${id}" 
+      class="citationBadge" 
+      contenteditable="false" 
+      data-ref-id="${id}" 
+      style="user-select: all; text-decoration: none; color: inherit; cursor: pointer;"
+    >${label}</a>`;
   });
 };

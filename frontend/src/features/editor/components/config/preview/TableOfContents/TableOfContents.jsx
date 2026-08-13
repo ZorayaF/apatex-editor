@@ -6,7 +6,7 @@ import classes from "./TableOfContents.module.css";
 
 // 1. RECIBIMOS startPage DESDE EL EXPORTADOR
 export const TableOfContents = ({ startPage }) => {
-  // 1. AÑADIMOS 'sources' PARA SABER SI HAY REFERENCIAS CREADAS
+  // AÑADIMOS 'sources' PARA SABER SI HAY REFERENCIAS CREADAS
   const { blocks, pages, projectMetadata, sources } = useStore();
 
   const allLists = generateAllLists(blocks, pages, projectMetadata);
@@ -18,7 +18,7 @@ export const TableOfContents = ({ startPage }) => {
     return "0px";
   };
 
-  // 2. LÓGICA INTELIGENTE EN CASCADA:
+  // LÓGICA INTELIGENTE EN CASCADA:
   let currentExportPage = startPage;
   const docIndices = projectMetadata?._docMap?.indices || {};
 
@@ -35,20 +35,28 @@ export const TableOfContents = ({ startPage }) => {
       : docIndices.anexos || "viii",
   };
 
-  // Sub-componente interno atómico para renderizar las filas con relleno de puntos nativo
-  const ListRow = ({ text, page, level }) => (
-    <div
+  // Sub-componente interno atómico para renderizar las filas
+  const ListRow = ({ text, page, level, blockId }) => (
+    <a
+      href={blockId ? `#${blockId}` : undefined}
       className={classes.tocRow}
-      style={{ paddingLeft: getIndentPixels(level) }}
+      style={{
+        paddingLeft: getIndentPixels(level),
+        textDecoration: "none",
+        color: "inherit",
+        cursor: blockId ? "pointer" : "default",
+        display: "flex",
+      }}
     >
       <p className={classes.tocText}>{text}</p>
       <div className={classes.dotLeader} />
       <p className={classes.tocPageNumber}>{page}</p>
-    </div>
+    </a>
   );
 
   return (
-    <Stack gap="xl">
+    // CAMBIO 1: Reemplazamos <Stack gap="xl"> por un Fragmento <></>
+    <>
       {/* 📜 ÍNDICE 1: CONTENIDO GENERAL (SIEMPRE VISIBLE) */}
       <div id="toc-sheet-contenido">
         <PageLayout metadata={projectMetadata} pageNumber={tocPages.contenido}>
@@ -58,36 +66,33 @@ export const TableOfContents = ({ startPage }) => {
           </div>
 
           <Stack gap="xs" style={{ flex: 1 }}>
-            {/* Títulos del cuerpo del documento */}
             {allLists.contenido.map((entry, index) => (
               <ListRow
                 key={index}
                 text={entry.text}
                 page={entry.page}
                 level={entry.level}
+                blockId={entry.id}
               />
             ))}
 
-            {/* 2. INYECCIÓN MANUAL DE REFERENCIAS AL FINAL DEL CONTENIDO */}
             {sources && sources.length > 0 && (
               <ListRow
                 text="Referencias"
                 page={projectMetadata?._docMap?.referencias || "10"}
-                level="h1" // Pasamos "h1" para que getIndentPixels devuelva "0px"
+                level="h1"
               />
             )}
 
-            {/* 3. INYECCIÓN MANUAL DE LA PÁGINA SEPARADORA DE ANEXOS */}
             {projectMetadata?.preliminares?.anexos?.enabled &&
               projectMetadata?.preliminares?.anexos?.items?.length > 0 && (
                 <ListRow
                   text="Anexos"
                   page={projectMetadata?._docMap?.anexos_separador || "12"}
-                  level="h1" // Pasamos "h1" para alinear al margen izquierdo
+                  level="h1"
                 />
               )}
 
-            {/* Actualizamos la regla del mensaje vacío para que considere las fuentes */}
             {allLists.contenido.length === 0 &&
               (!sources || sources.length === 0) && (
                 <p className={classes.emptyNotice}>
@@ -102,11 +107,11 @@ export const TableOfContents = ({ startPage }) => {
       {/* 📊 ÍNDICE 2: LISTA DE TABLAS (CONDICIONAL) */}
       {allLists.tablas.length > 0 && (
         <div id="toc-sheet-tablas">
+          {/* CAMBIO 2: Eliminamos mb="xl" para no empujar la página en la impresión */}
           <Divider
             label="Salto de página hacia Lista de Tablas"
             labelPosition="center"
             color="gray.4"
-            mb="xl"
             className="no-print"
           />
           <PageLayout metadata={projectMetadata} pageNumber={tocPages.tablas}>
@@ -135,7 +140,6 @@ export const TableOfContents = ({ startPage }) => {
             label="Salto de página hacia Lista de Figuras"
             labelPosition="center"
             color="gray.4"
-            mb="xl"
             className="no-print"
           />
           <PageLayout metadata={projectMetadata} pageNumber={tocPages.figuras}>
@@ -164,7 +168,6 @@ export const TableOfContents = ({ startPage }) => {
             label="Salto de página hacia Lista de Anexos"
             labelPosition="center"
             color="gray.4"
-            mb="xl"
             className="no-print"
           />
           <PageLayout metadata={projectMetadata} pageNumber={tocPages.anexos}>
@@ -185,6 +188,6 @@ export const TableOfContents = ({ startPage }) => {
           </PageLayout>
         </div>
       )}
-    </Stack>
+    </>
   );
 };

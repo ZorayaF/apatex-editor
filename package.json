@@ -4,9 +4,32 @@
   "description": "Validador APA Universidad de Boyacá",
   "main": "main.js",
   "scripts": {
-    "start": "electron ."
+    "dev": "npm --prefix frontend run dev",
+    "build": "vite build frontend --outDir ../dist",
+    "start": "electron .",
+    "dist": "npm run build && electron-builder --win"
+  },
+  "build": {
+    "appId": "com.uniboyaca.apatex",
+    "productName": "Validador APA - Universidad de Boyaca",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "main.js",
+      "preload.js"
+    ],
+    "win": {
+      "target": [
+        "nsis"
+      ],
+      "icon": "assets/icon.ico"
+    }
   },
   "devDependencies": {
-    "electron": "^31.0.0"
+    "electron": "^31.0.0",
+    "electron-builder": "^26.15.3",
+    "vite": "^7.2.4"
   }
 }

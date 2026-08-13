@@ -12,6 +12,15 @@ import {
 import { useStore } from "@store";
 import { HeaderButton } from "../HeaderButton";
 
+// Mapa estático de íconos para evitar el uso de eval()
+const HEADING_ICONS = {
+  1: IconH1,
+  2: IconH2,
+  3: IconH3,
+  4: IconH4,
+  5: IconH5,
+};
+
 export const FormattingGroup = () => {
   const { addBlock, selectedBlockId, blocks } = useStore();
   const activeBlock = blocks.find((b) => b.id === selectedBlockId);
@@ -24,7 +33,7 @@ export const FormattingGroup = () => {
           key={level}
           label={`H${level}`}
           description={`Título nivel ${level}`}
-          icon={eval(`IconH${level}`)}
+          icon={HEADING_ICONS[level]} // <-- Usamos el mapa en lugar de eval
           onClick={() => addBlock(`h${level}`)}
           isActive={activeType === `h${level}`}
         />
