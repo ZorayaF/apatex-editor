@@ -1,58 +1,31 @@
+// src/features/editor/layout/EditorShell.jsx
 import React, { useState } from "react";
+import { AppShell, Group, Box, Tabs, Text, Button } from "@mantine/core";
+import { notifications } from "@mantine/notifications";
 import {
-  AppShell,
-  ActionIcon,
-  Group,
-  Box,
-  Tabs,
-  Text,
-  Button,
-} from "@mantine/core";
-import { notifications } from "@mantine/notifications"; // Importante para los avisos
-import {
-  IconLayoutSidebarRightCollapse,
-  IconLayoutSidebarRightExpand,
-  IconLayoutSidebarLeftCollapse,
-  IconLayoutSidebarLeftExpand,
   IconEdit,
   IconLayoutBoard,
   IconDownload,
-  IconDeviceFloppy, // Ícono de guardado
+  IconDeviceFloppy,
   IconFolderOpen,
 } from "@tabler/icons-react";
 
 import { useStore } from "../store";
-import { Inspector } from "@writer/inspector/index.jsx";
-import { DocumentMap } from "@writer/navbar/DocumentMap";
 import "@editor/styles/editor.css";
 
-// VISTAS PRINCIPALES
 import { ConfigurationView } from "@editor/views/ConfigurationView";
 import { WritingView } from "@editor/views/WritingView";
 import { ExportView } from "@editor/views/ExportView";
 
 export const EditorShell = () => {
   const [activeTab, setActiveTab] = useState("configurar");
-  const [isSaving, setIsSaving] = useState(false); // Estado de carga del guardado
-
+  const [isSaving, setIsSaving] = useState(false);
   const [loadKey, setLoadKey] = useState(0);
-  const {
-    isNavbarOpen,
-    setNavbarOpen,
-    isInspectorOpen,
-    setInspectorOpen,
-    currentFilePath,
-    setCurrentFilePath,
-  } = useStore();
 
-  const isWritingMode = activeTab === "redaccion";
-
-  // --- LÓGICA DE GUARDADO GLOBAL ---
   const handleSaveProject = async (isSaveAs = false) => {
     setIsSaving(true);
     const currentState = useStore.getState();
 
-    // Empaquetamos los datos Y las instrucciones de guardado
     const payload = {
       projectData: {
         blocks: currentState.blocks,
@@ -60,32 +33,35 @@ export const EditorShell = () => {
         projectMetadata: currentState.projectMetadata,
         sources: currentState.sources,
       },
-      filePath: currentState.currentFilePath, // Si es null, Electron pedirá la ruta
-      isSaveAs: isSaveAs, // Si es true, Electron forzará la ventana de diálogo
+      filePath: currentState.currentFilePath,
+      isSaveAs: isSaveAs,
     };
 
     if (window.electronAPI) {
       const response = await window.electronAPI.saveProject(payload);
 
       if (response.success) {
-        // Actualizamos el store con la ruta (por si era un archivo nuevo)
         useStore.setState({ currentFilePath: response.filePath });
         notifications.show({
-          title: "Guardado",
-          message: "Progreso asegurado.",
-          color: "green",
+          id: "save-success",
+          message: "Documento guardado correctamente",
+          color: "teal",
+          autoClose: 1800,
+          withCloseButton: false,
         });
       } else if (response.error) {
         notifications.show({
-          title: "Error",
+          id: "save-error",
           message: response.error,
           color: "red",
+          autoClose: 3500,
+          withCloseButton: false,
         });
       }
     }
     setIsSaving(false);
   };
-  // --- LÓGICA DE APERTURA GLOBAL ---
+
   const handleOpenProject = async () => {
     if (window.electronAPI) {
       const response = await window.electronAPI.openProject();
@@ -102,68 +78,28 @@ export const EditorShell = () => {
           currentFilePath: response.filePath,
         });
 
-        // 2. NUEVO: Cambiamos la llave para obligar a React a repintar todo
         setLoadKey((prev) => prev + 1);
 
         notifications.show({
-          title: "Proyecto Cargado",
-          message: "Tu documento se ha cargado con éxito.",
+          id: "open-success",
+          message: "Proyecto cargado con éxito",
           color: "blue",
-          icon: <IconFolderOpen size={16} />,
-        });
-      } else if (response.error) {
-        notifications.show({
-          title: "Error al abrir",
-          message: response.error,
-          color: "red",
+          autoClose: 1800,
+          withCloseButton: false,
         });
       }
-    } else {
-      notifications.show({
-        title: "Modo Web",
-        message: "La carga de archivos nativos solo funciona en escritorio.",
-        color: "orange",
-      });
     }
   };
 
   return (
-    <AppShell
-      header={{ height: 60 }}
-      navbar={{
-        width: 260,
-        breakpoint: "sm",
-        collapsed: { desktop: !isNavbarOpen || !isWritingMode },
-      }}
-      aside={{
-        width: 300,
-        breakpoint: "md",
-        collapsed: { desktop: !isInspectorOpen || !isWritingMode },
-      }}
-    >
-      <AppShell.Header px="md">
+    <AppShell header={{ height: 60 }} padding={0}>
+      {/* 1. HEADER GLOBAL (100% fijo de borde a borde) */}
+      <AppShell.Header px="md" style={{ width: "100%" }}>
         <Group h="100%" justify="space-between">
-          {/* LADO IZQUIERDO: Logo y Toggle del Navbar */}
-          <Group gap="xs">
-            {isWritingMode && (
-              <ActionIcon
-                variant="subtle"
-                color="gray"
-                onClick={() => setNavbarOpen(!isNavbarOpen)}
-              >
-                {isNavbarOpen ? (
-                  <IconLayoutSidebarLeftCollapse size={20} />
-                ) : (
-                  <IconLayoutSidebarLeftExpand size={20} />
-                )}
-              </ActionIcon>
-            )}
-            <Text fw={900} size="xl" c="blue" style={{ letterSpacing: "-1px" }}>
-              APATEX
-            </Text>
-          </Group>
+          <Text fw={900} size="xl" c="blue" style={{ letterSpacing: "-1px" }}>
+            APATEX
+          </Text>
 
-          {/* CENTRO: Navegación de Pestañas */}
           <Tabs
             value={activeTab}
             onChange={setActiveTab}
@@ -190,9 +126,7 @@ export const EditorShell = () => {
             </Tabs.List>
           </Tabs>
 
-          {/* LADO DERECHO: Botón Guardar y Toggle del Inspector */}
           <Group gap="xs">
-            {/* NUEVO: Botón de Abrir */}
             <Button
               size="xs"
               variant="subtle"
@@ -202,8 +136,6 @@ export const EditorShell = () => {
             >
               Abrir
             </Button>
-
-            {/* GUARDAR NORMAL (Ctrl+S) */}
             <Button
               size="xs"
               variant="light"
@@ -214,8 +146,6 @@ export const EditorShell = () => {
             >
               Guardar
             </Button>
-
-            {/* GUARDAR COMO (Duplicar) */}
             <Button
               size="xs"
               variant="subtle"
@@ -225,34 +155,26 @@ export const EditorShell = () => {
             >
               Guardar como...
             </Button>
-
-            {isWritingMode && (
-              <ActionIcon
-                variant="subtle"
-                color="gray"
-                onClick={() => setInspectorOpen(!isInspectorOpen)}
-              >
-                {isInspectorOpen ? (
-                  <IconLayoutSidebarRightCollapse size={20} />
-                ) : (
-                  <IconLayoutSidebarRightExpand size={20} />
-                )}
-              </ActionIcon>
-            )}
           </Group>
         </Group>
       </AppShell.Header>
 
-      <AppShell.Navbar p="0">
-        <DocumentMap />
-      </AppShell.Navbar>
-
-      <AppShell.Main bg="gray.1">
+      {/* 2. CONTENIDO PRINCIPAL */}
+      <AppShell.Main
+        bg="gray.1"
+        style={{
+          height: "100vh",
+          display: "flex",
+          flexDirection: "column",
+          overflow: "hidden",
+        }}
+      >
         <Box
-          // 3. NUEVO: React destruirá este Box y su contenido cada vez que el loadKey cambie
           key={loadKey}
           style={{
-            height: "calc(100vh - 60px)",
+            flex: 1,
+            width: "100%",
+            height: "100%",
             overflow: "hidden",
             display: "flex",
             flexDirection: "column",
@@ -263,10 +185,6 @@ export const EditorShell = () => {
           {activeTab === "exportar" && <ExportView />}
         </Box>
       </AppShell.Main>
-
-      <AppShell.Aside>
-        <Inspector />
-      </AppShell.Aside>
     </AppShell>
   );
 };

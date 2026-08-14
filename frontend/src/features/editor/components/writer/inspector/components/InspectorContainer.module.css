@@ -2,34 +2,46 @@
   display: flex;
   flex-direction: column;
   height: 100%;
+  width: 100%;
   min-height: 0;
   overflow: hidden;
+  box-sizing: border-box;
 }
 
 .header {
   flex-shrink: 0;
+  width: 100%;
   padding-bottom: var(--mantine-spacing-xs);
 }
 
 .scrollBody {
   flex: 1;
+  width: 100%;
   min-height: 0;
+  min-width: 0;
 }
 
-.formContent {
+.scrollBody :global(.mantine-ScrollArea-viewport) {
+  overflow-x: hidden !important;
+}
+
+.content {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
   padding-top: var(--mantine-spacing-xs);
   padding-bottom: var(--mantine-spacing-md);
   padding-right: var(--mantine-spacing-xs);
+  padding-left: 2px;
 }
 
+/* Pie 100% fijo al fondo del panel lateral */
 .footer {
   flex-shrink: 0;
+  width: 100%;
   padding-top: var(--mantine-spacing-xs);
-  margin-top: var(--mantine-spacing-xs);
+  margin-top: auto;
   border-top: 1px solid var(--mantine-color-gray-3);
   background-color: var(--mantine-color-body);
-}
-
-.syncFeedback {
-  opacity: 0.75;
+  z-index: 10;
 }

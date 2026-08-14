@@ -1,36 +1,35 @@
-import { useMemo } from "react";
+// src/features/editor/components/writer/canvas/Canvas/Canvas.jsx
+import React, { useMemo } from "react";
 import { useStore } from "@store";
 import { useShallow } from "zustand/react/shallow";
-import { Text } from "@mantine/core";
+import { Text, Box } from "@mantine/core";
 import { Page } from "../Page";
-import { calculateDocumentMap } from "@logic/engine/documentLayoutEngine"; // NUEVO: Importamos el motor aquí
+import { calculateDocumentMap } from "@logic/engine/documentLayoutEngine";
 import classes from "./Canvas.module.css";
 
 export const Canvas = () => {
-  // 1. Añadimos projectMetadata al shallow para evitar re-renders innecesarios
-  const { pages, blocks, focusedChapterId, projectMetadata } = useStore(
+  const { pages, blocks, focusedChapterId, projectMetadata, zoom } = useStore(
     useShallow((s) => ({
       pages: s.pages,
       blocks: s.blocks,
       focusedChapterId: s.focusedChapterId,
       projectMetadata: s.projectMetadata,
+      zoom: s.zoom || 1.0,
     })),
   );
 
-  // 2. CALCULAMOS ESTO UNA SOLA VEZ PARA TODO EL DOCUMENTO (Elimina el lag)
   const docMap = useMemo(
     () => calculateDocumentMap(projectMetadata),
     [projectMetadata],
   );
 
-  // 3. UNIFICAMOS EL LÍMITE DEL TÍTULO AQUÍ
   const runningTitle =
     projectMetadata?.tituloAbreviado ||
     projectMetadata?.tituloProyecto?.substring(0, 50).toUpperCase() ||
     "TÍTULO DEL PROYECTO";
 
+  // Lógica de Modo Enfoque (Oculta los demás capítulos)
   const focusData = useMemo(() => {
-    // ... (Tu lógica de orderedIds y allowedSet se mantiene exactamente igual) ...
     const orderedIds = pages.flatMap((p) => p.blockIds);
 
     if (!focusedChapterId)
@@ -60,7 +59,14 @@ export const Canvas = () => {
   }, [pages, blocks, focusedChapterId]);
 
   return (
-    <div className={classes.canvasViewport}>
+    <div
+      className={classes.canvasViewport}
+      style={{
+        transform: `scale(${zoom})`,
+        transformOrigin: "top center",
+        transition: "transform 0.12s ease-out",
+      }}
+    >
       {focusData.pageIds.map((id) => {
         const originalIndex = pages.findIndex((p) => p.id === id);
         return (
@@ -69,7 +75,6 @@ export const Canvas = () => {
             pageId={id}
             pageNumber={originalIndex + 1}
             allowedBlockIds={focusData.allowedIds}
-            // 4. PASAMOS LOS DATOS YA CALCULADOS COMO PROPS LIGERAS
             editorStartPage={docMap.editorStartPage}
             runningTitle={runningTitle}
           />
@@ -78,8 +83,7 @@ export const Canvas = () => {
 
       {focusedChapterId && (
         <Text size="xs" c="dimmed" mt="xl" className={classes.focusIndicator}>
-          Modo Enfoque: Mostrando únicamente el contenido del capítulo
-          seleccionado.
+          Modo Enfoque activo: Viendo únicamente el capítulo seleccionado.
         </Text>
       )}
     </div>

@@ -12,7 +12,14 @@ import EditorPage from "./pages/EditorPage";
 const App = () => {
   return (
     <MantineProvider defaultColorScheme="light">
-      <Notifications position="top-right" zIndex={1000} />
+      {/* Notificaciones compactas: abajo a la derecha, sin apilarse y de cierre rápido */}
+      <Notifications
+        position="bottom-left"
+        zIndex={1000}
+        autoClose={1800}
+        limit={1}
+        containerWidth={300}
+      />
       <Router>
         <Routes>
           <Route path="/" element={<HomePage />} />

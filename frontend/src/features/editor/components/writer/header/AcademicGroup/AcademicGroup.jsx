@@ -10,45 +10,33 @@ export const AcademicGroup = () => {
     addAndEditSource,
     setActiveTab,
     setInspectorOpen,
-    isInspectorOpen, // o inspectorOpen según cómo lo tengas en el store
     activeTab,
     selectedSourceId,
     setSelectedSourceId,
+    setSelectedBlockId,
   } = useStore();
 
   // 1. Estados activos calculados
-  // "Citar" está activo si el panel está abierto, en la pestaña "library" y viendo la lista (no editando)
-  const isCitarActive =
-    isInspectorOpen && activeTab === "library" && !selectedSourceId;
+  // "Citar" está activo si estamos en la biblioteca viendo la lista
+  const isCitarActive = activeTab === "library" && !selectedSourceId;
 
-  // "Nueva Fuente" está activo si el panel está abierto, en "library" y creando/editando una fuente
-  const isNuevaFuenteActive =
-    isInspectorOpen && activeTab === "library" && !!selectedSourceId;
+  // "Nueva Fuente" está activo si estamos editando o creando una fuente
+  const isNuevaFuenteActive = activeTab === "library" && !!selectedSourceId;
 
-  // 2. Manejo de "Nueva Fuente" con Toggle
+  // 2. "Nueva Fuente": siempre crea/abre el formulario sin cerrar el panel
   const handleAddReference = () => {
-    if (isNuevaFuenteActive) {
-      // Si ya está abierto el formulario, el clic lo cierra
-      setInspectorOpen(false);
-      setSelectedSourceId(null);
-    } else {
-      addAndEditSource("articulo");
-      setActiveTab("library");
-      setInspectorOpen(true);
-    }
+    setSelectedBlockId(null); // Deselecciona tablas/figuras activas
+    addAndEditSource("articulo");
+    setActiveTab("library");
+    setInspectorOpen(true);
   };
 
-  // 3. Manejo de "Citar" con Toggle y Reset de vista
+  // 3. "Citar": siempre lleva a la lista limpia de fuentes
   const handleOpenLibrary = () => {
-    if (isCitarActive) {
-      // Si ya está abierta la lista de fuentes, el clic lo cierra
-      setInspectorOpen(false);
-    } else {
-      // Si estaba editando una fuente o en otra pestaña, lo lleva a la lista limpia
-      setSelectedSourceId(null);
-      setActiveTab("library");
-      setInspectorOpen(true);
-    }
+    setSelectedBlockId(null); // Deselecciona tablas/figuras activas
+    setSelectedSourceId(null); // Vuelve a la lista de fuentes
+    setActiveTab("library");
+    setInspectorOpen(true);
   };
 
   return (

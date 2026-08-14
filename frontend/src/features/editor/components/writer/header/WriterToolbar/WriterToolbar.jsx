@@ -1,25 +1,43 @@
-// src/features/editor/components/writer/header/WriterToolbar.jsx
+// src/features/editor/components/writer/header/WriterToolbar/WriterToolbar.jsx
 import React from "react";
-import { Group, Divider, Box } from "@mantine/core";
-// Ajusta estas rutas según tus nuevos aliases
+import { Group, Divider } from "@mantine/core";
 import { FormattingGroup } from "../FormattingGroup";
 import { ObjectGroup } from "../ObjectGroup";
 import { AcademicGroup } from "../AcademicGroup";
+import {
+  LeftPanelToggle,
+  RightPanelToggle,
+  ZoomControl,
+} from "../LayoutGroup/LayoutGroup";
 
 export const WriterToolbar = () => {
   return (
-    <Group h="100%" align="center" gap="lg" justify="center" w="100%">
-      <Box>
+    <Group
+      justify="space-between"
+      px="md"
+      wrap="nowrap"
+      style={{ width: "100%", boxSizing: "border-box" }}
+    >
+      {/* 1. EXTREMO IZQUIERDO: Encima del panel de Índice */}
+      <Group gap="xs" wrap="nowrap">
+        <LeftPanelToggle />
+      </Group>
+
+      {/* 2. CENTRO: Herramientas de edición y Zoom */}
+      <Group gap="xs" wrap="nowrap">
         <FormattingGroup />
-      </Box>
-      <Divider orientation="vertical" h={24} my="auto" color="gray.3" />
-      <Box>
+        <Divider orientation="vertical" />
         <ObjectGroup />
-      </Box>
-      <Divider orientation="vertical" h={24} my="auto" color="gray.3" />
-      <Box>
+        <Divider orientation="vertical" />
         <AcademicGroup />
-      </Box>
+        <Divider orientation="vertical" />
+        <ZoomControl />
+      </Group>
+
+      {/* 3. EXTREMO DERECHO: Encima del panel de Herramientas */}
+      <Group gap="xs" wrap="nowrap">
+        <RightPanelToggle />
+      </Group>
     </Group>
   );
 };

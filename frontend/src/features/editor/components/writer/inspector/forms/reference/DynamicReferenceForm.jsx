@@ -1,9 +1,7 @@
 import React from "react";
 import { TextInput, NumberInput, Stack } from "@mantine/core";
 import { REFERENCE_FIELDS } from "@logic/references/fieldDefinitions";
-import { InspectorField } from "@writer/inspector/InspectorField";
-
-import classes from "./DynamicReferenceForm.module.css";
+import { InspectorField } from "../../components/InspectorField";
 
 export const DynamicReferenceForm = ({ schema, data, onChange }) => {
   const BASE_FIELDS = ["author", "year", "title"];
@@ -11,7 +9,7 @@ export const DynamicReferenceForm = ({ schema, data, onChange }) => {
   if (!schema?.fields) return null;
 
   return (
-    <Stack className={classes.fieldsContainer}>
+    <Stack gap="xs" style={{ width: "100%", minWidth: 0 }}>
       {schema.fields.map((fieldName) => {
         const config = REFERENCE_FIELDS[fieldName];
         if (!config) return null;
@@ -43,6 +41,7 @@ export const DynamicReferenceForm = ({ schema, data, onChange }) => {
                 onChange={(val) => handleChange(val === "" ? "" : Number(val))}
                 hideControls
                 size="xs"
+                w="100%"
               />
             ) : (
               <TextInput
@@ -50,6 +49,7 @@ export const DynamicReferenceForm = ({ schema, data, onChange }) => {
                 value={value || ""}
                 onChange={(e) => handleChange(e.currentTarget.value)}
                 size="xs"
+                w="100%"
               />
             )}
           </InspectorField>

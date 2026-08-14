@@ -134,16 +134,16 @@ export const createContentSlice = (set, get) => ({
         blockIds: page.blockIds.filter((blockId) => blockId !== id),
       }));
 
-      // 3. Verificamos si el bloque eliminado era el que estaba seleccionado actualmente
+      // 3. Verificamos si el bloque eliminado era el seleccionado
       const wasSelected = state.selectedBlockId === id;
 
       return {
         blocks: newBlocks,
         pages: newPages,
-        // Si borramos el bloque que estábamos mirando, deseleccionamos todo y cerramos el inspector
+        // Si borramos el bloque seleccionado, solo limpiamos la selección
+        // Manteniendo el panel abierto en su estado neutral
         ...(wasSelected && {
           selectedBlockId: null,
-          isInspectorOpen: false,
         }),
       };
     }),

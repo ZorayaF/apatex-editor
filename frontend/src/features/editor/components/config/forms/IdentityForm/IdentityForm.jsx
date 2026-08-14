@@ -11,6 +11,7 @@ import {
   Text,
 } from "@mantine/core";
 import { useStore } from "@store";
+import { Autocomplete } from "@mantine/core";
 
 // Diccionario de facultades y programas institucionales (Uniboyacá)
 const ESTRUCTURA_UNIBOYACA = {
@@ -145,7 +146,7 @@ export const IdentityForm = () => {
               />
             </Grid.Col>
             <Grid.Col span={6}>
-              <Select
+              <Autocomplete
                 label="Título a Obtener"
                 placeholder="Selecciona o escribe el grado..."
                 data={[
@@ -156,13 +157,6 @@ export const IdentityForm = () => {
                   "Psicólogo",
                   "Abogado",
                 ]}
-                searchable
-                creatable
-                getCreateLabel={(query) => `+ Añadir "${query}"`}
-                onCreate={(query) => {
-                  setProjectMetadata("gradoObjetivo", query);
-                  return query;
-                }}
                 value={projectMetadata?.gradoObjetivo || ""}
                 onChange={(val) => setProjectMetadata("gradoObjetivo", val)}
               />

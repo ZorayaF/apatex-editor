@@ -1,3 +1,4 @@
+// src/features/editor/components/writer/inspector/forms/reference/SmartImportModal.jsx
 import React, { useState } from "react";
 import {
   Modal,
@@ -9,10 +10,8 @@ import {
   Group,
   Alert,
 } from "@mantine/core";
-import { IconSparkles, IconInfoCircle, IconCheck } from "@tabler/icons-react";
+import { IconSparkles, IconInfoCircle } from "@tabler/icons-react";
 import { notifications } from "@mantine/notifications";
-
-import classes from "./SmartImportModal.module.css";
 
 export const SmartImportModal = ({ opened, onClose, onApplyData }) => {
   const [rawText, setRawText] = useState("");
@@ -27,12 +26,10 @@ export const SmartImportModal = ({ opened, onClose, onApplyData }) => {
 
       notifications.show({
         id: "smart-import-success",
-        title: "Datos autocompletados",
-        message:
-          "Por favor revisa los campos en el formulario para asegurar su precisión.",
+        message: "Referencia extraída y completada",
         color: "teal",
-        icon: <IconCheck size={16} />,
-        autoClose: 3500,
+        autoClose: 2000,
+        withCloseButton: false,
       });
 
       setRawText("");
@@ -40,11 +37,10 @@ export const SmartImportModal = ({ opened, onClose, onApplyData }) => {
     } catch {
       notifications.show({
         id: "smart-import-error",
-        title: "No se pudo procesar el texto",
-        message:
-          "Intenta escribir los campos manualmente o verifica el formato del texto.",
+        message: "Formato no reconocido. Ingresa los datos manualmente.",
         color: "orange",
-        autoClose: 4000,
+        autoClose: 3500,
+        withCloseButton: false,
       });
     } finally {
       setIsLoading(false);
@@ -72,8 +68,8 @@ export const SmartImportModal = ({ opened, onClose, onApplyData }) => {
     >
       <Stack gap="sm">
         <Text size="xs" c="dimmed">
-          Útil si ya tienes la referencia generada por repositorios (ej: Google
-          Scholar, Scopus) o una nota rápida de autor, año y título.
+          Pega una referencia copiada de Google Scholar, Scopus o similar para
+          extraer sus campos automáticamente.
         </Text>
 
         <Textarea
@@ -90,10 +86,10 @@ export const SmartImportModal = ({ opened, onClose, onApplyData }) => {
           color="blue"
           icon={<IconInfoCircle size={16} />}
           py={6}
-          classNames={{ message: classes.alertMessage }}
+          styles={{ message: { fontSize: "11px" } }}
         >
-          Esta función es experimental. Analizaremos el texto para rellenar las
-          casillas automáticamente.
+          Función experimental: revisa los campos en el formulario tras
+          autocompletar.
         </Alert>
 
         <Group justify="flex-end" gap="xs" mt="xs">

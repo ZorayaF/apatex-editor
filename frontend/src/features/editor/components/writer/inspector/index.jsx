@@ -1,15 +1,8 @@
+// src/features/editor/components/writer/inspector/index.jsx
 import React from "react";
-import {
-  ScrollArea,
-  Title,
-  Text,
-  Box,
-  Stack,
-  Tabs,
-  Center,
-} from "@mantine/core";
+import { Box, Title, Text, Stack, Center } from "@mantine/core";
 import { useStore } from "@store";
-import { IconSettings, IconBooks, IconLayout2 } from "@tabler/icons-react";
+import { IconLayout2 } from "@tabler/icons-react";
 
 import { ReferenceForm } from "./forms/reference/ReferenceForm";
 import { TableForm } from "./forms/table/TableForm";
@@ -17,86 +10,100 @@ import { FigureForm } from "./forms/figure/FigureForm";
 import { SourceLibrary } from "./SourceLibrary";
 
 export const Inspector = () => {
-  const { activeTab, setActiveTab, selectedBlockId, selectedSourceId, blocks } =
-    useStore();
+  const {
+    activeTab,
+    selectedBlockId,
+    selectedSourceId,
+    blocks = [],
+  } = useStore();
 
   const activeBlock = blocks.find((b) => b.id === selectedBlockId);
 
-  // Pestaña Diseño: Sólo se activa con un bloque específico
-  const renderPropertiesTab = () => {
+  // 1. Título dinámico
+  const getHeaderTitle = () => {
+    if (selectedSourceId) return "Editar Referencia";
+    if (activeTab === "library") return "Biblioteca de Fuentes";
+    if (activeBlock?.type === "table") return "Propiedades de Tabla";
+    if (activeBlock?.type === "figure") return "Propiedades de Figura";
+    return "Inspector";
+  };
+
+  // 2. Renderizado reactivo inmediato
+  const renderContent = () => {
+    // Si se hizo clic en una cita o se seleccionó una fuente
+    if (selectedSourceId) {
+      return <ReferenceForm />;
+    }
+
+    // Si se abrió la biblioteca de citas
+    if (activeTab === "library") {
+      return <SourceLibrary />;
+    }
+
+    // Si hay una tabla seleccionada
     if (activeBlock?.type === "table") {
       return <TableForm blockData={activeBlock} />;
     }
 
+    // Si hay una figura seleccionada
     if (activeBlock?.type === "figure") {
       return <FigureForm blockData={activeBlock} />;
     }
 
-    return <EmptySelectionState />;
-  };
-
-  // Pestaña Fuentes: Lista o Formulario de Referencia
-  const renderLibraryTab = () => {
-    if (selectedSourceId) return <ReferenceForm />;
-    return <SourceLibrary />;
+    // Estado neutro cuando nada está activo
+    return <CleanEmptyState />;
   };
 
   return (
-    <Box h="100%" style={{ display: "flex", flexDirection: "column" }}>
-      <Tabs
-        variant="pills"
-        value={activeTab}
-        onChange={setActiveTab}
-        p="md"
-        styles={{
-          root: { display: "flex", flexDirection: "column", height: "100%" },
-          panel: {
-            flex: 1,
-            minHeight: 0,
-            display: "flex",
-            flexDirection: "column",
-          },
+    <Box
+      h="100%"
+      w="100%"
+      p="xs"
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        minWidth: 0,
+        height: "100%",
+        maxHeight: "100%",
+        overflow: "hidden",
+        boxSizing: "border-box",
+      }}
+    >
+      <Title order={5} mb="xs" c="gray.8" px={4} style={{ flexShrink: 0 }}>
+        {getHeaderTitle()}
+      </Title>
+
+      <Box
+        style={{
+          flex: 1,
+          minHeight: 0,
+          display: "flex",
+          flexDirection: "column",
+          overflow: "hidden",
         }}
       >
-        <Title order={4} mb="lg" c="gray.7" px="xs">
-          {activeTab === "properties" ? "Propiedades" : "Gestor Bibliográfico"}
-        </Title>
-
-        <Tabs.List grow mb="md">
-          <Tabs.Tab value="properties" leftSection={<IconSettings size={16} />}>
-            Diseño
-          </Tabs.Tab>
-          <Tabs.Tab value="library" leftSection={<IconBooks size={16} />}>
-            Fuentes
-          </Tabs.Tab>
-        </Tabs.List>
-
-        {/* Paneles ocupando el 100% de la altura disponible */}
-        <Tabs.Panel value="properties" style={{ height: "100%" }}>
-          {renderPropertiesTab()}
-        </Tabs.Panel>
-        <Tabs.Panel value="library" style={{ height: "100%" }}>
-          {renderLibraryTab()}
-        </Tabs.Panel>
-      </Tabs>
+        {renderContent()}
+      </Box>
     </Box>
   );
 };
 
-// Estado cuando no hay ninguna Tabla ni Figura seleccionada
-const EmptySelectionState = () => {
-  return (
-    <Center h={300} px="md">
-      <Stack align="center" gap="sm" c="dimmed">
-        <IconLayout2 size={36} stroke={1.5} style={{ opacity: 0.4 }} />
-        <Text size="sm" fw={600} ta="center">
-          Ningún elemento seleccionado
-        </Text>
-        <Text size="xs" ta="center" c="dimmed">
-          Haz clic sobre una tabla o figura en el documento para ajustar sus
-          propiedades de formato APA.
-        </Text>
-      </Stack>
-    </Center>
-  );
-};
+const CleanEmptyState = () => (
+  <Center h="100%" px="md">
+    <Stack
+      align="center"
+      gap="xs"
+      c="dimmed"
+      style={{ maxWidth: 240, textAlign: "center" }}
+    >
+      <IconLayout2 size={36} stroke={1.2} style={{ opacity: 0.35 }} />
+      <Text size="sm" fw={600} c="gray.7">
+        Sin elemento seleccionado
+      </Text>
+      <Text size="xs" c="dimmed" style={{ lineHeight: 1.4 }}>
+        Selecciona una tabla, figura o cita en tu texto para editarla, o añade
+        una desde la barra superior.
+      </Text>
+    </Stack>
+  </Center>
+);
