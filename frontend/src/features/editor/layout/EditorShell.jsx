@@ -18,7 +18,7 @@ import { WritingView } from "@editor/views/WritingView";
 import { ExportView } from "@editor/views/ExportView";
 
 export const EditorShell = () => {
-  const [activeTab, setActiveTab] = useState("configurar");
+  const [activeTab, setActiveTab] = useState("redaccion");
   const [isSaving, setIsSaving] = useState(false);
   const [loadKey, setLoadKey] = useState(0);
 
