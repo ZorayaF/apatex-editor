@@ -9,7 +9,7 @@ import { DOCUMENT_THEME } from "@logic/rules/documentStyles";
 export const BaseEditable = ({
   id,
   content,
-  type,
+  type = "paragraph",
   label,
   tag: Tag = "div",
   style,
@@ -49,38 +49,40 @@ export const BaseEditable = ({
       content,
     });
 
+  // Redirige el clic en el contenedor externo directamente al span editable
+  const handleContainerClick = (e) => {
+    if (e.target !== textRef.current && textRef.current) {
+      textRef.current.focus();
+    }
+  };
+
   // 3. Interceptor de clics: detecta si se hizo clic sobre una cita APA
   const handleEditableClick = (e) => {
-    // Verificamos si el clic fue sobre una pastilla de cita con data-ref-id
     const citationEl = e.target.closest("[data-ref-id]");
 
     if (citationEl) {
       const refId = citationEl.getAttribute("data-ref-id");
 
       if (refId) {
-        // 1. Selecciona la fuente en el Store
         setSelectedSourceId(refId);
-        // 2. Cambia a la vista de referencias
         setActiveTab("library");
-        // 3. Abre el panel lateral si estaba cerrado
         if (typeof setInspectorOpen === "function") {
           setInspectorOpen(true);
         }
       }
     }
 
-    // Mantiene la lógica normal del editor (mover cursor, selección de bloque)
     handleClick(e);
   };
 
   // 4. Estilos calculados
-  const blockStyle = DOCUMENT_THEME.blocks[type] || {};
+  const blockStyle = DOCUMENT_THEME.blocks?.[type] || {};
   const isCentered = blockStyle.textAlign === "center";
 
   return (
     <Tag
       className={className}
-      onClick={handleFocus}
+      onClick={handleContainerClick}
       style={{
         ...DOCUMENT_THEME.global,
         ...blockStyle,
@@ -112,8 +114,7 @@ export const BaseEditable = ({
         onKeyDown={handleKeyDown}
         onFocus={handleFocus}
         onKeyUp={handleKeyUp}
-        onClick={handleEditableClick} // <--- Interceptor conectado aquí
-        onBlur={handleInput}
+        onClick={handleEditableClick}
         onPaste={(e) => {
           e.preventDefault();
           handlePasteText(e.clipboardData.getData("text/plain"));

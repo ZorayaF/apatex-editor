@@ -36,37 +36,48 @@ export const DocumentMap = () => {
   const deferredPages = useDeferredValue(pages);
   const deferredBlocks = useDeferredValue(blocks);
 
-  // 1. Calculamos la numeración formal basada en el orden de las páginas
+  // Calculamos la numeración formal multinivel (1., 1.1., 1.1.1.) únicamente para H1-H3
   const numberedHeadings = useMemo(() => {
     const blockMap = new Map(deferredBlocks.map((b) => [b.id, b]));
     const orderedBlockIds = deferredPages.flatMap((p) => p.blockIds);
-    let h1 = 0;
-    let h2 = 0;
+
+    // Contadores para niveles h1, h2, h3
+    const counters = [0, 0, 0];
 
     return orderedBlockIds
       .map((id) => blockMap.get(id))
-      .filter((b) => b && (b.type === "h1" || b.type === "h2"))
+      .filter((b) => b && /^h[1-3]$/.test(b.type)) // <-- Solo títulos h1, h2 y h3
       .map((b) => {
-        let num = b.type === "h1" ? `${++h1}.` : `${h1}.${++h2}.`;
-        if (b.type === "h1") h2 = 0;
+        const level = parseInt(b.type.replace("h", ""), 10) || 1;
+        const index = level - 1;
 
-        // Limpiamos etiquetas HTML por si el título contiene estilos
+        // Incrementamos el contador del nivel actual
+        counters[index]++;
+        // Reseteamos todos los contadores de los subniveles inferiores
+        for (let i = index + 1; i < counters.length; i++) {
+          counters[i] = 0;
+        }
+
+        // Generamos la numeración según la profundidad (ej: "1.", "1.1.", "1.1.1.")
+        const number = counters.slice(0, level).join(".") + ".";
+
         const cleanText = b.content
           ? b.content.replace(/<[^>]*>?/gm, "").trim()
-          : "Sin título";
+          : "";
 
         return {
           id: b.id,
-          text: cleanText || "Sin título",
+          text: cleanText || `Título nivel ${level}`,
           type: b.type,
-          number: num,
+          level,
+          number,
         };
       });
   }, [deferredPages, deferredBlocks]);
 
   return (
     <Stack gap={0} h="100%" style={{ overflow: "hidden" }}>
-      {/* Encabezado del panel */}
+      {/* Encabezado */}
       <Group p="xs" pb={8} gap={8} justify="space-between">
         <Group gap={8}>
           <ThemeIcon variant="subtle" size="sm" color="blue">
@@ -83,11 +94,7 @@ export const DocumentMap = () => {
         </Group>
 
         {focusedChapterId && (
-          <Tooltip
-            label="Restablecer vista completa"
-            withArrow
-            position="bottom"
-          >
+          <Tooltip label="Ver todo el documento" withArrow position="bottom">
             <ActionIcon
               size="xs"
               variant="light"
@@ -100,17 +107,19 @@ export const DocumentMap = () => {
         )}
       </Group>
 
-      {/* Lista de encabezados */}
+      {/* Lista de Encabezados */}
       <ScrollArea scrollbarSize={4} offsetScrollbars style={{ flex: 1 }}>
         <Stack gap={1} p={4}>
           {numberedHeadings.length === 0 ? (
             <Text size="11px" c="dimmed" ta="center" py="xl" px="xs">
-              Sin títulos creados. Agrega encabezados H1 o H2 para ver el
-              esquema.
+              Sin títulos creados. Agrega títulos H1 a H3 en el texto para ver
+              el esquema.
             </Text>
           ) : (
             numberedHeadings.map((h) => {
               const isFocused = focusedChapterId === h.id;
+              // Indentación proporcional al nivel jerárquico
+              const paddingLeft = (h.level - 1) * 14 + 6;
 
               return (
                 <NavLink
@@ -120,15 +129,19 @@ export const DocumentMap = () => {
                   onClick={() => setSelectedBlockId(h.id)}
                   h={24}
                   py={0}
-                  pl={h.type === "h2" ? 22 : 6}
+                  pl={paddingLeft}
                   pr={4}
                   leftSection={
                     <Text
                       fz={11}
                       fw={800}
-                      c="blue.8"
+                      c={isFocused ? "blue.6" : "blue.8"}
                       lh={1}
-                      style={{ display: "flex", alignItems: "center" }}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        minWidth: 16,
+                      }}
                     >
                       {h.number}
                     </Text>
@@ -154,9 +167,9 @@ export const DocumentMap = () => {
                           }}
                         >
                           {isFocused ? (
-                            <IconEyeOff size={12} />
+                            <IconEyeOff size={11} />
                           ) : (
-                            <IconEye size={12} />
+                            <IconEye size={11} />
                           )}
                         </ActionIcon>
                       </Tooltip>
@@ -173,6 +186,7 @@ export const DocumentMap = () => {
                       fontSize: "11px",
                       lineHeight: 1,
                       fontWeight: h.type === "h1" ? 700 : 400,
+                      fontStyle: h.level >= 2 ? "italic" : "normal",
                       whiteSpace: "nowrap",
                       overflow: "hidden",
                       textOverflow: "ellipsis",
