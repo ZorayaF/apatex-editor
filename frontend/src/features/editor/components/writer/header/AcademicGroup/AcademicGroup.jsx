@@ -6,20 +6,49 @@ import { useStore } from "@store";
 import { HeaderButton } from "../HeaderButton";
 
 export const AcademicGroup = () => {
-  const { addAndEditSource, setActiveTab, setInspectorOpen, selectedSourceId } =
-    useStore();
+  const {
+    addAndEditSource,
+    setActiveTab,
+    setInspectorOpen,
+    isInspectorOpen, // o inspectorOpen según cómo lo tengas en el store
+    activeTab,
+    selectedSourceId,
+    setSelectedSourceId,
+  } = useStore();
 
-  // Función para crear una nueva fuente (abre formulario vacío)
+  // 1. Estados activos calculados
+  // "Citar" está activo si el panel está abierto, en la pestaña "library" y viendo la lista (no editando)
+  const isCitarActive =
+    isInspectorOpen && activeTab === "library" && !selectedSourceId;
+
+  // "Nueva Fuente" está activo si el panel está abierto, en "library" y creando/editando una fuente
+  const isNuevaFuenteActive =
+    isInspectorOpen && activeTab === "library" && !!selectedSourceId;
+
+  // 2. Manejo de "Nueva Fuente" con Toggle
   const handleAddReference = () => {
-    addAndEditSource("articulo");
-    setActiveTab("library");
-    setInspectorOpen(true);
+    if (isNuevaFuenteActive) {
+      // Si ya está abierto el formulario, el clic lo cierra
+      setInspectorOpen(false);
+      setSelectedSourceId(null);
+    } else {
+      addAndEditSource("articulo");
+      setActiveTab("library");
+      setInspectorOpen(true);
+    }
   };
 
-  // Función para abrir la biblioteca y citar algo existente
+  // 3. Manejo de "Citar" con Toggle y Reset de vista
   const handleOpenLibrary = () => {
-    setActiveTab("library");
-    setInspectorOpen(true);
+    if (isCitarActive) {
+      // Si ya está abierta la lista de fuentes, el clic lo cierra
+      setInspectorOpen(false);
+    } else {
+      // Si estaba editando una fuente o en otra pestaña, lo lleva a la lista limpia
+      setSelectedSourceId(null);
+      setActiveTab("library");
+      setInspectorOpen(true);
+    }
   };
 
   return (
@@ -29,13 +58,14 @@ export const AcademicGroup = () => {
         description="Crear referencia bibliográfica"
         icon={IconFilePlus}
         onClick={handleAddReference}
-        isActive={!!selectedSourceId}
+        isActive={isNuevaFuenteActive}
       />
       <HeaderButton
         label="Citar"
         description="Insertar cita (Autor, Año) en el texto"
-        icon={IconQuote} // Icono de comillas para citas
+        icon={IconQuote}
         onClick={handleOpenLibrary}
+        isActive={isCitarActive}
       />
     </Group>
   );

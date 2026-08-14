@@ -6,22 +6,14 @@ import {
   Box,
   Stack,
   Tabs,
-  Button,
+  Center,
 } from "@mantine/core";
 import { useStore } from "@store";
-import {
-  IconClick,
-  IconSettings,
-  IconBooks,
-  IconTable,
-  IconPhoto,
-  IconFilePlus,
-} from "@tabler/icons-react";
+import { IconSettings, IconBooks, IconLayout2 } from "@tabler/icons-react";
 
-// --- IMPORTACIÓN DE FORMULARIOS ---
 import { ReferenceForm } from "./forms/reference/ReferenceForm";
 import { TableForm } from "./forms/table/TableForm";
-import { FigureForm } from "./forms/figure/FigureForm"; // <--- Nueva importación
+import { FigureForm } from "./forms/figure/FigureForm";
 import { SourceLibrary } from "./SourceLibrary";
 
 export const Inspector = () => {
@@ -30,22 +22,20 @@ export const Inspector = () => {
 
   const activeBlock = blocks.find((b) => b.id === selectedBlockId);
 
-  // --- RENDERIZADO DE PESTAÑA: PROPIEDADES ---
+  // Pestaña Diseño: Sólo se activa con un bloque específico
   const renderPropertiesTab = () => {
-    // 1. Caso Tabla
     if (activeBlock?.type === "table") {
       return <TableForm blockData={activeBlock} />;
     }
 
-    // 2. Caso Figura (Ya no es próximamente)
     if (activeBlock?.type === "figure") {
       return <FigureForm blockData={activeBlock} />;
     }
 
-    // 3. Caso por defecto (Toolbox)
-    return <Toolbox />;
+    return <EmptySelectionState />;
   };
 
+  // Pestaña Fuentes: Lista o Formulario de Referencia
   const renderLibraryTab = () => {
     if (selectedSourceId) return <ReferenceForm />;
     return <SourceLibrary />;
@@ -59,14 +49,17 @@ export const Inspector = () => {
         onChange={setActiveTab}
         p="md"
         styles={{
-          root: { display: "flex", flexDirection: "column", flex: 1 },
-          panel: { flex: 1, overflow: "hidden" },
+          root: { display: "flex", flexDirection: "column", height: "100%" },
+          panel: {
+            flex: 1,
+            minHeight: 0,
+            display: "flex",
+            flexDirection: "column",
+          },
         }}
       >
         <Title order={4} mb="lg" c="gray.7" px="xs">
-          {activeTab === "properties"
-            ? "Diseño y Herramientas"
-            : "Gestor Bibliográfico"}
+          {activeTab === "properties" ? "Propiedades" : "Gestor Bibliográfico"}
         </Title>
 
         <Tabs.List grow mb="md">
@@ -78,69 +71,32 @@ export const Inspector = () => {
           </Tabs.Tab>
         </Tabs.List>
 
-        <ScrollArea h="calc(100vh - 200px)" scrollbarSize={6} offsetScrollbars>
-          <Tabs.Panel value="properties">{renderPropertiesTab()}</Tabs.Panel>
-          <Tabs.Panel value="library">{renderLibraryTab()}</Tabs.Panel>
-        </ScrollArea>
+        {/* Paneles ocupando el 100% de la altura disponible */}
+        <Tabs.Panel value="properties" style={{ height: "100%" }}>
+          {renderPropertiesTab()}
+        </Tabs.Panel>
+        <Tabs.Panel value="library" style={{ height: "100%" }}>
+          {renderLibraryTab()}
+        </Tabs.Panel>
       </Tabs>
     </Box>
   );
 };
 
-// --- LA CAJA DE HERRAMIENTAS (Toolbox) ---
-
-const Toolbox = () => {
-  const { setActiveTab, addAndEditSource, addBlock } = useStore();
-
+// Estado cuando no hay ninguna Tabla ni Figura seleccionada
+const EmptySelectionState = () => {
   return (
-    <Stack gap="xl" px="md" mt="xl">
-      <Stack align="center" gap="xs" style={{ opacity: 0.4 }}>
-        <IconClick size={40} stroke={1.5} />
-        <Text size="xs" fw={700} tt="uppercase" lts={1}>
-          Insertar Elementos
+    <Center h={300} px="md">
+      <Stack align="center" gap="sm" c="dimmed">
+        <IconLayout2 size={36} stroke={1.5} style={{ opacity: 0.4 }} />
+        <Text size="sm" fw={600} ta="center">
+          Ningún elemento seleccionado
+        </Text>
+        <Text size="xs" ta="center" c="dimmed">
+          Haz clic sobre una tabla o figura en el documento para ajustar sus
+          propiedades de formato APA.
         </Text>
       </Stack>
-
-      <Stack gap="sm" w="100%">
-        <Button
-          variant="light"
-          color="gray"
-          leftSection={<IconTable size={18} />}
-          fullWidth
-          justify="flex-start"
-          onClick={() => addBlock("table")}
-        >
-          Insertar Tabla APA
-        </Button>
-        <Button
-          variant="light"
-          color="gray"
-          leftSection={<IconPhoto size={18} />}
-          fullWidth
-          justify="flex-start"
-          onClick={() => addBlock("figure")}
-        >
-          Insertar Figura o Imagen
-        </Button>
-        <Button
-          variant="filled"
-          color="blue"
-          leftSection={<IconFilePlus size={18} />}
-          fullWidth
-          justify="flex-start"
-          onClick={() => {
-            addAndEditSource("articulo");
-            setActiveTab("library");
-          }}
-        >
-          Nueva Referencia
-        </Button>
-      </Stack>
-
-      <Text size="xs" c="dimmed" ta="center" mt="md" px="xs">
-        Selecciona un elemento en el lienzo para ajustar sus propiedades
-        específicas.
-      </Text>
-    </Stack>
+    </Center>
   );
 };
