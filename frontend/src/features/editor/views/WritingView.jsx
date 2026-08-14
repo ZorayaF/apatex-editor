@@ -2,12 +2,16 @@
 import React from "react";
 import { Box, ScrollArea } from "@mantine/core";
 import { useStore } from "@store";
+import { useEditor } from "../hooks/useEditor"; // <-- Importamos el hook de atajos
 import { Canvas } from "@writer/canvas/Canvas";
 import { WriterToolbar } from "@writer/header/WriterToolbar";
 import { DocumentMap } from "@writer/navbar/DocumentMap";
 import { Inspector } from "@writer/inspector/index.jsx";
 
 export const WritingView = () => {
+  // Inicializa los atajos de teclado globales (Ctrl+Z / Ctrl+Y)
+  useEditor();
+
   const {
     isNavbarOpen,
     isInspectorOpen,

@@ -4,10 +4,6 @@ import { useStore } from "@store";
 
 export const useEditor = () => {
   const addBlock = useStore((s) => s.addBlock);
-  const undo = useStore((s) => s.undo);
-  const redo = useStore((s) => s.redo);
-  const canUndo = useStore((s) => s.canUndo);
-  const canRedo = useStore((s) => s.canRedo);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -16,33 +12,37 @@ export const useEditor = () => {
 
       if (!isCmdOrCtrl) return;
 
-      // Ctrl + Z / Cmd + Z: Deshacer
-      if (e.key.toLowerCase() === "z" && !e.shiftKey) {
+      const key = e.key.toLowerCase();
+
+      // 1. DESHACER: Ctrl + Z o Cmd + Z (sin Shift)
+      if (key === "z" && !e.shiftKey) {
         e.preventDefault();
         e.stopPropagation();
-        undo();
+        const state = useStore.getState();
+        if (typeof state.undo === "function") {
+          state.undo();
+        }
+        return;
       }
-      // Ctrl + Y / Cmd + Shift + Z: Rehacer
-      else if (
-        e.key.toLowerCase() === "y" ||
-        (e.key.toLowerCase() === "z" && e.shiftKey)
-      ) {
+
+      // 2. REHACER: Ctrl + Y o Cmd + Shift + Z o Ctrl + Shift + Z
+      if (key === "y" || (key === "z" && e.shiftKey)) {
         e.preventDefault();
         e.stopPropagation();
-        redo();
+        const state = useStore.getState();
+        if (typeof state.redo === "function") {
+          state.redo();
+        }
+        return;
       }
     };
 
-    // Usamos el listener en fase de captura (true) para interceptar antes del DOM
+    // 'true' al final activa la fase de captura prioritaria
     window.addEventListener("keydown", handleKeyDown, true);
     return () => window.removeEventListener("keydown", handleKeyDown, true);
-  }, [undo, redo]);
+  }, []);
 
   return {
     insertBlock: addBlock,
-    undo,
-    redo,
-    canUndo,
-    canRedo,
   };
 };
