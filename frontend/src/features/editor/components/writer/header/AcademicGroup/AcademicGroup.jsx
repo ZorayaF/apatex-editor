@@ -6,18 +6,35 @@ import { useStore } from "@store";
 import { HeaderButton } from "../HeaderButton";
 
 export const AcademicGroup = () => {
-  const { addAndEditSource, setActiveTab, setInspectorOpen, selectedSourceId } =
-    useStore();
+  const {
+    addAndEditSource,
+    setActiveTab,
+    setInspectorOpen,
+    activeTab,
+    selectedSourceId,
+    setSelectedSourceId,
+    setSelectedBlockId,
+  } = useStore();
 
-  // Función para crear una nueva fuente (abre formulario vacío)
+  // 1. Estados activos calculados
+  // "Citar" está activo si estamos en la biblioteca viendo la lista
+  const isCitarActive = activeTab === "library" && !selectedSourceId;
+
+  // "Nueva Fuente" está activo si estamos editando o creando una fuente
+  const isNuevaFuenteActive = activeTab === "library" && !!selectedSourceId;
+
+  // 2. "Nueva Fuente": siempre crea/abre el formulario sin cerrar el panel
   const handleAddReference = () => {
+    setSelectedBlockId(null); // Deselecciona tablas/figuras activas
     addAndEditSource("articulo");
     setActiveTab("library");
     setInspectorOpen(true);
   };
 
-  // Función para abrir la biblioteca y citar algo existente
+  // 3. "Citar": siempre lleva a la lista limpia de fuentes
   const handleOpenLibrary = () => {
+    setSelectedBlockId(null); // Deselecciona tablas/figuras activas
+    setSelectedSourceId(null); // Vuelve a la lista de fuentes
     setActiveTab("library");
     setInspectorOpen(true);
   };
@@ -29,13 +46,14 @@ export const AcademicGroup = () => {
         description="Crear referencia bibliográfica"
         icon={IconFilePlus}
         onClick={handleAddReference}
-        isActive={!!selectedSourceId}
+        isActive={isNuevaFuenteActive}
       />
       <HeaderButton
         label="Citar"
         description="Insertar cita (Autor, Año) en el texto"
-        icon={IconQuote} // Icono de comillas para citas
+        icon={IconQuote}
         onClick={handleOpenLibrary}
+        isActive={isCitarActive}
       />
     </Group>
   );

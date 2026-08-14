@@ -6,6 +6,7 @@
   width: 100%;
   margin: 0;
   padding: 4px 0;
+  box-sizing: border-box;
 }
 
 .h1 {
@@ -13,14 +14,31 @@
   font-weight: bold;
   text-align: center;
 }
+
 .h2 {
   font-size: var(--font-size-base);
   font-weight: bold;
   text-align: left;
 }
+
 .h3 {
   font-size: var(--font-size-base);
   font-weight: bold;
   font-style: italic;
   text-align: left;
+}
+
+.h4 {
+  font-size: var(--font-size-base);
+  font-weight: bold;
+  text-align: left;
+  text-indent: 1.27cm; /* Sangría estándar APA */
+}
+
+.h5 {
+  font-size: var(--font-size-base);
+  font-weight: bold;
+  font-style: italic;
+  text-align: left;
+  text-indent: 1.27cm; /* Sangría estándar APA */
 }

@@ -15,26 +15,22 @@ export const usePagePagination = (pageContentRef, blockIds, pageNumber) => {
 
       if (result) {
         if (result.isImpossiblyLarge) {
-          // 1. Avisar que el bloque es gigante
+          // Advertencia concisa de desborde
           notifications.show({
             id: `overflow-${result.id}`,
-            title: "Objeto demasiado grande",
-            message: `La ${result.type} excede el tamaño de la página. Por favor, redúcela.`,
+            message: `El objeto (${result.type}) supera la altura de la página. Reduce su tamaño.`,
             color: "orange",
-            autoClose: 5000,
+            autoClose: 3500,
+            withCloseButton: false,
           });
 
-          // 2. ¡SOLUCIÓN AQUÍ!: Empujar al siguiente bloque
-          // Buscamos quién es el que está justo después del bloque gigante en esta página
           const currentIndex = blockIds.indexOf(result.id);
           const nextBlockId = blockIds[currentIndex + 1];
 
-          // Si hay alguien después, lo mandamos a la siguiente página
           if (nextBlockId) {
             moveToNextPage(nextBlockId);
           }
         } else {
-          // Escenario normal: El bloque sí cabe en una página limpia, así que lo movemos
           moveToNextPage(result.id);
         }
       }
@@ -45,8 +41,5 @@ export const usePagePagination = (pageContentRef, blockIds, pageNumber) => {
     }, 100);
 
     return () => clearTimeout(timeoutId);
-
-    // Es vital que blockIds esté aquí para que el efecto se repita
-    // hasta que no quede nadie desbordado
   }, [blockIds, pageNumber, moveToNextPage, pageContentRef]);
 };

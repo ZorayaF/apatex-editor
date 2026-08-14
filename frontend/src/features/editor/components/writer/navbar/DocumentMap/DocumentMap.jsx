@@ -1,5 +1,5 @@
-// src/features/editor/components/navbar/DocumentMap.jsx
-import React, { useCallback, useMemo, useDeferredValue } from "react";
+// src/features/editor/components/writer/navbar/DocumentMap/DocumentMap.jsx
+import React, { useMemo, useDeferredValue } from "react";
 import {
   ScrollArea,
   NavLink,
@@ -8,6 +8,7 @@ import {
   Group,
   ThemeIcon,
   ActionIcon,
+  Tooltip,
 } from "@mantine/core";
 import { IconListSearch, IconEye, IconEyeOff } from "@tabler/icons-react";
 import { useStore } from "@store";
@@ -15,8 +16,8 @@ import { useShallow } from "zustand/react/shallow";
 
 export const DocumentMap = () => {
   const {
-    pages,
-    blocks,
+    pages = [],
+    blocks = [],
     selectedBlockId,
     setSelectedBlockId,
     focusedChapterId,
@@ -35,118 +36,173 @@ export const DocumentMap = () => {
   const deferredPages = useDeferredValue(pages);
   const deferredBlocks = useDeferredValue(blocks);
 
+  // Calculamos la numeración formal multinivel (1., 1.1., 1.1.1.) únicamente para H1-H3
   const numberedHeadings = useMemo(() => {
     const blockMap = new Map(deferredBlocks.map((b) => [b.id, b]));
     const orderedBlockIds = deferredPages.flatMap((p) => p.blockIds);
-    let h1 = 0;
-    let h2 = 0;
+
+    // Contadores para niveles h1, h2, h3
+    const counters = [0, 0, 0];
 
     return orderedBlockIds
       .map((id) => blockMap.get(id))
-      .filter((b) => b && (b.type === "h1" || b.type === "h2"))
+      .filter((b) => b && /^h[1-3]$/.test(b.type)) // <-- Solo títulos h1, h2 y h3
       .map((b) => {
-        let num = b.type === "h1" ? `${++h1}.` : `${h1}.${++h2}.`;
-        if (b.type === "h1") h2 = 0;
+        const level = parseInt(b.type.replace("h", ""), 10) || 1;
+        const index = level - 1;
+
+        // Incrementamos el contador del nivel actual
+        counters[index]++;
+        // Reseteamos todos los contadores de los subniveles inferiores
+        for (let i = index + 1; i < counters.length; i++) {
+          counters[i] = 0;
+        }
+
+        // Generamos la numeración según la profundidad (ej: "1.", "1.1.", "1.1.1.")
+        const number = counters.slice(0, level).join(".") + ".";
+
+        const cleanText = b.content
+          ? b.content.replace(/<[^>]*>?/gm, "").trim()
+          : "";
+
         return {
           id: b.id,
-          text: b.content || "Sin título",
+          text: cleanText || `Título nivel ${level}`,
           type: b.type,
-          number: num,
+          level,
+          number,
         };
       });
   }, [deferredPages, deferredBlocks]);
 
   return (
-    <Stack gap={0} h="100%">
-      <Group p="xs" pb={8} gap={8}>
-        <ThemeIcon variant="subtle" size="sm" color="blue">
-          <IconListSearch size={16} />
-        </ThemeIcon>
-        <Text
-          fw={800}
-          size="10px"
-          c="dimmed"
-          style={{ letterSpacing: "0.8px" }}
-        >
-          ESTRUCTURA
-        </Text>
+    <Stack gap={0} h="100%" style={{ overflow: "hidden" }}>
+      {/* Encabezado */}
+      <Group p="xs" pb={8} gap={8} justify="space-between">
+        <Group gap={8}>
+          <ThemeIcon variant="subtle" size="sm" color="blue">
+            <IconListSearch size={16} />
+          </ThemeIcon>
+          <Text
+            fw={800}
+            size="10px"
+            c="dimmed"
+            style={{ letterSpacing: "0.8px" }}
+          >
+            ÍNDICE DEL DOCUMENTO
+          </Text>
+        </Group>
+
+        {focusedChapterId && (
+          <Tooltip label="Ver todo el documento" withArrow position="bottom">
+            <ActionIcon
+              size="xs"
+              variant="light"
+              color="blue"
+              onClick={() => setFocusedChapterId(null)}
+            >
+              <IconEyeOff size={12} />
+            </ActionIcon>
+          </Tooltip>
+        )}
       </Group>
 
-      <ScrollArea scrollbarSize={4} offsetScrollbars>
+      {/* Lista de Encabezados */}
+      <ScrollArea scrollbarSize={4} offsetScrollbars style={{ flex: 1 }}>
         <Stack gap={1} p={4}>
-          {numberedHeadings.map((h) => {
-            const isFocused = focusedChapterId === h.id;
+          {numberedHeadings.length === 0 ? (
+            <Text size="11px" c="dimmed" ta="center" py="xl" px="xs">
+              Sin títulos creados. Agrega títulos H1 a H3 en el texto para ver
+              el esquema.
+            </Text>
+          ) : (
+            numberedHeadings.map((h) => {
+              const isFocused = focusedChapterId === h.id;
+              // Indentación proporcional al nivel jerárquico
+              const paddingLeft = (h.level - 1) * 14 + 6;
 
-            return (
-              <NavLink
-                key={h.id}
-                label={h.text}
-                active={h.id === selectedBlockId}
-                onClick={() => setSelectedBlockId(h.id)}
-                // 1. FORZAMOS ALTURA MÍNIMA Y PADDING CERO
-                h={22} // Altura fija muy pequeña
-                py={0} // Sin espacio arriba ni abajo
-                pl={h.type === "h2" ? 22 : 6}
-                pr={4}
-                // 2. NÚMERO ALINEADO
-                leftSection={
-                  <Text
-                    fz={11}
-                    fw={800}
-                    c="blue.8"
-                    lh={1}
-                    style={{ display: "flex", alignItems: "center" }}
-                  >
-                    {h.number}
-                  </Text>
-                }
-                // 3. OJO ALINEADO
-                rightSection={
-                  h.type === "h1" && (
-                    <ActionIcon
-                      size={16} // Tamaño manual para que no estire el bloque
-                      variant={isFocused ? "filled" : "subtle"}
-                      color="blue"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setFocusedChapterId(isFocused ? null : h.id);
+              return (
+                <NavLink
+                  key={h.id}
+                  label={h.text}
+                  active={h.id === selectedBlockId}
+                  onClick={() => setSelectedBlockId(h.id)}
+                  h={24}
+                  py={0}
+                  pl={paddingLeft}
+                  pr={4}
+                  leftSection={
+                    <Text
+                      fz={11}
+                      fw={800}
+                      c={isFocused ? "blue.6" : "blue.8"}
+                      lh={1}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        minWidth: 16,
                       }}
                     >
-                      {isFocused ? (
-                        <IconEyeOff size={10} />
-                      ) : (
-                        <IconEye size={10} />
-                      )}
-                    </ActionIcon>
-                  )
-                }
-                // 4. EL SECRETO: Overrides de CSS interno de Mantine
-                styles={{
-                  root: {
-                    display: "flex",
-                    alignItems: "center", // Centrado vertical puro
-                    borderRadius: "2px",
-                    minHeight: "unset", // Matamos el min-height por defecto de Mantine
-                  },
-                  label: {
-                    fontSize: "11px",
-                    lineHeight: 1, // Altura de línea mínima
-                    fontWeight: h.type === "h1" ? 700 : 400,
-                    whiteSpace: "nowrap",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    paddingTop: "1px", // Ajuste fino para centrar visualmente la tipografía
-                  },
-                  section: {
-                    marginRight: 6,
-                    display: "flex",
-                    alignItems: "center",
-                    height: "100%", // Que la sección ocupe toda la fila
-                  },
-                }}
-              />
-            );
-          })}
+                      {h.number}
+                    </Text>
+                  }
+                  rightSection={
+                    h.type === "h1" && (
+                      <Tooltip
+                        label={
+                          isFocused
+                            ? "Mostrar todo el documento"
+                            : "Enfocar solo este capítulo"
+                        }
+                        position="right"
+                        withArrow
+                      >
+                        <ActionIcon
+                          size={18}
+                          variant={isFocused ? "filled" : "subtle"}
+                          color="blue"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setFocusedChapterId(isFocused ? null : h.id);
+                          }}
+                        >
+                          {isFocused ? (
+                            <IconEyeOff size={11} />
+                          ) : (
+                            <IconEye size={11} />
+                          )}
+                        </ActionIcon>
+                      </Tooltip>
+                    )
+                  }
+                  styles={{
+                    root: {
+                      display: "flex",
+                      alignItems: "center",
+                      borderRadius: "4px",
+                      minHeight: "unset",
+                    },
+                    label: {
+                      fontSize: "11px",
+                      lineHeight: 1,
+                      fontWeight: h.type === "h1" ? 700 : 400,
+                      fontStyle: h.level >= 2 ? "italic" : "normal",
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      paddingTop: "1px",
+                    },
+                    section: {
+                      marginRight: 6,
+                      display: "flex",
+                      alignItems: "center",
+                      height: "100%",
+                    },
+                  }}
+                />
+              );
+            })
+          )}
         </Stack>
       </ScrollArea>
     </Stack>

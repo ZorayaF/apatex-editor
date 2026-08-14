@@ -9,7 +9,7 @@ import { DOCUMENT_THEME } from "@logic/rules/documentStyles";
 export const BaseEditable = ({
   id,
   content,
-  type,
+  type = "paragraph",
   label,
   tag: Tag = "div",
   style,
@@ -19,9 +19,15 @@ export const BaseEditable = ({
   const isTyping = useRef(false);
 
   const caret = useCaret(textRef);
-  const { selectedBlockId, handlePasteText } = useStore();
+  const {
+    selectedBlockId,
+    handlePasteText,
+    setSelectedSourceId,
+    setActiveTab,
+    setInspectorOpen,
+  } = useStore();
 
-  // 1. Conectar lógica de sincronización (Pasiva: Store -> DOM)
+  // 1. Sincronización (Store -> DOM)
   useBlockSync({
     id,
     textRef,
@@ -32,7 +38,7 @@ export const BaseEditable = ({
     setAtEnd: caret.setAtEnd,
   });
 
-  // 2. Conectar lógica de eventos (Activa: DOM -> Store)
+  // 2. Eventos de bloque (DOM -> Store)
   const { handleInput, handleKeyDown, handleFocus, handleKeyUp, handleClick } =
     useBlockHandlers({
       id,
@@ -43,14 +49,40 @@ export const BaseEditable = ({
       content,
     });
 
-  // 3. Estilos calculados
-  const blockStyle = DOCUMENT_THEME.blocks[type] || {};
+  // Redirige el clic en el contenedor externo directamente al span editable
+  const handleContainerClick = (e) => {
+    if (e.target !== textRef.current && textRef.current) {
+      textRef.current.focus();
+    }
+  };
+
+  // 3. Interceptor de clics: detecta si se hizo clic sobre una cita APA
+  const handleEditableClick = (e) => {
+    const citationEl = e.target.closest("[data-ref-id]");
+
+    if (citationEl) {
+      const refId = citationEl.getAttribute("data-ref-id");
+
+      if (refId) {
+        setSelectedSourceId(refId);
+        setActiveTab("library");
+        if (typeof setInspectorOpen === "function") {
+          setInspectorOpen(true);
+        }
+      }
+    }
+
+    handleClick(e);
+  };
+
+  // 4. Estilos calculados
+  const blockStyle = DOCUMENT_THEME.blocks?.[type] || {};
   const isCentered = blockStyle.textAlign === "center";
 
   return (
     <Tag
       className={className}
-      onClick={handleFocus}
+      onClick={handleContainerClick}
       style={{
         ...DOCUMENT_THEME.global,
         ...blockStyle,
@@ -82,12 +114,7 @@ export const BaseEditable = ({
         onKeyDown={handleKeyDown}
         onFocus={handleFocus}
         onKeyUp={handleKeyUp}
-        onClick={handleClick}
-        // --- LA RED DE SEGURIDAD ---
-        // Si el usuario cambia de pestaña, forzamos un último guardado
-        onBlur={handleInput}
-        // ---------------------------
-
+        onClick={handleEditableClick}
         onPaste={(e) => {
           e.preventDefault();
           handlePasteText(e.clipboardData.getData("text/plain"));

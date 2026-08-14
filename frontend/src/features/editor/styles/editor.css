@@ -62,6 +62,24 @@
   border-left: 3px solid #228be6;
   background-color: rgba(34, 139, 230, 0.05);
 }
+/* =========================================================
+   ANIMACIÓN DE RETROALIMENTACIÓN IN-SITU (Destello suave)
+   ========================================================= */
+@keyframes apa-item-flash {
+  0% {
+    background-color: rgba(34, 139, 230, 0.25);
+    box-shadow: 0 0 0 4px rgba(34, 139, 230, 0.15);
+  }
+  100% {
+    background-color: rgba(34, 139, 230, 0.08);
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
+
+.citationBadge {
+  transition: all 0.2s ease;
+  animation: apa-item-flash 1.2s ease-out forwards;
+}
 
 /* =========================================================
    REGLAS DE IMPRESIÓN / EXPORTACIÓN PDF (Solo Chromium)

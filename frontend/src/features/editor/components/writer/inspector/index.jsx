@@ -1,146 +1,109 @@
+// src/features/editor/components/writer/inspector/index.jsx
 import React from "react";
-import {
-  ScrollArea,
-  Title,
-  Text,
-  Box,
-  Stack,
-  Tabs,
-  Button,
-} from "@mantine/core";
+import { Box, Title, Text, Stack, Center } from "@mantine/core";
 import { useStore } from "@store";
-import {
-  IconClick,
-  IconSettings,
-  IconBooks,
-  IconTable,
-  IconPhoto,
-  IconFilePlus,
-} from "@tabler/icons-react";
+import { IconLayout2 } from "@tabler/icons-react";
 
-// --- IMPORTACIÓN DE FORMULARIOS ---
 import { ReferenceForm } from "./forms/reference/ReferenceForm";
 import { TableForm } from "./forms/table/TableForm";
-import { FigureForm } from "./forms/figure/FigureForm"; // <--- Nueva importación
+import { FigureForm } from "./forms/figure/FigureForm";
 import { SourceLibrary } from "./SourceLibrary";
 
 export const Inspector = () => {
-  const { activeTab, setActiveTab, selectedBlockId, selectedSourceId, blocks } =
-    useStore();
+  const {
+    activeTab,
+    selectedBlockId,
+    selectedSourceId,
+    blocks = [],
+  } = useStore();
 
   const activeBlock = blocks.find((b) => b.id === selectedBlockId);
 
-  // --- RENDERIZADO DE PESTAÑA: PROPIEDADES ---
-  const renderPropertiesTab = () => {
-    // 1. Caso Tabla
+  // 1. Título dinámico
+  const getHeaderTitle = () => {
+    if (selectedSourceId) return "Editar Referencia";
+    if (activeTab === "library") return "Biblioteca de Fuentes";
+    if (activeBlock?.type === "table") return "Propiedades de Tabla";
+    if (activeBlock?.type === "figure") return "Propiedades de Figura";
+    return "Inspector";
+  };
+
+  // 2. Renderizado reactivo inmediato
+  const renderContent = () => {
+    // Si se hizo clic en una cita o se seleccionó una fuente
+    if (selectedSourceId) {
+      return <ReferenceForm />;
+    }
+
+    // Si se abrió la biblioteca de citas
+    if (activeTab === "library") {
+      return <SourceLibrary />;
+    }
+
+    // Si hay una tabla seleccionada
     if (activeBlock?.type === "table") {
       return <TableForm blockData={activeBlock} />;
     }
 
-    // 2. Caso Figura (Ya no es próximamente)
+    // Si hay una figura seleccionada
     if (activeBlock?.type === "figure") {
       return <FigureForm blockData={activeBlock} />;
     }
 
-    // 3. Caso por defecto (Toolbox)
-    return <Toolbox />;
-  };
-
-  const renderLibraryTab = () => {
-    if (selectedSourceId) return <ReferenceForm />;
-    return <SourceLibrary />;
+    // Estado neutro cuando nada está activo
+    return <CleanEmptyState />;
   };
 
   return (
-    <Box h="100%" style={{ display: "flex", flexDirection: "column" }}>
-      <Tabs
-        variant="pills"
-        value={activeTab}
-        onChange={setActiveTab}
-        p="md"
-        styles={{
-          root: { display: "flex", flexDirection: "column", flex: 1 },
-          panel: { flex: 1, overflow: "hidden" },
+    <Box
+      h="100%"
+      w="100%"
+      p="xs"
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        minWidth: 0,
+        height: "100%",
+        maxHeight: "100%",
+        overflow: "hidden",
+        boxSizing: "border-box",
+      }}
+    >
+      <Title order={5} mb="xs" c="gray.8" px={4} style={{ flexShrink: 0 }}>
+        {getHeaderTitle()}
+      </Title>
+
+      <Box
+        style={{
+          flex: 1,
+          minHeight: 0,
+          display: "flex",
+          flexDirection: "column",
+          overflow: "hidden",
         }}
       >
-        <Title order={4} mb="lg" c="gray.7" px="xs">
-          {activeTab === "properties"
-            ? "Diseño y Herramientas"
-            : "Gestor Bibliográfico"}
-        </Title>
-
-        <Tabs.List grow mb="md">
-          <Tabs.Tab value="properties" leftSection={<IconSettings size={16} />}>
-            Diseño
-          </Tabs.Tab>
-          <Tabs.Tab value="library" leftSection={<IconBooks size={16} />}>
-            Fuentes
-          </Tabs.Tab>
-        </Tabs.List>
-
-        <ScrollArea h="calc(100vh - 200px)" scrollbarSize={6} offsetScrollbars>
-          <Tabs.Panel value="properties">{renderPropertiesTab()}</Tabs.Panel>
-          <Tabs.Panel value="library">{renderLibraryTab()}</Tabs.Panel>
-        </ScrollArea>
-      </Tabs>
+        {renderContent()}
+      </Box>
     </Box>
   );
 };
 
-// --- LA CAJA DE HERRAMIENTAS (Toolbox) ---
-
-const Toolbox = () => {
-  const { setActiveTab, addAndEditSource, addBlock } = useStore();
-
-  return (
-    <Stack gap="xl" px="md" mt="xl">
-      <Stack align="center" gap="xs" style={{ opacity: 0.4 }}>
-        <IconClick size={40} stroke={1.5} />
-        <Text size="xs" fw={700} tt="uppercase" lts={1}>
-          Insertar Elementos
-        </Text>
-      </Stack>
-
-      <Stack gap="sm" w="100%">
-        <Button
-          variant="light"
-          color="gray"
-          leftSection={<IconTable size={18} />}
-          fullWidth
-          justify="flex-start"
-          onClick={() => addBlock("table")}
-        >
-          Insertar Tabla APA
-        </Button>
-        <Button
-          variant="light"
-          color="gray"
-          leftSection={<IconPhoto size={18} />}
-          fullWidth
-          justify="flex-start"
-          onClick={() => addBlock("figure")}
-        >
-          Insertar Figura o Imagen
-        </Button>
-        <Button
-          variant="filled"
-          color="blue"
-          leftSection={<IconFilePlus size={18} />}
-          fullWidth
-          justify="flex-start"
-          onClick={() => {
-            addAndEditSource("articulo");
-            setActiveTab("library");
-          }}
-        >
-          Nueva Referencia
-        </Button>
-      </Stack>
-
-      <Text size="xs" c="dimmed" ta="center" mt="md" px="xs">
-        Selecciona un elemento en el lienzo para ajustar sus propiedades
-        específicas.
+const CleanEmptyState = () => (
+  <Center h="100%" px="md">
+    <Stack
+      align="center"
+      gap="xs"
+      c="dimmed"
+      style={{ maxWidth: 240, textAlign: "center" }}
+    >
+      <IconLayout2 size={36} stroke={1.2} style={{ opacity: 0.35 }} />
+      <Text size="sm" fw={600} c="gray.7">
+        Sin elemento seleccionado
+      </Text>
+      <Text size="xs" c="dimmed" style={{ lineHeight: 1.4 }}>
+        Selecciona una tabla, figura o cita en tu texto para editarla, o añade
+        una desde la barra superior.
       </Text>
     </Stack>
-  );
-};
+  </Center>
+);

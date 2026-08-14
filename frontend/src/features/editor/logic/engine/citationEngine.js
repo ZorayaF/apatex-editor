@@ -27,7 +27,7 @@ export const parseCitations = (content, sources) => {
     const source = sources?.find((s) => s.id === id);
 
     if (!source) {
-      return `<span class="citationBadge" contenteditable="false" style="color: red;">[Fuente no encontrada]</span>`;
+      return `<span class="citationBadge" contenteditable="false" style="color: red; user-select: none;">[Fuente no encontrada]</span>`;
     }
 
     const authorStr = source.author || "Anónimo";
@@ -49,11 +49,13 @@ export const parseCitations = (content, sources) => {
     }
 
     // CAMBIO AQUÍ: Cambiamos <a> por <span> y removemos href
+    // Usamos un <span> interactivo con cursor pointer y data-ref-id
     return `<span 
       class="citationBadge" 
       contenteditable="false" 
       data-ref-id="${id}" 
       style="user-select: all; text-decoration: none; color: inherit; cursor: default;"
+      style="user-select: all; cursor: pointer; color: var(--mantine-color-blue-7); font-weight: 500;"
     >${label}</span>`;
   });
 };
