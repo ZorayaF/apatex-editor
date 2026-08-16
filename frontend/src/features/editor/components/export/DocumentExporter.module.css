@@ -8,9 +8,8 @@
 }
 
 /* =========================================================
-   SANITIZACIÓN VISUAL EXTREMA
+   SANITIZACIÓN VISUAL (Evita halos de selección, cursores y bordes)
    ========================================================= */
-
 .exportCanvas * {
   cursor: default !important;
   caret-color: transparent !important;
@@ -34,26 +33,26 @@
 }
 
 /* =========================================================
-   VISTA DE PANTALLA: Solo el "escritorio" gris
+   VISTA DE PANTALLA: Escritorio con hojas centradas
    ========================================================= */
 @media screen {
   .exportCanvas {
-    display: block !important;
-    background-color: transparent !important; /* Cristal transparente */
-    padding: 40px 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    background-color: transparent !important;
+    padding: 32px 0 !important;
     border: none !important;
     box-shadow: none !important;
+    gap: 2rem;
   }
 }
 
 /* =========================================================
    VISTA DE IMPRESIÓN (PDF)
    ========================================================= */
-/* =========================================================
-   VISTA DE IMPRESIÓN (PDF): LA CURA DEFINITIVA PARA LA PAGINACIÓN
-   ========================================================= */
 @media print {
-  /* 1. DESTRUIMOS TODAS LAS RESTRICCIONES DEL FRAMEWORK MANTINE */
+  /* 1. Destruye restricciones de altura y overflow en la jerarquía */
   :global(html),
   :global(body),
   :global(#root),
@@ -72,17 +71,29 @@
     background-color: white !important;
   }
 
-  /* 2. LIMPIAMOS NUESTRO LIENZO */
+  /* 2. Ocultar barras y botones */
+  :global(.no-print),
+  :global(button),
+  :global(header),
+  :global(nav) {
+    display: none !important;
+  }
+
+  /* 3. Flujo estático y visible para que Chromium pagine */
   .exportCanvas {
     display: block !important;
+    position: static !important;
+    width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
     background-color: white !important;
     padding: 0 !important;
     margin: 0 !important;
   }
 
-  /* 3. ELIMINAMOS EL "DOCK" Y CUALQUIER MARGEN FANTASMA DEL NAVEGADOR */
+  /* 4. Formato carta estándar sin márgenes del navegador */
   @page {
+    size: letter portrait;
     margin: 0 !important;
-    size: letter; /* Fuerza el PDF al tamaño carta físico */
   }
 }

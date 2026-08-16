@@ -95,6 +95,8 @@
     overflow: visible !important;
     background-color: white !important;
     position: static !important;
+    margin: 0 !important;
+    padding: 0 !important;
   }
 
   /* 2. Destruir los contenedores restrictivos de Mantine */
@@ -112,7 +114,7 @@
     transform: none !important;
   }
 
-  /* 3. Ocultar la barra lateral y barras superiores */
+  /* 3. Ocultar la barra lateral, botones y elementos con .no-print */
   .mantine-AppShell-navbar,
   .mantine-AppShell-header,
   .mantine-AppShell-aside,
@@ -121,20 +123,21 @@
     display: none !important;
   }
 
-  /* 4. Forzar que el lienzo de exportación tome el control total */
+  /* 4. CONTENEDOR DE EXPORTACIÓN (DEBE SER STATIC PARA PERMITIR PAGINACIÓN) */
   .print-only-container {
     display: block !important;
-    position: absolute !important;
-    top: 0 !important;
-    left: 0 !important;
+    position: static !important; /* <--- CORREGIDO (ERA absolute) */
     width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
     margin: 0 !important;
     padding: 0 !important;
+    background: transparent !important;
   }
 
-  /* 5. Asegurar que el papel no tenga márgenes del navegador */
+  /* 5. Tamaño de página y márgenes */
   @page {
-    size: letter;
+    size: letter portrait;
     margin: 0 !important;
   }
 }

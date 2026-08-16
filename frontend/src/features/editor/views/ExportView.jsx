@@ -26,7 +26,10 @@ export const ExportView = () => {
     setIsExporting(true);
 
     // Quitamos foco de cualquier campo activo para eliminar cursores en el PDF
-    if (document.activeElement) {
+    if (
+      document.activeElement &&
+      typeof document.activeElement.blur === "function"
+    ) {
       document.activeElement.blur();
     }
 
@@ -38,6 +41,7 @@ export const ExportView = () => {
 
     const targetFileName = fileNames[exportMode] || "Documento_APA7";
 
+    // Espera para asegurar que React complete el ciclo de render antes de imprimir
     setTimeout(() => {
       if (window.electronAPI?.exportToPDF) {
         window.electronAPI.exportToPDF(targetFileName);
@@ -45,7 +49,7 @@ export const ExportView = () => {
         window.print();
       }
       setIsExporting(false);
-    }, 400);
+    }, 350);
   };
 
   return (
@@ -55,10 +59,10 @@ export const ExportView = () => {
         flexDirection: "column",
         height: "100%",
         width: "100%",
-        overflow: "hidden", // Impide que la ventana principal haga scroll
+        overflow: "hidden", // Fija la vista en pantalla
       }}
     >
-      {/* 1. BARRA SUPERIOR FIJA (no se oculta con el scroll y no sale en impresión) */}
+      {/* 1. BARRA SUPERIOR FIJA */}
       <Paper
         p="md"
         radius={0}
@@ -74,7 +78,7 @@ export const ExportView = () => {
         <Group justify="space-between" align="center" wrap="wrap" gap="md">
           <div>
             <Title order={3} size="h4">
-              Exportar y Compilar
+              Exportar
             </Title>
             <Text c="dimmed" size="xs">
               Selecciona qué secciones deseas previsualizar o guardar en PDF.
@@ -82,7 +86,7 @@ export const ExportView = () => {
           </div>
 
           <Group gap="sm" wrap="wrap">
-            {/* Selector de modo de vista/exportación */}
+            {/* Selector de modo */}
             <SegmentedControl
               size="xs"
               value={exportMode}
@@ -131,16 +135,15 @@ export const ExportView = () => {
         </Group>
       </Paper>
 
-      {/* 2. CONTENEDOR DEL DOCUMENTO CON SCROLL INDEPENDIENTE */}
+      {/* 2. ÁREA DE VISUALIZACIÓN CON SCROLL EN PANTALLA */}
+      {/* NOTA: Eliminamos la clase 'print-only-container' de aquí para evitar duplicarla */}
       <Box
-        className="print-only-container"
         style={{
           flex: 1,
           overflowY: "auto",
           backgroundColor: "var(--mantine-color-gray-1)",
         }}
       >
-        {/* Pasamos exportMode a DocumentExporter para filtrar las secciones */}
         <DocumentExporter exportMode={exportMode} />
       </Box>
     </Box>
