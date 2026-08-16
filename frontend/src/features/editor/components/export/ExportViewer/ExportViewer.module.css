@@ -1,0 +1,10 @@
+.viewerContainer {
+  flex: 1;
+  overflow-y: auto;
+  background-color: var(--mantine-color-gray-1);
+  padding: 24px 0;
+}
+
+.fab {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.16);
+}

@@ -1,31 +1,128 @@
 // src/features/editor/views/ExportView.jsx
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
+import { Box } from "@mantine/core";
 import {
-  Group,
-  Box,
-  Button,
-  Title,
-  Text,
-  SegmentedControl,
-  Paper,
-} from "@mantine/core";
-import {
-  IconFileTypePdf,
-  IconFiles,
-  IconFileText,
-  IconBook,
-} from "@tabler/icons-react";
-import { DocumentExporter } from "../components/export/DocumentExporter";
+  ExportHeader,
+  ExportSidebar,
+  ExportViewer,
+  ExportModal,
+} from "../components/export";
+import classes from "./ExportView.module.css";
 
 export const ExportView = () => {
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
-  // Modos: 'all' (Completo), 'body' (Solo redacción + ref), 'prelims' (Solo preliminares)
-  const [exportMode, setExportMode] = useState("all");
+  const [showScrollTop, setShowScrollTop] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
-  const handleExportPDF = () => {
+  const [targetPageInput, setTargetPageInput] = useState(1);
+  const [exportScope, setExportScope] = useState("current");
+  const [pageRange, setPageRange] = useState("");
+
+  const [sections, setSections] = useState({
+    titlePage: true,
+    contraportada: true,
+    aceptacion: true,
+    reglamento: true,
+    dedicatoria: true,
+    agradecimientos: true,
+    toc: true,
+    glosario: true,
+    resumen: true,
+    abstract: true,
+    introduccion: true,
+    body: true,
+    references: true,
+    annexes: true,
+  });
+
+  const scrollContainerRef = useRef(null);
+
+  const handleScroll = () => {
+    if (scrollContainerRef.current) {
+      setShowScrollTop(scrollContainerRef.current.scrollTop > 300);
+    }
+  };
+
+  const scrollToTop = () => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTo({
+        top: 0,
+        behavior: "smooth",
+      });
+    }
+  };
+
+  const scrollToPage = (pageNum) => {
+    const pageElement = document.getElementById(`doc-page-${pageNum}`);
+    if (pageElement) {
+      pageElement.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
+  const handleSetPreset = (preset) => {
+    if (preset === "all") {
+      setSections({
+        titlePage: true,
+        contraportada: true,
+        aceptacion: true,
+        reglamento: true,
+        dedicatoria: true,
+        agradecimientos: true,
+        toc: true,
+        glosario: true,
+        resumen: true,
+        abstract: true,
+        introduccion: true,
+        body: true,
+        references: true,
+        annexes: true,
+      });
+    } else if (preset === "body_only") {
+      setSections({
+        titlePage: false,
+        contraportada: false,
+        aceptacion: false,
+        reglamento: false,
+        dedicatoria: false,
+        agradecimientos: false,
+        toc: false,
+        glosario: false,
+        resumen: false,
+        abstract: false,
+        introduccion: false,
+        body: true,
+        references: true,
+        annexes: true,
+      });
+    } else if (preset === "prelims_only") {
+      setSections({
+        titlePage: true,
+        contraportada: true,
+        aceptacion: true,
+        reglamento: true,
+        dedicatoria: true,
+        agradecimientos: true,
+        toc: true,
+        glosario: true,
+        resumen: true,
+        abstract: true,
+        introduccion: true,
+        body: false,
+        references: false,
+        annexes: false,
+      });
+    }
+  };
+
+  const handleToggleSection = (key) => {
+    setSections((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  const handleExecuteExport = () => {
+    setIsExportModalOpen(false);
     setIsExporting(true);
 
-    // Quitamos foco de cualquier campo activo para eliminar cursores en el PDF
     if (
       document.activeElement &&
       typeof document.activeElement.blur === "function"
@@ -33,15 +130,13 @@ export const ExportView = () => {
       document.activeElement.blur();
     }
 
-    const fileNames = {
-      all: "Documento_Completo_APA7",
-      body: "Redaccion_y_Referencias_APA7",
-      prelims: "Paginas_Preliminares_APA7",
-    };
+    const targetFileName =
+      exportScope === "all"
+        ? "Documento_Completo_APA7"
+        : exportScope === "page_range"
+          ? `Documento_Paginas_${pageRange.replace(/[\s,]+/g, "_")}`
+          : "Documento_Compilado_APA7";
 
-    const targetFileName = fileNames[exportMode] || "Documento_APA7";
-
-    // Espera para asegurar que React complete el ciclo de render antes de imprimir
     setTimeout(() => {
       if (window.electronAPI?.exportToPDF) {
         window.electronAPI.exportToPDF(targetFileName);
@@ -49,103 +144,51 @@ export const ExportView = () => {
         window.print();
       }
       setIsExporting(false);
-    }, 350);
+    }, 400);
   };
 
   return (
-    <Box
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        height: "100%",
-        width: "100%",
-        overflow: "hidden", // Fija la vista en pantalla
-      }}
-    >
-      {/* 1. BARRA SUPERIOR FIJA */}
-      <Paper
-        p="md"
-        radius={0}
-        bg="white"
-        className="no-print"
-        style={{
-          borderBottom: "1px solid #e9ecef",
-          flexShrink: 0,
-          zIndex: 100,
-          boxShadow: "0 2px 4px rgba(0,0,0,0.03)",
-        }}
-      >
-        <Group justify="space-between" align="center" wrap="wrap" gap="md">
-          <div>
-            <Title order={3} size="h4">
-              Exportar
-            </Title>
-            <Text c="dimmed" size="xs">
-              Selecciona qué secciones deseas previsualizar o guardar en PDF.
-            </Text>
-          </div>
+    <Box className={classes.root}>
+      {/* 1. Header */}
+      <ExportHeader
+        isSidebarOpen={isSidebarOpen}
+        onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
+        onOpenExportModal={() => setIsExportModalOpen(true)}
+        isExporting={isExporting}
+      />
 
-          <Group gap="sm" wrap="wrap">
-            {/* Selector de modo */}
-            <SegmentedControl
-              size="xs"
-              value={exportMode}
-              onChange={setExportMode}
-              data={[
-                {
-                  value: "all",
-                  label: (
-                    <Group gap={6} wrap="nowrap">
-                      <IconFiles size={14} />
-                      <span>Doc. Completo</span>
-                    </Group>
-                  ),
-                },
-                {
-                  value: "body",
-                  label: (
-                    <Group gap={6} wrap="nowrap">
-                      <IconFileText size={14} />
-                      <span>Solo Redacción y Ref.</span>
-                    </Group>
-                  ),
-                },
-                {
-                  value: "prelims",
-                  label: (
-                    <Group gap={6} wrap="nowrap">
-                      <IconBook size={14} />
-                      <span>Solo Preliminares</span>
-                    </Group>
-                  ),
-                },
-              ]}
-            />
+      {/* 2. Cuerpo: Sidebar + Viewer */}
+      <Box className={classes.bodyWrapper}>
+        {isSidebarOpen && (
+          <ExportSidebar
+            targetPage={targetPageInput}
+            onChangeTargetPage={setTargetPageInput}
+            onScrollToPage={scrollToPage}
+            sections={sections}
+            onToggleSection={handleToggleSection}
+            onSetPreset={handleSetPreset}
+          />
+        )}
 
-            <Button
-              leftSection={<IconFileTypePdf size={18} />}
-              color="blue"
-              size="sm"
-              loading={isExporting}
-              onClick={handleExportPDF}
-            >
-              Guardar como PDF
-            </Button>
-          </Group>
-        </Group>
-      </Paper>
-
-      {/* 2. ÁREA DE VISUALIZACIÓN CON SCROLL EN PANTALLA */}
-      {/* NOTA: Eliminamos la clase 'print-only-container' de aquí para evitar duplicarla */}
-      <Box
-        style={{
-          flex: 1,
-          overflowY: "auto",
-          backgroundColor: "var(--mantine-color-gray-1)",
-        }}
-      >
-        <DocumentExporter exportMode={exportMode} />
+        <ExportViewer
+          sections={sections}
+          scrollContainerRef={scrollContainerRef}
+          onScroll={handleScroll}
+          showScrollTop={showScrollTop}
+          onScrollToTop={scrollToTop}
+        />
       </Box>
+
+      {/* 3. Modal */}
+      <ExportModal
+        opened={isExportModalOpen}
+        onClose={() => setIsExportModalOpen(false)}
+        exportScope={exportScope}
+        onChangeExportScope={setExportScope}
+        pageRange={pageRange}
+        onChangePageRange={setPageRange}
+        onConfirmExport={handleExecuteExport}
+      />
     </Box>
   );
 };

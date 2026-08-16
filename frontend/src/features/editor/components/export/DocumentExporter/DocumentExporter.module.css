@@ -1,4 +1,4 @@
-/* DocumentExporter.module.css */
+/* src/features/editor/components/export/DocumentExporter/DocumentExporter.module.css */
 
 .exportCanvas {
   background-color: #ffffff;
@@ -33,7 +33,7 @@
 }
 
 /* =========================================================
-   VISTA DE PANTALLA: Escritorio con hojas centradas
+   VISTA DE PANTALLA: Escritorio con hojas centradas y espacio vertical
    ========================================================= */
 @media screen {
   .exportCanvas {
@@ -49,7 +49,7 @@
 }
 
 /* =========================================================
-   VISTA DE IMPRESIÓN (PDF)
+   VISTA DE IMPRESIÓN (PDF / Chromium)
    ========================================================= */
 @media print {
   /* 1. Destruye restricciones de altura y overflow en la jerarquía */

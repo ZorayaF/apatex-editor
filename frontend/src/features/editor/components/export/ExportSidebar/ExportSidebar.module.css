@@ -1,0 +1,11 @@
+.sidebar {
+  border-right: 1px solid #e9ecef;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  z-index: 10;
+}
+
+.sectionHeader {
+  letter-spacing: 0.5px;
+}

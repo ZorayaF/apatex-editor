@@ -1,0 +1,22 @@
+.card {
+  cursor: pointer;
+  border: 1.5px solid var(--mantine-color-gray-3);
+  background-color: var(--mantine-color-white);
+  transition: all 150ms ease;
+  user-select: none;
+}
+
+.card:hover {
+  border-color: var(--mantine-color-blue-4);
+  background-color: var(--mantine-color-blue-0);
+}
+
+.cardSelected {
+  border-color: var(--mantine-color-blue-6) !important;
+  background-color: var(--mantine-color-blue-0) !important;
+  box-shadow: 0 0 0 1px var(--mantine-color-blue-6);
+}
+
+.radioWrapper {
+  pointer-events: none; /* Permite que el clic en cualquier lugar active el contenedor */
+}
