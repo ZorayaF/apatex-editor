@@ -2,13 +2,16 @@
 
 .exportCanvas {
   background-color: #ffffff;
-  /* Desactiva clics, selecciones y focos en toda la vista de exportación */
   pointer-events: none !important;
   user-select: none !important;
 }
 
+.pageItemWrapper {
+  display: block;
+}
+
 /* =========================================================
-   SANITIZACIÓN VISUAL (Evita halos de selección, cursores y bordes)
+   SANITIZACIÓN VISUAL
    ========================================================= */
 .exportCanvas * {
   cursor: default !important;
@@ -27,13 +30,8 @@
   background-color: transparent !important;
 }
 
-.exportCanvas :global(.editable-cell) {
-  outline: none !important;
-  box-shadow: none !important;
-}
-
 /* =========================================================
-   VISTA DE PANTALLA: Escritorio con hojas centradas y espacio vertical
+   VISTA DE PANTALLA
    ========================================================= */
 @media screen {
   .exportCanvas {
@@ -52,14 +50,27 @@
    VISTA DE IMPRESIÓN (PDF / Chromium)
    ========================================================= */
 @media print {
-  /* 1. Destruye restricciones de altura y overflow en la jerarquía */
+  /* 1. Ocultar scrollbars en todos los navegadores y Chromium */
+  ::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+  }
+
+  * {
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+  }
+
+  /* 2. Anular alturas fijas y contenedores con scroll */
   :global(html),
   :global(body),
   :global(#root),
   :global(.mantine-AppShell-root),
   :global(.mantine-AppShell-main),
   :global(.mantine-ScrollArea-root),
-  :global(.mantine-ScrollArea-viewport) {
+  :global(.mantine-ScrollArea-viewport),
+  :global([class*="viewerContainer"]) {
     display: block !important;
     position: static !important;
     height: auto !important;
@@ -69,17 +80,20 @@
     padding: 0 !important;
     margin: 0 !important;
     background-color: white !important;
+    border: none !important;
+    box-shadow: none !important;
   }
 
-  /* 2. Ocultar barras y botones */
+  /* 3. Ocultar elementos de UI */
   :global(.no-print),
   :global(button),
   :global(header),
-  :global(nav) {
+  :global(nav),
+  :global(aside) {
     display: none !important;
   }
 
-  /* 3. Flujo estático y visible para que Chromium pagine */
+  /* 4. Lienzo de impresión */
   .exportCanvas {
     display: block !important;
     position: static !important;
@@ -89,9 +103,21 @@
     background-color: white !important;
     padding: 0 !important;
     margin: 0 !important;
+    gap: 0 !important;
   }
 
-  /* 4. Formato carta estándar sin márgenes del navegador */
+  /* 5. Wrapper de cada página (sin márgenes para evitar páginas en blanco) */
+  .pageItemWrapper {
+    display: block !important;
+    position: relative !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    page-break-after: always !important;
+    break-after: page !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
   @page {
     size: letter portrait;
     margin: 0 !important;

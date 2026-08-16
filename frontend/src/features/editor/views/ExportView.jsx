@@ -1,5 +1,5 @@
 // src/features/editor/views/ExportView.jsx
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useMemo } from "react";
 import { Box } from "@mantine/core";
 import {
   ExportHeader,
@@ -9,6 +9,23 @@ import {
 } from "../components/export";
 import classes from "./ExportView.module.css";
 
+const ALL_SECTIONS = {
+  titlePage: true,
+  contraportada: true,
+  aceptacion: true,
+  reglamento: true,
+  dedicatoria: true,
+  agradecimientos: true,
+  toc: true,
+  glosario: true,
+  resumen: true,
+  abstract: true,
+  introduccion: true,
+  body: true,
+  references: true,
+  annexes: true,
+};
+
 export const ExportView = () => {
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
@@ -16,25 +33,11 @@ export const ExportView = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   const [targetPageInput, setTargetPageInput] = useState(1);
-  const [exportScope, setExportScope] = useState("current");
+  const [exportScope, setExportScope] = useState("all"); // 'all' | 'current' | 'page_range'
   const [pageRange, setPageRange] = useState("");
 
-  const [sections, setSections] = useState({
-    titlePage: true,
-    contraportada: true,
-    aceptacion: true,
-    reglamento: true,
-    dedicatoria: true,
-    agradecimientos: true,
-    toc: true,
-    glosario: true,
-    resumen: true,
-    abstract: true,
-    introduccion: true,
-    body: true,
-    references: true,
-    annexes: true,
-  });
+  // Secciones que el usuario filtra en pantalla mediante el panel lateral
+  const [screenSections, setScreenSections] = useState({ ...ALL_SECTIONS });
 
   const scrollContainerRef = useRef(null);
 
@@ -62,24 +65,9 @@ export const ExportView = () => {
 
   const handleSetPreset = (preset) => {
     if (preset === "all") {
-      setSections({
-        titlePage: true,
-        contraportada: true,
-        aceptacion: true,
-        reglamento: true,
-        dedicatoria: true,
-        agradecimientos: true,
-        toc: true,
-        glosario: true,
-        resumen: true,
-        abstract: true,
-        introduccion: true,
-        body: true,
-        references: true,
-        annexes: true,
-      });
+      setScreenSections({ ...ALL_SECTIONS });
     } else if (preset === "body_only") {
-      setSections({
+      setScreenSections({
         titlePage: false,
         contraportada: false,
         aceptacion: false,
@@ -96,7 +84,7 @@ export const ExportView = () => {
         annexes: true,
       });
     } else if (preset === "prelims_only") {
-      setSections({
+      setScreenSections({
         titlePage: true,
         contraportada: true,
         aceptacion: true,
@@ -116,9 +104,25 @@ export const ExportView = () => {
   };
 
   const handleToggleSection = (key) => {
-    setSections((prev) => ({ ...prev, [key]: !prev[key] }));
+    setScreenSections((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
+  // Determinar qué secciones se incluirán en el lienzo de impresión
+  const printSections = useMemo(() => {
+    if (exportScope === "all" || exportScope === "page_range") {
+      return ALL_SECTIONS;
+    }
+    return screenSections;
+  }, [exportScope, screenSections]);
+
+  const printRange = useMemo(() => {
+    if (exportScope === "page_range") {
+      return pageRange;
+    }
+    return "";
+  }, [exportScope, pageRange]);
+
+  // Ejecución directa de la exportación
   const handleExecuteExport = () => {
     setIsExportModalOpen(false);
     setIsExporting(true);
@@ -130,13 +134,14 @@ export const ExportView = () => {
       document.activeElement.blur();
     }
 
-    const targetFileName =
-      exportScope === "all"
-        ? "Documento_Completo_APA7"
-        : exportScope === "page_range"
-          ? `Documento_Paginas_${pageRange.replace(/[\s,]+/g, "_")}`
-          : "Documento_Compilado_APA7";
+    let targetFileName = "Documento_Completo_APA7";
+    if (exportScope === "current") {
+      targetFileName = "Documento_Personalizado_APA7";
+    } else if (exportScope === "page_range") {
+      targetFileName = `Documento_Paginas_${pageRange.replace(/[\s,]+/g, "_")}`;
+    }
 
+    // Pequeño retardo para asegurar que el modal se cierre antes de capturar
     setTimeout(() => {
       if (window.electronAPI?.exportToPDF) {
         window.electronAPI.exportToPDF(targetFileName);
@@ -144,7 +149,7 @@ export const ExportView = () => {
         window.print();
       }
       setIsExporting(false);
-    }, 400);
+    }, 200);
   };
 
   return (
@@ -164,14 +169,16 @@ export const ExportView = () => {
             targetPage={targetPageInput}
             onChangeTargetPage={setTargetPageInput}
             onScrollToPage={scrollToPage}
-            sections={sections}
+            sections={screenSections}
             onToggleSection={handleToggleSection}
             onSetPreset={handleSetPreset}
           />
         )}
 
         <ExportViewer
-          sections={sections}
+          screenSections={screenSections}
+          printSections={printSections}
+          printRange={printRange}
           scrollContainerRef={scrollContainerRef}
           onScroll={handleScroll}
           showScrollTop={showScrollTop}
@@ -179,7 +186,7 @@ export const ExportView = () => {
         />
       </Box>
 
-      {/* 3. Modal */}
+      {/* 3. Modal de Configuración */}
       <ExportModal
         opened={isExportModalOpen}
         onClose={() => setIsExportModalOpen(false)}

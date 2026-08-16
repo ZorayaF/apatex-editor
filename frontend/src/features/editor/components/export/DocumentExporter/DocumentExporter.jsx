@@ -15,24 +15,32 @@ import { BibliographyPreview } from "@config/preview/BibliographyPreview";
 import { ConnectedBlock } from "@writer/canvas/ConnectedBlock";
 import classes from "./DocumentExporter.module.css";
 
-export const DocumentExporter = ({
-  sections = {
-    titlePage: true,
-    contraportada: true,
-    aceptacion: true,
-    reglamento: true,
-    dedicatoria: true,
-    agradecimientos: true,
-    toc: true,
-    glosario: true,
-    resumen: true,
-    abstract: true,
-    introduccion: true,
-    body: true,
-    references: true,
-    annexes: true,
-  },
-}) => {
+const parsePageRange = (rangeStr) => {
+  if (!rangeStr || !rangeStr.trim()) return null;
+  const pagesSet = new Set();
+  const parts = rangeStr.split(",");
+  for (const part of parts) {
+    const trimmed = part.trim();
+    if (trimmed.includes("-")) {
+      const [start, end] = trimmed
+        .split("-")
+        .map((n) => parseInt(n.trim(), 10));
+      if (!isNaN(start) && !isNaN(end)) {
+        for (let i = Math.min(start, end); i <= Math.max(start, end); i++) {
+          pagesSet.add(i);
+        }
+      }
+    } else {
+      const num = parseInt(trimmed, 10);
+      if (!isNaN(num)) {
+        pagesSet.add(num);
+      }
+    }
+  }
+  return pagesSet.size > 0 ? pagesSet : null;
+};
+
+export const DocumentExporter = ({ sections = {}, pageRange = "" }) => {
   const {
     pages = [],
     projectMetadata = {},
@@ -40,27 +48,31 @@ export const DocumentExporter = ({
   } = useStore();
 
   const preliminares = storePreliminares || projectMetadata?.preliminares || {};
+  const allowedPagesSet = parsePageRange(pageRange);
 
   let globalPageCounter = 1;
 
-  // Envoltorio con ID para que el scroll a página funcione con precisión
-  const wrapPage = (pageNum, element) => (
-    <div
-      key={`page-wrapper-${pageNum}`}
-      id={`doc-page-${pageNum}`}
-      data-page={pageNum}
-    >
-      {element}
-    </div>
-  );
+  const wrapPage = (pageNum, element) => {
+    // Si hay un rango definido y esta página no está incluida, no la renderizamos
+    if (allowedPagesSet && !allowedPagesSet.has(pageNum)) {
+      return null;
+    }
+
+    return (
+      <div
+        key={`page-wrapper-${pageNum}`}
+        id={`doc-page-${pageNum}`}
+        data-page={pageNum}
+        className={classes.pageItemWrapper}
+      >
+        {element}
+      </div>
+    );
+  };
 
   return (
     <div className={`print-only-container ${classes.exportCanvas}`}>
-      {/* ============================================================ */}
-      {/* 1. SECCIONES PRELIMINARES                                    */}
-      {/* ============================================================ */}
-
-      {/* 1.1 Portada */}
+      {/* 1. SECCIONES PRELIMINARES */}
       {sections.titlePage &&
         wrapPage(
           globalPageCounter,
@@ -72,7 +84,6 @@ export const DocumentExporter = ({
           />,
         )}
 
-      {/* 1.2 Contraportada */}
       {sections.contraportada &&
         wrapPage(
           globalPageCounter,
@@ -84,7 +95,6 @@ export const DocumentExporter = ({
           />,
         )}
 
-      {/* 1.3 Aceptación */}
       {sections.aceptacion &&
         preliminares.aceptacion?.enabled &&
         wrapPage(
@@ -95,7 +105,6 @@ export const DocumentExporter = ({
           />,
         )}
 
-      {/* 1.4 Nota de Reglamento */}
       {sections.reglamento &&
         preliminares.reglamento?.enabled &&
         wrapPage(
@@ -111,7 +120,6 @@ export const DocumentExporter = ({
           />,
         )}
 
-      {/* 1.5 Dedicatoria */}
       {sections.dedicatoria &&
         preliminares.dedicatoria?.enabled &&
         wrapPage(
@@ -124,7 +132,6 @@ export const DocumentExporter = ({
           />,
         )}
 
-      {/* 1.6 Agradecimientos */}
       {sections.agradecimientos &&
         preliminares.agradecimientos?.enabled &&
         wrapPage(
@@ -137,7 +144,6 @@ export const DocumentExporter = ({
           />,
         )}
 
-      {/* 1.7 Tabla de Contenido */}
       {sections.toc &&
         wrapPage(
           globalPageCounter,
@@ -147,7 +153,6 @@ export const DocumentExporter = ({
           </>,
         )}
 
-      {/* 1.8 Glosario */}
       {sections.glosario &&
         preliminares.glosario?.enabled &&
         wrapPage(
@@ -159,7 +164,6 @@ export const DocumentExporter = ({
           />,
         )}
 
-      {/* 1.9 Resumen */}
       {sections.resumen &&
         preliminares.resumen?.enabled &&
         wrapPage(
@@ -173,7 +177,6 @@ export const DocumentExporter = ({
           />,
         )}
 
-      {/* 1.10 Abstract */}
       {sections.abstract &&
         preliminares.abstract?.enabled &&
         wrapPage(
@@ -187,7 +190,6 @@ export const DocumentExporter = ({
           />,
         )}
 
-      {/* 1.11 Introducción */}
       {sections.introduccion &&
         preliminares.introduccion?.content?.trim().length > 0 &&
         wrapPage(
@@ -200,9 +202,7 @@ export const DocumentExporter = ({
           />,
         )}
 
-      {/* ============================================================ */}
-      {/* 2. CUERPO DE REDACCIÓN (Canvas)                              */}
-      {/* ============================================================ */}
+      {/* 2. CUERPO DE REDACCIÓN */}
       {sections.body &&
         pages.map((page) => {
           const currentPageNum = globalPageCounter++;
@@ -222,9 +222,7 @@ export const DocumentExporter = ({
           );
         })}
 
-      {/* ============================================================ */}
-      {/* 3. REFERENCIAS BIBLIOGRÁFICAS                                */}
-      {/* ============================================================ */}
+      {/* 3. REFERENCIAS BIBLIOGRÁFICAS */}
       {sections.references &&
         wrapPage(
           globalPageCounter,
@@ -234,9 +232,7 @@ export const DocumentExporter = ({
           />,
         )}
 
-      {/* ============================================================ */}
-      {/* 4. SECCIÓN DE ANEXOS                                         */}
-      {/* ============================================================ */}
+      {/* 4. ANEXOS */}
       {sections.annexes &&
         preliminares?.anexos?.enabled &&
         preliminares?.anexos?.items?.length > 0 && (
