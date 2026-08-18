@@ -41,7 +41,7 @@ export const ExportSidebar = ({
                 c="dimmed"
                 className={classes.sectionHeader}
               >
-                Ir a Página
+                Página
               </Text>
             </Group>
 
@@ -159,7 +159,7 @@ export const ExportSidebar = ({
               />
               <Checkbox
                 size="xs"
-                label="Tabla de Contenido (TOC)"
+                label="Tabla de Contenido"
                 checked={sections.toc}
                 onChange={() => onToggleSection("toc")}
               />

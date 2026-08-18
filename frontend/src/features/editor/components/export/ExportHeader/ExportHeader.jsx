@@ -55,13 +55,9 @@ export const ExportHeader = ({
             </ActionIcon>
           </Tooltip>
 
-          <Box className={classes.iconBadge}>
-            <IconEye size={22} color="var(--mantine-color-blue-6)" />
-          </Box>
-
           <div>
             <Title order={3} size="h4" fw={700} className={classes.title}>
-              Previsualización y Compilación
+              Previsualización
             </Title>
             <Text c="dimmed" size="xs">
               Normativa APA 7.ª edición · Universidad de Boyacá

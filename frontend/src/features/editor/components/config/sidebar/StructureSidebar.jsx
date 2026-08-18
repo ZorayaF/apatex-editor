@@ -46,13 +46,13 @@ export const StructureSidebar = ({
             <SectionHeader label="Elementos Requeridos (APA)" />
             <Stack gap={4}>
               <NavItem
-                label="Portada y Contraportada"
+                label="Portada y contraportada"
                 icon={<IconFileCheck size={18} />}
                 active={activeSection === "portada"}
                 onClick={() => setActiveSection("portada")}
               />
               <NavItem
-                label="Tabla de Contenido"
+                label="Tabla de contenido"
                 icon={<IconListDetails size={18} />}
                 active={activeSection === "toc"}
                 onClick={() => setActiveSection("toc")}
@@ -136,13 +136,13 @@ export const StructureSidebar = ({
             <SectionHeader label="Legal / Institucional" />
             <Stack gap={4}>
               <NavItem
-                label="Nota de Reglamento"
+                label="Nota de reglamento"
                 icon={<IconGavel size={18} />}
                 active={activeSection === "reglamento"}
                 onClick={() => setActiveSection("reglamento")}
               />
               <NavItem
-                label="Nota de Aceptación"
+                label="Nota de aceptación"
                 icon={<IconCircleCheckFilled size={18} />}
                 active={activeSection === "aceptacion"}
                 onClick={() => setActiveSection("aceptacion")}

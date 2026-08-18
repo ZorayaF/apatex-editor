@@ -4,7 +4,6 @@
   font-size: var(--font-size-base); /* 12pt */
   font-weight: bold;
   text-align: center;
-  text-transform: capitalize;
   margin-top: 0;
   margin-bottom: 24px;
 }

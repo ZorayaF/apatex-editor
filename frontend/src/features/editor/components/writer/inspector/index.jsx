@@ -25,7 +25,7 @@ export const Inspector = () => {
     if (activeTab === "library") return "Biblioteca de Fuentes";
     if (activeBlock?.type === "table") return "Propiedades de Tabla";
     if (activeBlock?.type === "figure") return "Propiedades de Figura";
-    return "Inspector";
+    return "Herramientas";
   };
 
   // 2. Renderizado reactivo inmediato
