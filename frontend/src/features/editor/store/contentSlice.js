@@ -211,11 +211,50 @@ export const createContentSlice = (set, get) => {
 
         const history = commitInstantSnapshot(state);
 
+        const isSourceRunIn = block.type === "h4" || block.type === "h5";
+        const isTargetRunIn = targetType === "h4" || targetType === "h5";
+
+        let updatedProperties = { type: targetType };
+
+        // CASO 1: De bloque normal (paragraph, h1-h3, bullet) -> a H4/H5
+        if (!isSourceRunIn && isTargetRunIn) {
+          const rawText = block.content || "";
+          const firstPointIndex = rawText.indexOf(".");
+
+          if (firstPointIndex !== -1) {
+            updatedProperties.title = rawText.slice(0, firstPointIndex).trim();
+            updatedProperties.content = rawText
+              .slice(firstPointIndex + 1)
+              .trimStart();
+          } else {
+            // Si no tiene punto, todo el texto pasa a ser el título
+            updatedProperties.title = rawText.trim();
+            updatedProperties.content = "";
+          }
+        }
+        // CASO 2: De H4/H5 -> a bloque normal (paragraph, h1-h3, bullet)
+        else if (isSourceRunIn && !isTargetRunIn) {
+          const titlePart = (block.title || "").trim();
+          const contentPart = (block.content || "").trim();
+
+          let unifiedContent = "";
+          if (titlePart && contentPart) {
+            unifiedContent = `${titlePart}. ${contentPart}`;
+          } else {
+            unifiedContent = titlePart || contentPart;
+          }
+
+          updatedProperties.content = unifiedContent;
+          updatedProperties.title = undefined; // Limpiamos la propiedad title
+        }
+
+        const updatedBlocks = state.blocks.map((b) =>
+          b.id === id ? { ...b, ...updatedProperties } : b,
+        );
+
         return {
           ...history,
-          blocks: state.blocks.map((b) =>
-            b.id === id ? { ...b, type: targetType } : b,
-          ),
+          blocks: updatedBlocks,
           selectedBlockId: id,
         };
       }),

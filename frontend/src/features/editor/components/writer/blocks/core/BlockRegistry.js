@@ -3,13 +3,14 @@ import { ReferenceBlock } from "@writer/blocks/complex/ReferenceBlock";
 import { CitationInline } from "@writer/blocks/complex/CitationInline";
 import { TableBlock } from "@writer/blocks/complex/TableBlock";
 import { FigureBlock } from "@writer/blocks/complex/FigureBlock";
+import { RunInHeadingBlock } from "@writer/blocks/text/RunInHeadingBlock/RunInHeadingBlock.jsx";
 
 export const BLOCK_COMPONENTS = {
   h1: BaseEditable,
   h2: BaseEditable,
   h3: BaseEditable,
-  h4: BaseEditable,
-  h5: BaseEditable,
+  h4: RunInHeadingBlock,
+  h5: RunInHeadingBlock,
   paragraph: BaseEditable,
   bullet: BaseEditable,
   reference: ReferenceBlock,

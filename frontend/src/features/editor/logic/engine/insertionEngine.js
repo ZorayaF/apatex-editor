@@ -14,25 +14,19 @@ export const calculateSplit = ({
   if (!originalBlock)
     return { updatedBlocks: blocks, updatedPages: pages, newBlockId: null };
 
-  let newBlockId = crypto.randomUUID();
+  const newBlockId = crypto.randomUUID();
   let updatedBlocks = [...blocks];
 
-  // --- LÓGICA DE HERENCIA Y SALIDA DE LISTA ---
-
-  // Por defecto, al dar Enter creamos un párrafo
+  // --- LÓGICA DE HERENCIA ---
   let newType = "paragraph";
 
-  // CASO ESPECIAL: Si estamos en una viñeta (bullet)
+  // CASO ESPECIAL: Si venimos de un bullet
   if (originalBlock.type === "bullet") {
-    // Si la viñeta tiene texto, la siguiente también será una viñeta
     if (textBefore.trim() !== "" || textAfter.trim() !== "") {
       newType = "bullet";
-    }
-    // Si la viñeta está VACÍA y damos Enter, "salimos" de la lista:
-    // Convertimos el bloque actual en párrafo y NO creamos uno nuevo.
-    else {
+    } else {
+      // Salir de la lista si el bullet estaba vacío
       const finalBlocks = blocks.map((b) =>
-        // Forzamos content: "" para asegurar que el párrafo nuevo esté limpio
         b.id === blockId ? { ...b, type: "paragraph", content: "" } : b,
       );
 
@@ -44,19 +38,19 @@ export const calculateSplit = ({
     }
   }
 
-  // 1. Actualizar el contenido del bloque original con la primera mitad del texto
+  // 1. Actualizar el bloque actual (conservando su 'title' si es h4/h5)
   updatedBlocks = updatedBlocks.map((b) =>
     b.id === blockId ? { ...b, content: textBefore } : b,
   );
 
-  // 2. Crear el nuevo bloque con el tipo heredado y la segunda mitad del texto
+  // 2. Crear el nuevo bloque siempre como párrafo (con content limpio)
   updatedBlocks.push({
     id: newBlockId,
     type: newType,
     content: textAfter,
   });
 
-  // 3. Reordenar la página: Insertar el nuevo ID justo debajo del original
+  // 3. Insertar el nuevo bloque en la página correspondiente
   const updatedPages = pages.map((page) => {
     if (page.blockIds.includes(blockId)) {
       const newIds = [...page.blockIds];
