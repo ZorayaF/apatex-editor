@@ -48,11 +48,13 @@ export const parseCitations = (content, sources) => {
       label = `(${displayAuthor}, ${year}${pageText})`;
     }
 
+    // CAMBIO AQUÍ: Cambiamos <a> por <span> y removemos href
     // Usamos un <span> interactivo con cursor pointer y data-ref-id
     return `<span 
       class="citationBadge" 
       contenteditable="false" 
       data-ref-id="${id}" 
+      style="user-select: all; text-decoration: none; color: inherit; cursor: default;"
       style="user-select: all; cursor: pointer; color: var(--mantine-color-blue-7); font-weight: 500;"
     >${label}</span>`;
   });

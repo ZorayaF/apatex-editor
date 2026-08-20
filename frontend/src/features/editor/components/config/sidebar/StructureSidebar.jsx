@@ -1,11 +1,12 @@
+import React from "react";
 import {
   Stack,
   Text,
-  NavLink,
   Box,
   Group,
   Switch,
   ScrollArea,
+  Tooltip,
 } from "@mantine/core";
 import {
   IconFileCheck,
@@ -19,6 +20,7 @@ import {
   IconPaperclip,
   IconListDetails,
 } from "@tabler/icons-react";
+import classes from "./StructureSidebar.module.css";
 
 export const StructureSidebar = ({
   activeSection,
@@ -33,8 +35,8 @@ export const StructureSidebar = ({
       component="nav"
       style={{
         height: "100%",
-        borderRight: "1px solid #e0e0e0",
-        backgroundColor: "#fcfcfc",
+        borderRight: "1px solid #e9ecef",
+        backgroundColor: "#ffffff",
       }}
     >
       <ScrollArea h="100%" p="md">
@@ -44,13 +46,13 @@ export const StructureSidebar = ({
             <SectionHeader label="Elementos Requeridos (APA)" />
             <Stack gap={4}>
               <NavItem
-                label="Portada y Contraportada"
+                label="Portada y contraportada"
                 icon={<IconFileCheck size={18} />}
                 active={activeSection === "portada"}
                 onClick={() => setActiveSection("portada")}
               />
               <NavItem
-                label="Tabla de Contenido"
+                label="Tabla de contenido"
                 icon={<IconListDetails size={18} />}
                 active={activeSection === "toc"}
                 onClick={() => setActiveSection("toc")}
@@ -90,7 +92,7 @@ export const StructureSidebar = ({
                 label="Dedicatoria"
                 icon={<IconHeart size={18} />}
                 active={activeSection === "dedicatoria"}
-                enabled={prelim.dedicatoria?.enabled}
+                enabled={Boolean(prelim.dedicatoria?.enabled)}
                 onToggle={(val) =>
                   onToggleSection("preliminares.dedicatoria.enabled", val)
                 }
@@ -100,7 +102,7 @@ export const StructureSidebar = ({
                 label="Agradecimientos"
                 icon={<IconAward size={18} />}
                 active={activeSection === "agradecimientos"}
-                enabled={prelim.agradecimientos?.enabled}
+                enabled={Boolean(prelim.agradecimientos?.enabled)}
                 onToggle={(val) =>
                   onToggleSection("preliminares.agradecimientos.enabled", val)
                 }
@@ -110,7 +112,7 @@ export const StructureSidebar = ({
                 label="Glosario"
                 icon={<IconVocabulary size={18} />}
                 active={activeSection === "glosario"}
-                enabled={prelim.glosario?.enabled}
+                enabled={Boolean(prelim.glosario?.enabled)}
                 onToggle={(val) =>
                   onToggleSection("preliminares.glosario.enabled", val)
                 }
@@ -120,7 +122,7 @@ export const StructureSidebar = ({
                 label="Anexos"
                 icon={<IconPaperclip size={18} />}
                 active={activeSection === "anexos"}
-                enabled={prelim.anexos?.enabled}
+                enabled={Boolean(prelim.anexos?.enabled)}
                 onToggle={(val) =>
                   onToggleSection("preliminares.anexos.enabled", val)
                 }
@@ -134,13 +136,13 @@ export const StructureSidebar = ({
             <SectionHeader label="Legal / Institucional" />
             <Stack gap={4}>
               <NavItem
-                label="Nota de Reglamento"
+                label="Nota de reglamento"
                 icon={<IconGavel size={18} />}
                 active={activeSection === "reglamento"}
                 onClick={() => setActiveSection("reglamento")}
               />
               <NavItem
-                label="Nota de Aceptación"
+                label="Nota de aceptación"
                 icon={<IconCircleCheckFilled size={18} />}
                 active={activeSection === "aceptacion"}
                 onClick={() => setActiveSection("aceptacion")}
@@ -153,7 +155,7 @@ export const StructureSidebar = ({
   );
 };
 
-// --- SUB-COMPONENTES INTERNOS ---
+// --- SUBCOMPONENTES ---
 
 const SectionHeader = ({ label }) => (
   <Text
@@ -167,52 +169,57 @@ const SectionHeader = ({ label }) => (
   </Text>
 );
 
-const NavItem = ({ label, icon, active, onClick, rightSection }) => (
-  <NavLink
-    label={label}
-    leftSection={icon}
-    active={active}
+const NavItem = ({ label, icon, active, onClick }) => (
+  <Box
+    className={`${classes.navCard} ${active ? classes.navCardActive : ""}`}
     onClick={onClick}
-    rightSection={rightSection}
-    variant="filled"
-    color="blue"
-    style={{ borderRadius: "6px" }}
-  />
+  >
+    <Group gap="sm" wrap="nowrap">
+      <Box className={classes.iconWrapper}>{icon}</Box>
+      <Text size="sm" fw={active ? 600 : 500} style={{ flex: 1 }}>
+        {label}
+      </Text>
+    </Group>
+  </Box>
 );
 
 const NavItemToggle = ({ label, icon, active, enabled, onToggle, onClick }) => (
-  <Group justify="space-between" wrap="nowrap" gap={0}>
-    <NavLink
-      label={label}
-      leftSection={icon}
-      active={active}
-      onClick={onClick}
-      disabled={!enabled && !active} // Bloquea clics si está desactivado y no activo
-      variant="filled"
-      color="blue"
-      style={{
-        borderRadius: "6px 0 0 6px",
-        flex: 1,
-        opacity: enabled ? 1 : 0.6,
-      }}
-    />
-    <Box
-      style={{
-        border: "1px solid #f1f3f5",
-        borderLeft: "none",
-        borderRadius: "0 6px 6px 0",
-        padding: "0 10px",
-        display: "flex",
-        alignItems: "center",
-        height: "38px",
-        backgroundColor: active ? "var(--mantine-color-blue-light)" : "white",
-      }}
-    >
-      <Switch
-        size="xs"
-        checked={enabled}
-        onChange={(e) => onToggle(e.currentTarget.checked)}
-      />
-    </Box>
-  </Group>
+  <Box
+    className={`${classes.navCard} ${active ? classes.navCardActive : ""}`}
+    onClick={onClick}
+  >
+    <Group justify="space-between" align="center" wrap="nowrap">
+      <Group gap="sm" wrap="nowrap" style={{ flex: 1 }}>
+        <Box className={classes.iconWrapper}>{icon}</Box>
+        <Text size="sm" fw={active ? 600 : 500}>
+          {label}
+        </Text>
+      </Group>
+
+      {/* SWITCH CON BORDE AJUSTADO */}
+      <Tooltip
+        label={enabled ? "Desactivar sección" : "Activar sección"}
+        position="left"
+        withArrow
+      >
+        <Box
+          className={`${classes.tightSwitch} ${
+            enabled ? classes.tightSwitchActive : ""
+          }`}
+          onClick={(e) => {
+            e.stopPropagation();
+            onToggle(!enabled);
+          }}
+        >
+          <Switch
+            size="xs"
+            color="blue"
+            checked={enabled}
+            onChange={() => {}}
+            style={{ pointerEvents: "none" }}
+          />
+        </Box>
+      </Tooltip>
+    </Group>
+  </Box>
 );

@@ -1,0 +1,24 @@
+.header {
+  border-bottom: 1px solid #e9ecef;
+  flex-shrink: 0;
+  z-index: 100;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.iconBadge {
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  background-color: var(--mantine-color-blue-0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.title {
+  letter-spacing: -0.3px;
+}
+
+.exportBtn {
+  box-shadow: 0 2px 8px rgba(34, 139, 230, 0.25);
+}

@@ -22,6 +22,20 @@ import { AnnexesForm } from "@config/forms/AnnexesForm";
 import { IntroductionForm } from "@config/forms/IntroductionForm";
 import { TOCForm } from "@config/forms/TOCForm";
 
+const SECTION_TITLES = {
+  portada: "Portada y contraportada",
+  resumen: "Resumen",
+  abstract: "Abstract",
+  dedicatoria: "Dedicatoria",
+  agradecimientos: "Agradecimientos",
+  glosario: "Glosario",
+  anexos: "Anexos",
+  introduccion: "Introducción",
+  referencias: "Referencias",
+  reglamento: "Reglamento",
+  toc: "Tabla de contenido",
+};
+
 export const ConfigurationView = () => {
   const { projectMetadata, setProjectMetadata } = useStore();
   const [activeSection, setActiveSection] = useState("portada");
@@ -112,13 +126,8 @@ export const ConfigurationView = () => {
             >
               CONFIGURACIÓN
             </Text>
-            <Text
-              fw={700}
-              mb="xl"
-              size="xl"
-              style={{ textTransform: "capitalize" }}
-            >
-              {activeSection}
+            <Text fw={700} mb="xl" size="xl">
+              {SECTION_TITLES[activeSection] || activeSection}
             </Text>
 
             <Box pb={100}>{renderActiveForm()}</Box>

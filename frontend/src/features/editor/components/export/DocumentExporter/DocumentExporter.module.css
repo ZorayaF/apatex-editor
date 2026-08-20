@@ -1,16 +1,18 @@
-/* DocumentExporter.module.css */
+/* src/features/editor/components/export/DocumentExporter/DocumentExporter.module.css */
 
 .exportCanvas {
   background-color: #ffffff;
-  /* Desactiva clics, selecciones y focos en toda la vista de exportación */
   pointer-events: none !important;
   user-select: none !important;
 }
 
-/* =========================================================
-   SANITIZACIÓN VISUAL EXTREMA
-   ========================================================= */
+.pageItemWrapper {
+  display: block;
+}
 
+/* =========================================================
+   SANITIZACIÓN VISUAL
+   ========================================================= */
 .exportCanvas * {
   cursor: default !important;
   caret-color: transparent !important;
@@ -28,39 +30,47 @@
   background-color: transparent !important;
 }
 
-.exportCanvas :global(.editable-cell) {
-  outline: none !important;
-  box-shadow: none !important;
-}
-
 /* =========================================================
-   VISTA DE PANTALLA: Solo el "escritorio" gris
+   VISTA DE PANTALLA
    ========================================================= */
 @media screen {
   .exportCanvas {
-    display: block !important;
-    background-color: transparent !important; /* Cristal transparente */
-    padding: 40px 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    background-color: transparent !important;
+    padding: 32px 0 !important;
     border: none !important;
     box-shadow: none !important;
+    gap: 2rem;
   }
 }
 
 /* =========================================================
-   VISTA DE IMPRESIÓN (PDF)
-   ========================================================= */
-/* =========================================================
-   VISTA DE IMPRESIÓN (PDF): LA CURA DEFINITIVA PARA LA PAGINACIÓN
+   VISTA DE IMPRESIÓN (PDF / Chromium)
    ========================================================= */
 @media print {
-  /* 1. DESTRUIMOS TODAS LAS RESTRICCIONES DEL FRAMEWORK MANTINE */
+  /* 1. Ocultar scrollbars en todos los navegadores y Chromium */
+  ::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+  }
+
+  * {
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+  }
+
+  /* 2. Anular alturas fijas y contenedores con scroll */
   :global(html),
   :global(body),
   :global(#root),
   :global(.mantine-AppShell-root),
   :global(.mantine-AppShell-main),
   :global(.mantine-ScrollArea-root),
-  :global(.mantine-ScrollArea-viewport) {
+  :global(.mantine-ScrollArea-viewport),
+  :global([class*="viewerContainer"]) {
     display: block !important;
     position: static !important;
     height: auto !important;
@@ -70,19 +80,46 @@
     padding: 0 !important;
     margin: 0 !important;
     background-color: white !important;
+    border: none !important;
+    box-shadow: none !important;
   }
 
-  /* 2. LIMPIAMOS NUESTRO LIENZO */
+  /* 3. Ocultar elementos de UI */
+  :global(.no-print),
+  :global(button),
+  :global(header),
+  :global(nav),
+  :global(aside) {
+    display: none !important;
+  }
+
+  /* 4. Lienzo de impresión */
   .exportCanvas {
     display: block !important;
+    position: static !important;
+    width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
     background-color: white !important;
     padding: 0 !important;
     margin: 0 !important;
+    gap: 0 !important;
   }
 
-  /* 3. ELIMINAMOS EL "DOCK" Y CUALQUIER MARGEN FANTASMA DEL NAVEGADOR */
-  @page {
+  /* 5. Wrapper de cada página (sin márgenes para evitar páginas en blanco) */
+  .pageItemWrapper {
+    display: block !important;
+    position: relative !important;
     margin: 0 !important;
-    size: letter; /* Fuerza el PDF al tamaño carta físico */
+    padding: 0 !important;
+    page-break-after: always !important;
+    break-after: page !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  @page {
+    size: letter portrait;
+    margin: 0 !important;
   }
 }
