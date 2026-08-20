@@ -7,6 +7,7 @@ import {
 } from "@logic/engine/insertionEngine";
 import { cleanAndSplitText } from "@logic/engine/parser";
 import { isTextBlock } from "@logic/rules/blockRules";
+
 const MAX_HISTORY = 40;
 
 // Clon profundo del árbol JSON del documento
@@ -123,7 +124,7 @@ export const createContentSlice = (set, get) => {
       });
     },
 
-    // --- NAVEGACIÓN ---
+    // --- NAVEGACIÓN Y ENFOQUE ---
     setActivePage: (index) => set({ activePageIndex: index }),
     setSelectedBlockId: (id) =>
       set((state) => ({
@@ -135,6 +136,44 @@ export const createContentSlice = (set, get) => {
     setLastCaretOffset: (offset) => set({ lastCaretOffset: offset }),
     setFocusedChapterId: (id) => set({ focusedChapterId: id }),
     clearFocus: () => set({ focusedChapterId: null }),
+
+    focusOrCreateBlockInPage: (pageId) =>
+      set((state) => {
+        const pageIndex = state.pages.findIndex((p) => p.id === pageId);
+        if (pageIndex === -1) return state;
+
+        const page = state.pages[pageIndex];
+
+        // Caso 1: La página ya contiene bloques -> seleccionamos el último
+        if (page.blockIds.length > 0) {
+          const lastBlockId = page.blockIds[page.blockIds.length - 1];
+          return {
+            selectedBlockId: lastBlockId,
+            activePageIndex: pageIndex,
+          };
+        }
+
+        // Caso 2: La página está vacía -> insertamos un párrafo inicial
+        const history = commitInstantSnapshot(state);
+        const newBlockId = crypto.randomUUID();
+        const newBlock = {
+          id: newBlockId,
+          type: "paragraph",
+          content: "",
+        };
+
+        const updatedPages = state.pages.map((p) =>
+          p.id === pageId ? { ...p, blockIds: [newBlockId] } : p,
+        );
+
+        return {
+          ...history,
+          blocks: [...state.blocks, newBlock],
+          pages: updatedPages,
+          activePageIndex: pageIndex,
+          selectedBlockId: newBlockId,
+        };
+      }),
 
     // --- ESCRITURA EN VIVO (Nivel 1: Palabras agrupadas) ---
     updateBlockContent: (id, content) => {
@@ -154,7 +193,6 @@ export const createContentSlice = (set, get) => {
           ),
         }));
       } else {
-        // Acciones discretas (cambiar ancho, filas, columnas, imágenes)
         set((state) => ({
           ...commitInstantSnapshot(state),
           blocks: state.blocks.map((b) =>
@@ -163,10 +201,13 @@ export const createContentSlice = (set, get) => {
         }));
       }
     },
+
+    // --- MUTACIÓN DE TIPO DE BLOQUE ---
     setBlockType: (id, targetType) =>
       set((state) => {
         const block = state.blocks.find((b) => b.id === id);
         if (!block || block.type === targetType) return state;
+        if (!isTextBlock(block.type) || !isTextBlock(targetType)) return state;
 
         const history = commitInstantSnapshot(state);
 

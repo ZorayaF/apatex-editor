@@ -1,3 +1,4 @@
+// src/features/editor/hooks/useBlockHandlers.js
 import { useCallback } from "react";
 import { useStore } from "@store";
 import { formatRunInHeading } from "@logic/engine/formatting";
@@ -21,54 +22,41 @@ export const useBlockHandlers = ({
 
   const { getOffset, setOffset } = caret;
 
-  /**
-   * Sincroniza la posición actual del cursor con el Store.
-   */
   const syncCaretPosition = useCallback(() => {
     const offset = getOffset();
     setLastCaretOffset(offset);
     return offset;
   }, [getOffset, setLastCaretOffset]);
 
-  /**
-   * ESTA ES LA FUNCIÓN CLAVE:
-   * Toma el HTML del navegador y lo limpia convirtiendo las citas
-   * de nuevo a códigos ((ref:id)) antes de guardarlos.
-   */
   const getRawContentFromDOM = useCallback(() => {
     if (!textRef.current) return "";
 
-    // Creamos un clon temporal para no ensuciar lo que el usuario ve
     const tempDiv = document.createElement("div");
     tempDiv.innerHTML = textRef.current.innerHTML;
 
-    // Buscamos todos los spans de cita y los revertimos a su "código secreto"
+    // Revertir citas visuales a formato canónico ((ref:...))
     const citationSpans = tempDiv.querySelectorAll(".apa-citation");
     citationSpans.forEach((span) => {
       const refId = span.getAttribute("data-ref-id");
-      // Reemplazamos el nodo visual por el marcador de texto puro
       span.replaceWith(`((ref:${refId}))`);
     });
 
-    // Devolvemos el texto limpio (ahora con los marcadores restaurados)
     return tempDiv.textContent || "";
   }, [textRef]);
 
   const handleInput = useCallback(() => {
     isTyping.current = true;
     const offset = syncCaretPosition();
-
-    // 1. Obtenemos el contenido restaurando los marcadores ((ref:id))
     const cleanText = getRawContentFromDOM();
 
-    // 2. Notificar al Store (Ahora las citas son inmortales ️)
     updateBlockContent(id, cleanText);
 
-    // 3. Formateo APA para encabezados H4/H5
+    // Formateo APA dinámico para encabezados de nivel 4 y 5
     if (type === "h4" || type === "h5") {
-      // Usamos el texto con marcadores para el formateo
       textRef.current.innerHTML = formatRunInHeading(cleanText, type);
-      setOffset(offset);
+      if (typeof setOffset === "function") {
+        setOffset(offset);
+      }
     }
 
     setTimeout(() => {
@@ -87,22 +75,35 @@ export const useBlockHandlers = ({
 
   const handleKeyDown = useCallback(
     (e) => {
-      const offset = getOffset();
-
       if (e.key === "Enter") {
         e.preventDefault();
-        // Usamos 'content' del Store que siempre tiene los marcadores originales
-        const textBefore = content.slice(0, offset);
-        const textAfter = content.slice(offset);
+        e.stopPropagation();
+
+        // 1. Obtener la posición del cursor
+        const offset = getOffset();
+
+        // 2. Usar el contenido actual del store o extraerlo en vivo si está desfasado
+        const currentContent =
+          typeof content === "string" ? content : getRawContentFromDOM();
+
+        // 3. Delimitar el punto de partición
+        const safeOffset = Math.max(0, Math.min(offset, currentContent.length));
+        const textBefore = currentContent.slice(0, safeOffset);
+        const textAfter = currentContent.slice(safeOffset);
+
         splitBlock(id, textBefore, textAfter);
+        return;
       }
 
-      if (e.key === "Backspace" && offset === 0) {
-        e.preventDefault();
-        mergeBlocks(id);
+      if (e.key === "Backspace") {
+        const offset = getOffset();
+        if (offset === 0) {
+          e.preventDefault();
+          mergeBlocks(id);
+        }
       }
     },
-    [id, getOffset, content, splitBlock, mergeBlocks],
+    [id, getOffset, content, splitBlock, mergeBlocks, getRawContentFromDOM],
   );
 
   const handleKeyUp = useCallback(

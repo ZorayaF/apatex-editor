@@ -1,3 +1,4 @@
+// features/editor/components/writer/canvas/Page/Page.jsx
 import { useRef, memo, useMemo } from "react";
 import { Box } from "@mantine/core";
 import { useStore } from "@store";
@@ -11,13 +12,11 @@ import { usePagePagination } from "@hooks/usePagePagination";
 import { ConnectedBlock } from "../ConnectedBlock";
 import classes from "./Page.module.css";
 
-// 1. RECIBIMOS EL TÍTULO Y EL OFFSET DE PÁGINA COMO PROPS
 export const Page = memo(
   ({ pageId, pageNumber, allowedBlockIds, editorStartPage, runningTitle }) => {
     const pageContentRef = useRef(null);
     const { margins, typography } = APA_CONFIG;
 
-    // 2. YA NO CALCULAMOS EL MAPA DEL DOCUMENTO AQUÍ. Solo sumamos el prop.
     const realPageNumber = pageNumber + (editorStartPage - 1);
 
     const page = useStore((s) => s.pages.find((p) => p.id === pageId));
@@ -29,15 +28,23 @@ export const Page = memo(
     }, [rawBlockIds, allowedBlockIds]);
 
     const isActive = useStore((s) => s.activePageIndex === pageNumber - 1);
-    const { setActivePage, setSelectedBlockId } = useStore();
+    const focusOrCreateBlockInPage = useStore(
+      (s) => s.focusOrCreateBlockInPage,
+    );
 
     usePagePagination(pageContentRef, rawBlockIds, pageNumber);
 
+    // Captura clics en márgenes y áreas vacías de la hoja
     const handlePageClick = (e) => {
-      if (e.target === e.currentTarget) {
-        setActivePage(pageNumber - 1);
-        setSelectedBlockId(null);
+      // Si el clic fue dentro de un editable o control interactivo, dejamos que el bloque lo gestione
+      if (
+        e.target.closest('[contenteditable="true"]') ||
+        e.target.closest("button, input, select, textarea")
+      ) {
+        return;
       }
+
+      focusOrCreateBlockInPage(pageId);
     };
 
     const pageVariables = {
@@ -65,7 +72,6 @@ export const Page = memo(
             paddingRight: "var(--margin-right)",
           }}
         >
-          {/* 3. RENDERIZAMOS EL PROP DIRECTAMENTE */}
           <span className={classes.runningHead}>{runningTitle}</span>
           <span
             className={`${classes.pageNumber} ${
@@ -80,7 +86,7 @@ export const Page = memo(
           ref={pageContentRef}
           style={{ height: "100%", position: "relative" }}
         >
-          <div style={{ pointerEvents: "auto" }}>
+          <div style={{ pointerEvents: "auto", minHeight: "100%" }}>
             {visibleBlockIds.map((id) => (
               <ConnectedBlock key={id} blockId={id} />
             ))}
