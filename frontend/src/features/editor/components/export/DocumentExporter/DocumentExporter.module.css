@@ -13,11 +13,11 @@
 /* =========================================================
    SANITIZACIÓN VISUAL
    ========================================================= */
-.exportCanvas * {
-  cursor: default !important;
-  caret-color: transparent !important;
-  -webkit-user-modify: read-only !important;
-  text-decoration: none !important;
+.exportCanvas :global(.citationBadge) {
+  color: inherit !important;
+  font-weight: normal !important;
+  background-color: transparent !important;
+  animation: none !important;
 }
 
 .exportCanvas :global(.is-selected) {

@@ -31,7 +31,18 @@ export const parseCitations = (content, sources) => {
     }
 
     const authorStr = source.author || "Anónimo";
-    const year = source.year || "s.f.";
+
+    // 1. Resolver el año: buscar 'year', luego extraer el año de 'metadata.fullDate' o 'metadata.year'
+    let year = source.year;
+    if (!year && source.metadata?.fullDate) {
+      // Intenta extraer un año de 4 dígitos (ej: "15 de marzo de 2024" -> "2024")
+      const yearMatch = String(source.metadata.fullDate).match(/\b\d{4}\b/);
+      year = yearMatch ? yearMatch[0] : source.metadata.fullDate;
+    } else if (!year && source.metadata?.year) {
+      year = source.metadata.year;
+    }
+    year = year || "s.f.";
+
     const pageText = page ? `, p. ${page}` : "";
 
     const firstAuthor = authorStr.split(/,| y | & /)[0].trim();
@@ -48,14 +59,12 @@ export const parseCitations = (content, sources) => {
       label = `(${displayAuthor}, ${year}${pageText})`;
     }
 
-    // CAMBIO AQUÍ: Cambiamos <a> por <span> y removemos href
-    // Usamos un <span> interactivo con cursor pointer y data-ref-id
     return `<span 
-      class="citationBadge" 
+      class="citationBadge apa-citation-badge" 
       contenteditable="false" 
       data-ref-id="${id}" 
-      style="user-select: all; text-decoration: none; color: inherit; cursor: default;"
-      style="user-select: all; cursor: pointer; color: var(--mantine-color-blue-7); font-weight: 500;"
+      data-ref-type="${type || "parenthetical"}"
+      data-ref-page="${page || ""}"
     >${label}</span>`;
   });
 };

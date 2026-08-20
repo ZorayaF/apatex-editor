@@ -49,7 +49,7 @@ export const REFERENCE_SCHEMAS = {
   },
   web: {
     label: "Página Web",
-    fields: ["author", "fullDate", "title", "url"],
+    fields: ["author", "year", "fullDate", "title", "siteName", "url"],
   },
   redes_sociales: {
     label: "Redes Sociales",

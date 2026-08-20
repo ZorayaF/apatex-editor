@@ -1,43 +1,24 @@
+// src/features/editor/components/config/preview/BibliographyPreview/BibliographyPreview.jsx
 import React from "react";
 import { PageLayout } from "../PageLayout/PageLayout";
 import { useStore } from "@store";
-// Importa tus clases CSS si las tienes, o usa estilos en línea
+import { renderSourceAPA } from "@logic/engine/bibliographyRenderer";
 import classes from "../PrelimPagePreview/PrelimPagePreview.module.css";
 
 export const BibliographyPreview = ({ metadata, pageNumber }) => {
-  // 1. EXTRAEMOS LAS FUENTES REALES DEL STORE
   const { sources } = useStore();
 
-  // 2. ORDENAMOS ALFABÉTICAMENTE POR AUTOR (Norma APA estricta)
+  // Orden alfabético estricto APA
   const sortedSources = [...(sources || [])].sort((a, b) => {
-    const authorA = (a.author || "Anónimo").toLowerCase();
-    const authorB = (b.author || "Anónimo").toLowerCase();
+    const authorA = (a.author || a.title || "Anónimo").toLowerCase();
+    const authorB = (b.author || b.title || "Anónimo").toLowerCase();
     return authorA.localeCompare(authorB);
   });
 
   const finalPageNumber = pageNumber || metadata?._docMap?.referencias || "10";
 
-  // 3. GENERADOR DE FORMATO APA BÁSICO
-  const renderAPAReference = (source) => {
-    const author = source.author || "Anónimo";
-    const year = source.year || "s.f.";
-    const title = source.title || "Sin título";
-    const publisher = source.metadata?.publisher
-      ? `${source.metadata.publisher}. `
-      : "";
-    const url = source.metadata?.url ? `${source.metadata.url}` : "";
-
-    return (
-      <>
-        {author} ({year}). <i>{title}</i>. {publisher}
-        {url}
-      </>
-    );
-  };
-
   return (
     <PageLayout metadata={metadata} pageNumber={finalPageNumber}>
-      {/* TÍTULO CENTRADO Y EN NEGRITA */}
       <div
         className={classes.bodyText}
         style={{
@@ -49,7 +30,6 @@ export const BibliographyPreview = ({ metadata, pageNumber }) => {
         Referencias
       </div>
 
-      {/* RENDERIZADO DE LA LISTA */}
       {sortedSources.length === 0 ? (
         <p
           className={classes.bodyText}
@@ -64,16 +44,15 @@ export const BibliographyPreview = ({ metadata, pageNumber }) => {
           {sortedSources.map((source) => (
             <p
               key={source.id}
-              id={`ref-${source.id}`} // <--- ESTA ES LA ETIQUETA DE DESTINO
+              id={`ref-${source.id}`}
               className={classes.bodyText}
               style={{
                 paddingLeft: "1.27cm",
                 textIndent: "-1.27cm",
                 margin: 0,
               }}
-            >
-              {renderAPAReference(source)}
-            </p>
+              dangerouslySetInnerHTML={{ __html: renderSourceAPA(source) }}
+            />
           ))}
         </div>
       )}

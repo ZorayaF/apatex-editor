@@ -77,8 +77,18 @@
 }
 
 .citationBadge {
-  transition: all 0.2s ease;
+  color: var(--editor-blue, #228be6);
+  font-weight: 500;
+  cursor: pointer;
+  user-select: all;
+  transition:
+    color 0.15s ease,
+    background-color 0.2s ease;
   animation: apa-item-flash 1.2s ease-out forwards;
+}
+.citationBadge:hover {
+  color: #1864ab;
+  text-decoration: underline;
 }
 
 /* =========================================================
@@ -139,5 +149,13 @@
   @page {
     size: letter portrait;
     margin: 0 !important;
+  }
+  .citationBadge {
+    color: inherit !important;
+    font-weight: normal !important;
+    text-decoration: none !important;
+    cursor: default !important;
+    background-color: transparent !important;
+    animation: none !important;
   }
 }

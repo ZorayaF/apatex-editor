@@ -34,11 +34,15 @@ export const useBlockHandlers = ({
     const tempDiv = document.createElement("div");
     tempDiv.innerHTML = textRef.current.innerHTML;
 
-    // Revertir citas visuales a formato canónico ((ref:...))
-    const citationSpans = tempDiv.querySelectorAll(".apa-citation");
+    // Buscamos cualquier pastilla de cita por su atributo de datos
+    const citationSpans = tempDiv.querySelectorAll("[data-ref-id]");
     citationSpans.forEach((span) => {
       const refId = span.getAttribute("data-ref-id");
-      span.replaceWith(`((ref:${refId}))`);
+      const refType = span.getAttribute("data-ref-type") || "parenthetical";
+      const refPage = span.getAttribute("data-ref-page") || "";
+
+      // Revertimos al código canónico exacto
+      span.replaceWith(`((ref:${refId}|type:${refType}|page:${refPage}))`);
     });
 
     return tempDiv.textContent || "";
