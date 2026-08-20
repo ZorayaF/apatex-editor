@@ -10,31 +10,34 @@ export const PrelimPagePreview = ({
 }) => {
   const isSpanish = type === "resumen";
 
-  // LÓGICA DE SELECCIÓN DE TÍTULO
+  // 1. TÍTULO DE LA SECCIÓN MANUAL (Sin funciones automáticas)
+  const sectionTitle = isSpanish ? "Resumen" : "Abstract";
+
+  // 2. LÓGICA DE SELECCIÓN DE TÍTULO DEL PROYECTO
   const displayProjectTitle = isSpanish
     ? projectTitle
     : data?.title || "ENGLISH TITLE REQUIRED";
 
-  // LÓGICA INTELIGENTE DE PAGINACIÓN
+  // 3. LÓGICA DE PAGINACIÓN
   const finalPageNumber =
     pageNumber || metadata?._docMap?.preliminares?.[type] || "iii";
 
-  // TRATAMIENTO DEL TEXTO: Separamos los saltos de línea físicos en párrafos HTML
+  // 4. TRATAMIENTO DEL TEXTO
   const rawContent = data?.content || `[Contenido del ${type}]`;
   const paragraphs = rawContent.split("\n").filter((p) => p.trim() !== "");
 
-  // TRATAMIENTO DE PALABRAS CLAVE: Extraemos el string según el idioma
+  // 5. TRATAMIENTO DE PALABRAS CLAVE
   const keywordsString = isSpanish ? data?.palabrasClave : data?.keywords;
 
   return (
     <PageLayout metadata={metadata} pageNumber={finalPageNumber}>
-      {/* 1. NOMBRE DE LA SECCIÓN (Resumen / Abstract) */}
-      <h1 className={classes.sectionHeader}>{type}</h1>
+      {/* 1. NOMBRE DE LA SECCIÓN */}
+      <h1 className={classes.sectionHeader}>{sectionTitle}</h1>
 
-      {/* 2. TÍTULO DEL PROYECTO (En el idioma correspondiente) */}
+      {/* 2. TÍTULO DEL PROYECTO */}
       <h2 className={classes.projectTitle}>{displayProjectTitle}</h2>
 
-      {/* 3. CONTENIDO DEL PÁRRAFO PRELIMINAR (Iterado para respetar saltos de línea) */}
+      {/* 3. CONTENIDO DEL PÁRRAFO PRELIMINAR */}
       <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
         {paragraphs.map((text, index) => (
           <p
@@ -47,12 +50,9 @@ export const PrelimPagePreview = ({
         ))}
       </div>
 
-      {/* 4. PALABRAS CLAVE / KEYWORDS (Renderizado condicional con sangría e itálica nativa) */}
+      {/* 4. PALABRAS CLAVE / KEYWORDS */}
       {keywordsString && keywordsString.trim().length > 0 && (
-        <div
-          className={classes.keywordsBox}
-          style={{ marginTop: "1rem" }} // Sangría estricta APA
-        >
+        <div className={classes.keywordsBox} style={{ marginTop: "1rem" }}>
           <span className={classes.keywordsLabel}>
             {isSpanish ? "Palabras clave: " : "Keywords: "}
           </span>
