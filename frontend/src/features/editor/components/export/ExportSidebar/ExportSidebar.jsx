@@ -1,4 +1,5 @@
-import React from "react";
+// src/features/editor/components/export/ExportSidebar/ExportSidebar.jsx
+import React, { useMemo } from "react";
 import {
   Paper,
   ScrollArea,
@@ -9,25 +10,188 @@ import {
   NumberInput,
   Button,
   Divider,
-  Checkbox,
+  Switch,
+  Badge,
 } from "@mantine/core";
 import {
   IconCompass,
   IconAdjustments,
   IconArrowRight,
 } from "@tabler/icons-react";
+import { useStore } from "@store";
+import { buildDocumentPages } from "@logic/engine/document/buildDocumentPages";
 import classes from "./ExportSidebar.module.css";
+
+const SECTION_METADATA = {
+  titlePage: { label: "Portada", group: "prelim" },
+  contraportada: { label: "Contraportada", group: "prelim" },
+  aceptacion: { label: "Aceptación", group: "prelim" },
+  reglamento: { label: "Reglamento", group: "prelim" },
+  dedicatoria: { label: "Dedicatoria", group: "prelim" },
+  agradecimientos: { label: "Agradecimientos", group: "prelim" },
+  toc: { label: "Tabla de Contenido", group: "prelim" },
+  glosario: { label: "Glosario", group: "prelim" },
+  resumen: { label: "Resumen", group: "prelim" },
+  abstract: { label: "Abstract", group: "prelim" },
+  introduccion: { label: "Introducción", group: "prelim" },
+  body: { label: "Cuerpo de Redacción", group: "body" },
+  references: { label: "Referencias Bibliográficas", group: "body" },
+  annexes: { label: "Anexos", group: "body" },
+};
 
 export const ExportSidebar = ({
   targetPage,
   onChangeTargetPage,
   onScrollToPage,
-  sections,
+  sections = {},
   onToggleSection,
   onSetPreset,
 }) => {
+  const {
+    pages = [],
+    blocks = [],
+    sources = [],
+    projectMetadata = {},
+    preliminares: storePreliminares,
+  } = useStore();
+
+  const preliminares = storePreliminares || projectMetadata?.preliminares || {};
+  const metadataWithPrelim = { ...projectMetadata, preliminares };
+
+  // 1. Páginas físicas totales existentes en el documento
+  const allExistingPages = useMemo(() => {
+    const fullActiveSections = Object.keys(SECTION_METADATA).reduce(
+      (acc, k) => {
+        acc[k] = true;
+        return acc;
+      },
+      {},
+    );
+
+    return buildDocumentPages({
+      projectMetadata: metadataWithPrelim,
+      canvasPages: pages,
+      blocks,
+      sources,
+      activeSections: fullActiveSections,
+    });
+  }, [metadataWithPrelim, pages, blocks, sources]);
+
+  // 2. Páginas activas según la selección actual
+  const activeDocumentPages = useMemo(() => {
+    return buildDocumentPages({
+      projectMetadata: metadataWithPrelim,
+      canvasPages: pages,
+      blocks,
+      sources,
+      activeSections: sections,
+    });
+  }, [metadataWithPrelim, pages, blocks, sources, sections]);
+
+  // 3. Secciones filtradas que realmente tienen contenido
+  const availableSections = useMemo(() => {
+    const sectionTypesPresent = new Set();
+
+    allExistingPages.forEach((p) => {
+      if (p.type === "portada") sectionTypesPresent.add("titlePage");
+      if (p.type === "contraportada") sectionTypesPresent.add("contraportada");
+      if (p.type === "aceptacion") sectionTypesPresent.add("aceptacion");
+      if (p.type === "reglamento") sectionTypesPresent.add("reglamento");
+      if (p.type === "dedicatoria") sectionTypesPresent.add("dedicatoria");
+      if (p.type === "agradecimientos")
+        sectionTypesPresent.add("agradecimientos");
+      if (p.type.startsWith("toc_")) sectionTypesPresent.add("toc");
+      if (p.type === "glosario") sectionTypesPresent.add("glosario");
+      if (p.type === "resumen") sectionTypesPresent.add("resumen");
+      if (p.type === "abstract") sectionTypesPresent.add("abstract");
+      if (p.type === "introduccion") sectionTypesPresent.add("introduccion");
+      if (p.type === "canvas_page") sectionTypesPresent.add("body");
+      if (p.type === "referencias") sectionTypesPresent.add("references");
+      if (p.type === "anexos_portada" || p.type === "anexo_item") {
+        sectionTypesPresent.add("annexes");
+      }
+    });
+
+    return Object.keys(SECTION_METADATA)
+      .filter((key) => sectionTypesPresent.has(key))
+      .map((key) => {
+        const pageMatch = activeDocumentPages.find((p) => {
+          if (key === "titlePage") return p.type === "portada";
+          if (key === "contraportada") return p.type === "contraportada";
+          if (key === "toc") return p.type === "toc_contenido";
+          if (key === "body") return p.type === "canvas_page";
+          if (key === "references") return p.type === "referencias";
+          if (key === "annexes") return p.type === "anexos_portada";
+          return p.type === key;
+        });
+
+        return {
+          key,
+          label: SECTION_METADATA[key].label,
+          group: SECTION_METADATA[key].group,
+          pageNumber: pageMatch?.pageNumber || null,
+          isVisible: Boolean(sections[key]),
+        };
+      });
+  }, [allExistingPages, activeDocumentPages, sections]);
+
+  const prelimSections = availableSections.filter((s) => s.group === "prelim");
+  const bodySections = availableSections.filter((s) => s.group === "body");
+
+  const renderSectionItem = (item) => {
+    const isChecked = item.isVisible;
+
+    const handleCardClick = () => {
+      // Si está visible y tiene página asignada, navega a ella
+      if (isChecked && item.pageNumber) {
+        onScrollToPage(item.pageNumber);
+      }
+    };
+
+    return (
+      <div
+        key={item.key}
+        className={`${classes.navCard} ${!isChecked ? classes.navCardDisabled : ""}`}
+        onClick={handleCardClick}
+      >
+        {/* Controles Izquierdos: Switch y Nombre */}
+        <Group gap="xs" style={{ flex: 1, minWidth: 0 }}>
+          <div
+            className={`${classes.tightSwitch} ${isChecked ? classes.tightSwitchActive : ""}`}
+            onClick={(e) => e.stopPropagation()} // Evita que al tocar el switch se active la navegación de la tarjeta
+          >
+            <Switch
+              size="xs"
+              checked={isChecked}
+              onChange={(e) => {
+                e.stopPropagation();
+                onToggleSection(item.key);
+              }}
+            />
+          </div>
+
+          <Text
+            size="xs"
+            fw={isChecked ? 600 : 400}
+            truncate
+            style={{ flex: 1 }}
+          >
+            {item.label}
+          </Text>
+        </Group>
+
+        {/* Control Derecho: Insignia con el número de página */}
+        {isChecked && item.pageNumber && (
+          <Badge size="xs" variant="light" color="blue">
+            p. {item.pageNumber}
+          </Badge>
+        )}
+      </div>
+    );
+  };
+
   return (
-    <Paper className={`no-print ${classes.sidebar}`} w={280} bg="white">
+    <Paper className={`no-print ${classes.sidebar}`} w={290} bg="white">
       <ScrollArea style={{ flex: 1 }} p="md">
         <Stack gap="lg">
           {/* 1. Salto a Página */}
@@ -49,6 +213,7 @@ export const ExportSidebar = ({
               <NumberInput
                 size="xs"
                 min={1}
+                max={activeDocumentPages.length || 1}
                 value={targetPage}
                 onChange={(val) => onChangeTargetPage(val || 1)}
                 style={{ flex: 1 }}
@@ -116,99 +281,25 @@ export const ExportSidebar = ({
               </Button>
             </Group>
 
-            {/* Checkboxes de Secciones */}
-            <Stack gap={8}>
-              <Text size="11px" fw={600} c="dimmed" mt={4}>
-                Páginas Preliminares
-              </Text>
-              <Checkbox
-                size="xs"
-                label="Portada"
-                checked={sections.titlePage}
-                onChange={() => onToggleSection("titlePage")}
-              />
-              <Checkbox
-                size="xs"
-                label="Contraportada"
-                checked={sections.contraportada}
-                onChange={() => onToggleSection("contraportada")}
-              />
-              <Checkbox
-                size="xs"
-                label="Aceptación"
-                checked={sections.aceptacion}
-                onChange={() => onToggleSection("aceptacion")}
-              />
-              <Checkbox
-                size="xs"
-                label="Reglamento"
-                checked={sections.reglamento}
-                onChange={() => onToggleSection("reglamento")}
-              />
-              <Checkbox
-                size="xs"
-                label="Dedicatoria"
-                checked={sections.dedicatoria}
-                onChange={() => onToggleSection("dedicatoria")}
-              />
-              <Checkbox
-                size="xs"
-                label="Agradecimientos"
-                checked={sections.agradecimientos}
-                onChange={() => onToggleSection("agradecimientos")}
-              />
-              <Checkbox
-                size="xs"
-                label="Tabla de Contenido"
-                checked={sections.toc}
-                onChange={() => onToggleSection("toc")}
-              />
-              <Checkbox
-                size="xs"
-                label="Glosario"
-                checked={sections.glosario}
-                onChange={() => onToggleSection("glosario")}
-              />
-              <Checkbox
-                size="xs"
-                label="Resumen"
-                checked={sections.resumen}
-                onChange={() => onToggleSection("resumen")}
-              />
-              <Checkbox
-                size="xs"
-                label="Abstract"
-                checked={sections.abstract}
-                onChange={() => onToggleSection("abstract")}
-              />
-              <Checkbox
-                size="xs"
-                label="Introducción"
-                checked={sections.introduccion}
-                onChange={() => onToggleSection("introduccion")}
-              />
+            {/* Listado de Tarjetas */}
+            <Stack gap={6}>
+              {prelimSections.length > 0 && (
+                <>
+                  <Text size="11px" fw={600} c="dimmed" mt={4}>
+                    Páginas Preliminares
+                  </Text>
+                  {prelimSections.map(renderSectionItem)}
+                </>
+              )}
 
-              <Text size="11px" fw={600} c="dimmed" mt={8}>
-                Cuerpo y Finales
-              </Text>
-              <Checkbox
-                size="xs"
-                label="Cuerpo de Redacción (Canvas)"
-                checked={sections.body}
-                onChange={() => onToggleSection("body")}
-              />
-              <Checkbox
-                size="xs"
-                label="Referencias Bibliográficas"
-                checked={sections.references}
-                onChange={() => onToggleSection("references")}
-              />
-              <Checkbox
-                size="xs"
-                label="Anexos"
-                checked={sections.annexes}
-                onChange={() => onToggleSection("annexes")}
-              />
+              {bodySections.length > 0 && (
+                <>
+                  <Text size="11px" fw={600} c="dimmed" mt={8}>
+                    Cuerpo y Finales
+                  </Text>
+                  {bodySections.map(renderSectionItem)}
+                </>
+              )}
             </Stack>
           </Box>
         </Stack>

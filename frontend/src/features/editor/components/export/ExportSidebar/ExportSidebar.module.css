@@ -1,3 +1,5 @@
+/* src/features/editor/components/export/ExportSidebar/ExportSidebar.module.css */
+
 .sidebar {
   border-right: 1px solid #e9ecef;
   display: flex;
@@ -8,4 +10,87 @@
 
 .sectionHeader {
   letter-spacing: 0.5px;
+}
+
+/* =========================================================
+   TARJETAS DE NAVEGACIÓN (Clic = Ir a página)
+   ========================================================= */
+.navCard {
+  cursor: pointer;
+  border-radius: 8px;
+  padding: 6px 10px;
+  border: 1px solid transparent;
+  background-color: transparent;
+  transition:
+    background-color 120ms ease,
+    border-color 120ms ease,
+    transform 100ms ease;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+/* Hover: Gris muy suave */
+.navCard:hover {
+  background-color: var(--mantine-color-gray-1);
+  border-color: var(--mantine-color-gray-3);
+}
+
+/* Feedback momentáneo azul al hacer clic para navegar */
+.navCard:active {
+  background-color: var(--mantine-color-blue-0);
+  border-color: var(--mantine-color-blue-3);
+  transform: scale(0.99);
+}
+
+/* Estado cuando la sección está desmarcada (apagada) */
+.navCardDisabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.navCardDisabled:hover {
+  background-color: var(--mantine-color-gray-0);
+  border-color: var(--mantine-color-gray-2);
+}
+
+/* =========================================================
+   SWITCH AJUSTADO Y ESTILIZADO (Clic = Activar/Desactivar)
+   ========================================================= */
+.tightSwitch {
+  cursor: pointer;
+  display: inline-flex;
+  border-radius: 9999px;
+  transition: transform 120ms ease;
+}
+
+.tightSwitch:hover {
+  transform: scale(1.08);
+}
+
+/* Riel apagado */
+.tightSwitch :global(.mantine-Switch-track) {
+  border: 1.5px solid var(--mantine-color-gray-4) !important;
+  background-color: var(--mantine-color-gray-1) !important;
+  box-sizing: border-box;
+  cursor: pointer;
+}
+
+/* Riel encendido */
+.tightSwitchActive :global(.mantine-Switch-track) {
+  border: 1.5px solid var(--mantine-color-blue-7) !important;
+  background-color: var(--mantine-color-blue-6) !important;
+  box-sizing: border-box;
+}
+
+/* Tirador interno */
+.tightSwitch :global(.mantine-Switch-thumb) {
+  border-color: var(--mantine-color-gray-4) !important;
+  cursor: pointer;
+}
+
+.tightSwitchActive :global(.mantine-Switch-thumb) {
+  border-color: var(--mantine-color-blue-7) !important;
 }
