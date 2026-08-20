@@ -4,99 +4,129 @@ export const calculateDocumentMap = (
   metadata,
   editorPagesCount = 1,
   introductionText = "",
+  sections = {},
+  sources = [],
 ) => {
   const prelim = metadata?.preliminares || {};
   const listaAnexos = prelim.anexos?.items || [];
 
-  // Objeto donde acumularemos en qué número de página inicia cada sección
-  const map = {
-    portada: 1,
-    contraportada: 2,
-    aceptacion: 3,
-    reglamento: 4,
-  };
+  const map = {};
+  let currentPage = 1;
 
-  // Llevamos un contador dinámico de páginas acumuladas
-  let currentPage = 5; // Empezamos en la 5, ya que las 4 primeras son fijas obligatorias
-
-  // 1. Dedicatoria (Opcional - Ocupa 1 página si está activa)
-  if (prelim.dedicatoria?.enabled) {
-    map.dedicatoria = currentPage;
-    currentPage += 1;
-  } else {
-    map.dedicatoria = null;
+  // 1. Portada
+  if (sections.titlePage) {
+    map.portada = currentPage++;
   }
 
-  // 2. Agradecimientos (Opcional - Ocupa 1 página si está activa)
-  if (prelim.agradecimientos?.enabled) {
-    map.agradecimientos = currentPage;
-    currentPage += 1;
-  } else {
-    map.agradecimientos = null;
+  // 2. Contraportada
+  if (sections.contraportada) {
+    map.contraportada = currentPage++;
   }
 
-  // 3. Bloque de Índices (TOC, Tablas, Figuras, Anexos)
-  // El índice de contenido general siempre ocupa mínimo 1 página
-  map.toc = currentPage;
-  let paginasDeIndices = 1;
+  // 3. Aceptación
+  if (sections.aceptacion && prelim.aceptacion?.enabled) {
+    map.aceptacion = currentPage++;
+  }
 
-  // Si hay elementos en el editor, el motor sumará sus respectivas hojas independientes
-  // Nota: Estas listas se calculan dinámicamente en base a los bloques existentes
-  if (metadata?._internalStatus?.hasTables) paginasDeIndices += 1;
-  if (metadata?._internalStatus?.hasFigures) paginasDeIndices += 1;
-  if (prelim.anexos?.enabled && listaAnexos.length > 0) paginasDeIndices += 1;
+  // 4. Reglamento
+  if (sections.reglamento && prelim.reglamento?.enabled) {
+    map.reglamento = currentPage++;
+  }
 
-  currentPage += paginasDeIndices;
+  // 5. Dedicatoria
+  if (
+    sections.dedicatoria &&
+    prelim.dedicatoria?.enabled &&
+    prelim.dedicatoria?.content?.trim()
+  ) {
+    map.dedicatoria = currentPage++;
+  }
 
-  // 4. Glosario (Opcional - Flexible)
-  if (prelim.glosario?.enabled) {
+  // 6. Agradecimientos
+  if (
+    sections.agradecimientos &&
+    prelim.agradecimientos?.enabled &&
+    prelim.agradecimientos?.content?.trim()
+  ) {
+    map.agradecimientos = currentPage++;
+  }
+
+  // 7. Índices (TOC General, Tablas, Figuras, Anexos)
+  if (sections.toc) {
+    map.toc = currentPage++;
+    // Tablas, Figuras y Anexos consumen hoja si existen datos
+    if (metadata?._internalStatus?.hasTables) map.tocTablas = currentPage++;
+    if (metadata?._internalStatus?.hasFigures) map.tocFiguras = currentPage++;
+    if (sections.annexes && prelim.anexos?.enabled && listaAnexos.length > 0) {
+      map.tocAnexos = currentPage++;
+    }
+  }
+
+  // 8. Glosario
+  if (
+    sections.glosario &&
+    prelim.glosario?.enabled &&
+    (prelim.glosario.terms?.length || 0) > 0
+  ) {
     map.glosario = currentPage;
-    // Estimación: 1 página por cada 8 términos de glosario (mínimo 1)
-    const termsCount = prelim.glosario.terms?.length || 0;
-    const glosarioPages =
-      termsCount > 0 ? Math.max(1, Math.ceil(termsCount / 8)) : 1;
-    currentPage += glosarioPages;
-  } else {
-    map.glosario = null;
+    const termsCount = prelim.glosario.terms.length;
+    currentPage += Math.max(1, Math.ceil(termsCount / 8));
   }
 
-  // 5. Resumen (Requerido - Fijo 1 página)
-  map.resumen = currentPage;
-  currentPage += 1;
+  // 9. Resumen
+  if (
+    sections.resumen &&
+    prelim.resumen?.enabled &&
+    prelim.resumen?.content?.trim()
+  ) {
+    map.resumen = currentPage++;
+  }
 
-  // 6. Abstract (Requerido - Fijo 1 página)
-  map.abstract = currentPage;
-  currentPage += 1;
+  // 10. Abstract
+  if (
+    sections.abstract &&
+    prelim.abstract?.enabled &&
+    prelim.abstract?.content?.trim()
+  ) {
+    map.abstract = currentPage++;
+  }
 
-  // 7. Introducción (Requerida - Flexible)
-  map.introduccionPage = currentPage;
+  // 11. Introducción (Solo si está seleccionada y tiene texto)
+  const hasIntro = sections.introduccion && introductionText?.trim().length > 0;
+  if (hasIntro) {
+    map.introduccionPage = currentPage;
+    const caracteresIntro = introductionText.trim().length;
+    const paginasIntro = Math.max(1, Math.ceil(caracteresIntro / 1400));
+    currentPage += paginasIntro;
+  } else {
+    map.introduccionPage = null;
+  }
 
-  // Calculamos el tamaño de la introducción basándonos en caracteres
-  // Una página normal a doble espacio en APA aloja unos 1200 a 1500 caracteres.
-  const caracteresIntro = introductionText?.length || 0;
-  const paginasIntroduccion =
-    caracteresIntro > 0 ? Math.max(1, Math.ceil(caracteresIntro / 1400)) : 1;
+  // 12. Cuerpo de Redacción (Canvas)
+  if (sections.body) {
+    map.editorStartPage = currentPage;
+    currentPage += Math.max(1, editorPagesCount);
+  } else {
+    map.editorStartPage = null;
+  }
 
-  currentPage += paginasIntroduccion;
+  // 13. Referencias Bibliográficas
+  const hasReferences = sections.references && sources && sources.length > 0;
+  if (hasReferences) {
+    map.referenciasPage = currentPage;
+    currentPage += 1; // Mínimo 1 hoja de referencias
+  } else {
+    map.referenciasPage = null;
+  }
 
-  // 8. Editor de Texto Principal (Capítulos h1, h2, h3)
-  // Inicia inmediatamente después de que termine la introducción
-  map.editorStartPage = currentPage;
-
-  // Sumamos la cantidad de páginas reales que el usuario ha redactado en el canvas
-  currentPage += editorPagesCount;
-
-  // 9. Bloque Final de Anexos Físicos
-  if (prelim.anexos?.enabled && listaAnexos.length > 0) {
+  // 14. Anexos
+  if (sections.annexes && prelim.anexos?.enabled && listaAnexos.length > 0) {
     map.anexosStartPage = currentPage;
-    // 1 página de la carátula "Anexos" + 1 página por cada ítem del array
-    currentPage += 1 + listaAnexos.length;
+    currentPage += 1 + listaAnexos.length; // 1 carátula divisoria + 1 por anexo
   } else {
     map.anexosStartPage = null;
   }
 
-  // Guardamos el total del documento por si se requiere
   map.totalPages = currentPage - 1;
-
   return map;
 };

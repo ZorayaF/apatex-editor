@@ -1,8 +1,9 @@
 // src/features/editor/components/export/DocumentExporter/DocumentExporter.jsx
 import React from "react";
 import { useStore } from "@store";
+import { buildDocumentPages } from "@logic/engine/document/buildDocumentPages";
 
-// Importaciones de Vistas Previas
+// Vistas previas
 import { TitlePagePreview } from "@config/preview/TitlePagePreview";
 import { AceptacionPagePreview } from "@config/preview/AceptacionPagePreview";
 import { SimplePagePreview } from "@config/preview/SimplePagePreview";
@@ -43,72 +44,56 @@ const parsePageRange = (rangeStr) => {
 export const DocumentExporter = ({ sections = {}, pageRange = "" }) => {
   const {
     pages = [],
+    blocks = [],
+    sources = [],
     projectMetadata = {},
     preliminares: storePreliminares,
   } = useStore();
 
   const preliminares = storePreliminares || projectMetadata?.preliminares || {};
+  const metadataWithPrelim = { ...projectMetadata, preliminares };
+
+  // 1. Construcción del mapa secuencial de páginas reales
+  const documentPages = buildDocumentPages({
+    projectMetadata: metadataWithPrelim,
+    canvasPages: pages,
+    blocks,
+    sources,
+    activeSections: sections,
+  });
+
   const allowedPagesSet = parsePageRange(pageRange);
 
-  let globalPageCounter = 1;
-
-  const wrapPage = (pageNum, element) => {
-    // Si hay un rango definido y esta página no está incluida, no la renderizamos
-    if (allowedPagesSet && !allowedPagesSet.has(pageNum)) {
-      return null;
-    }
-
-    return (
-      <div
-        key={`page-wrapper-${pageNum}`}
-        id={`doc-page-${pageNum}`}
-        data-page={pageNum}
-        className={classes.pageItemWrapper}
-      >
-        {element}
-      </div>
-    );
-  };
-
-  return (
-    <div className={`print-only-container ${classes.exportCanvas}`}>
-      {/* 1. SECCIONES PRELIMINARES */}
-      {sections.titlePage &&
-        wrapPage(
-          globalPageCounter,
+  // 2. Renderizador modular por tipo de página
+  const renderPageContent = (page) => {
+    switch (page.type) {
+      case "portada":
+        return (
           <TitlePagePreview
             isContraportada={false}
             data={projectMetadata}
             metadata={projectMetadata}
-            pageNumber={globalPageCounter++}
-          />,
-        )}
-
-      {sections.contraportada &&
-        wrapPage(
-          globalPageCounter,
+            pageNumber={page.pageNumber}
+          />
+        );
+      case "contraportada":
+        return (
           <TitlePagePreview
             isContraportada={true}
             data={projectMetadata}
             metadata={projectMetadata}
-            pageNumber={globalPageCounter++}
-          />,
-        )}
-
-      {sections.aceptacion &&
-        preliminares.aceptacion?.enabled &&
-        wrapPage(
-          globalPageCounter,
+            pageNumber={page.pageNumber}
+          />
+        );
+      case "aceptacion":
+        return (
           <AceptacionPagePreview
             metadata={projectMetadata}
-            pageNumber={globalPageCounter++}
-          />,
-        )}
-
-      {sections.reglamento &&
-        preliminares.reglamento?.enabled &&
-        wrapPage(
-          globalPageCounter,
+            pageNumber={page.pageNumber}
+          />
+        );
+      case "reglamento":
+        return (
           <SimplePagePreview
             type="reglamento"
             data={{
@@ -116,162 +101,118 @@ export const DocumentExporter = ({ sections = {}, pageRange = "" }) => {
                 "“Únicamente el graduando es responsable de las ideas expuestas en el presente trabajo”. (Lineamientos constitucionales, legales e institucionales que rigen la propiedad intelectual).",
             }}
             metadata={projectMetadata}
-            pageNumber={globalPageCounter++}
-          />,
-        )}
-
-      {sections.dedicatoria &&
-        preliminares.dedicatoria?.enabled &&
-        wrapPage(
-          globalPageCounter,
+            pageNumber={page.pageNumber}
+          />
+        );
+      case "dedicatoria":
+      case "agradecimientos":
+      case "introduccion":
+        return (
           <SimplePagePreview
-            type="dedicatoria"
-            data={preliminares.dedicatoria}
+            type={page.type}
+            data={page.data}
             metadata={projectMetadata}
-            pageNumber={globalPageCounter++}
-          />,
-        )}
-
-      {sections.agradecimientos &&
-        preliminares.agradecimientos?.enabled &&
-        wrapPage(
-          globalPageCounter,
-          <SimplePagePreview
-            type="agradecimientos"
-            data={preliminares.agradecimientos}
-            metadata={projectMetadata}
-            pageNumber={globalPageCounter++}
-          />,
-        )}
-
-      {sections.toc &&
-        wrapPage(
-          globalPageCounter,
-          <>
-            <TableOfContents startPage={globalPageCounter} />
-            <div style={{ display: "none" }}>{globalPageCounter++}</div>
-          </>,
-        )}
-
-      {sections.glosario &&
-        preliminares.glosario?.enabled &&
-        wrapPage(
-          globalPageCounter,
+            pageNumber={page.pageNumber}
+          />
+        );
+      case "toc_contenido":
+        return <TableOfContents sections={sections} />;
+      case "toc_tablas":
+      case "toc_figuras":
+      case "toc_anexos":
+        // TableOfContents gestiona las hojas secundarias de índices dentro de su bloque
+        return null;
+      case "glosario":
+        return (
           <GlossaryPagePreview
-            terms={preliminares.glosario.terms}
+            terms={page.data?.terms || []}
             metadata={projectMetadata}
-            pageNumber={globalPageCounter++}
-          />,
-        )}
-
-      {sections.resumen &&
-        preliminares.resumen?.enabled &&
-        wrapPage(
-          globalPageCounter,
+            pageNumber={page.pageNumber}
+          />
+        );
+      case "resumen":
+      case "abstract":
+        return (
           <PrelimPagePreview
-            type="resumen"
-            data={preliminares.resumen}
+            type={page.type}
+            data={page.data}
             projectTitle={projectMetadata?.tituloProyecto}
             metadata={projectMetadata}
-            pageNumber={globalPageCounter++}
-          />,
-        )}
-
-      {sections.abstract &&
-        preliminares.abstract?.enabled &&
-        wrapPage(
-          globalPageCounter,
-          <PrelimPagePreview
-            type="abstract"
-            data={preliminares.abstract}
-            projectTitle={projectMetadata?.tituloProyecto}
-            metadata={projectMetadata}
-            pageNumber={globalPageCounter++}
-          />,
-        )}
-
-      {sections.introduccion &&
-        preliminares.introduccion?.content?.trim().length > 0 &&
-        wrapPage(
-          globalPageCounter,
-          <SimplePagePreview
-            type="introduccion"
-            data={preliminares.introduccion}
-            metadata={projectMetadata}
-            pageNumber={globalPageCounter++}
-          />,
-        )}
-
-      {/* 2. CUERPO DE REDACCIÓN */}
-      {sections.body &&
-        pages.map((page) => {
-          const currentPageNum = globalPageCounter++;
-          return wrapPage(
-            currentPageNum,
-            <PageLayout
-              key={page.id}
-              pageNumber={currentPageNum}
-              metadata={projectMetadata}
-            >
-              <div style={{ pointerEvents: "none", height: "100%" }}>
-                {page.blockIds.map((id) => (
-                  <ConnectedBlock key={id} blockId={id} />
-                ))}
-              </div>
-            </PageLayout>,
-          );
-        })}
-
-      {/* 3. REFERENCIAS BIBLIOGRÁFICAS */}
-      {sections.references &&
-        wrapPage(
-          globalPageCounter,
+            pageNumber={page.pageNumber}
+          />
+        );
+      case "canvas_page":
+        return (
+          <PageLayout pageNumber={page.pageNumber} metadata={projectMetadata}>
+            <div style={{ pointerEvents: "none", height: "100%" }}>
+              {(page.blockIds || []).map((id) => (
+                <ConnectedBlock key={id} blockId={id} />
+              ))}
+            </div>
+          </PageLayout>
+        );
+      case "referencias":
+        return (
           <BibliographyPreview
             metadata={projectMetadata}
-            pageNumber={globalPageCounter++}
-          />,
-        )}
+            pageNumber={page.pageNumber}
+          />
+        );
+      case "anexos_portada":
+        return (
+          <PageLayout pageNumber={page.pageNumber} metadata={projectMetadata}>
+            <div
+              style={{
+                display: "flex",
+                height: "100%",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <div style={{ fontSize: "12pt", fontWeight: "bold" }}>Anexos</div>
+            </div>
+          </PageLayout>
+        );
+      case "anexo_item":
+        return (
+          <AnnexPagePreview
+            item={page.data}
+            metadata={projectMetadata}
+            pageNumber={page.pageNumber}
+          />
+        );
+      default:
+        return null;
+    }
+  };
 
-      {/* 4. ANEXOS */}
-      {sections.annexes &&
-        preliminares?.anexos?.enabled &&
-        preliminares?.anexos?.items?.length > 0 && (
-          <>
-            {wrapPage(
-              globalPageCounter,
-              <PageLayout
-                pageNumber={globalPageCounter++}
-                metadata={projectMetadata}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    height: "100%",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <div style={{ fontSize: "12pt", fontWeight: "bold" }}>
-                    Anexos
-                  </div>
-                </div>
-              </PageLayout>,
-            )}
+  return (
+    <div className={`print-only-container ${classes.exportCanvas}`}>
+      {documentPages.map((page) => {
+        // Omite hojas de índices suplementarias porque TableOfContents las genera
+        if (["toc_tablas", "toc_figuras", "toc_anexos"].includes(page.type)) {
+          return null;
+        }
 
-            {preliminares.anexos.items.map((anexo, index) => {
-              const currentAnnexPage = globalPageCounter++;
-              return wrapPage(
-                currentAnnexPage,
-                <AnnexPagePreview
-                  key={anexo.id || index}
-                  item={anexo}
-                  metadata={projectMetadata}
-                  pageNumber={currentAnnexPage}
-                />,
-              );
-            })}
-          </>
-        )}
+        // Filtro por rango de página
+        if (allowedPagesSet && !allowedPagesSet.has(page.pageNumber)) {
+          return null;
+        }
+
+        const content = renderPageContent(page);
+        if (!content) return null;
+
+        return (
+          <div
+            key={`doc-page-${page.pageNumber}`}
+            id={`doc-page-${page.pageNumber}`}
+            data-page={page.pageNumber}
+            className={classes.pageItemWrapper}
+          >
+            {content}
+          </div>
+        );
+      })}
     </div>
   );
 };
