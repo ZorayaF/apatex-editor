@@ -6,7 +6,7 @@ import {
   calculateMerge,
 } from "@logic/engine/insertionEngine";
 import { cleanAndSplitText } from "@logic/engine/parser";
-
+import { isTextBlock } from "@logic/rules/blockRules";
 const MAX_HISTORY = 40;
 
 // Clon profundo del árbol JSON del documento
@@ -163,6 +163,21 @@ export const createContentSlice = (set, get) => {
         }));
       }
     },
+    setBlockType: (id, targetType) =>
+      set((state) => {
+        const block = state.blocks.find((b) => b.id === id);
+        if (!block || block.type === targetType) return state;
+
+        const history = commitInstantSnapshot(state);
+
+        return {
+          ...history,
+          blocks: state.blocks.map((b) =>
+            b.id === id ? { ...b, type: targetType } : b,
+          ),
+          selectedBlockId: id,
+        };
+      }),
 
     // --- ACCIONES DE BLOQUES (Nivel 2: Snapshot Instantáneo) ---
     addBlock: (type = "paragraph") =>
