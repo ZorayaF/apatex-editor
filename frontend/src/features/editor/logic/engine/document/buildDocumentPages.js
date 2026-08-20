@@ -116,8 +116,7 @@ export const buildDocumentPages = ({
 
   // 11. Introducción
   if (
-    activeSections.introduccion &&
-    prelim.introduccion?.enabled &&
+    activeSections.introduccion !== false &&
     hasContent(prelim.introduccion?.content)
   ) {
     rawList.push({ type: "introduccion", data: prelim.introduccion });

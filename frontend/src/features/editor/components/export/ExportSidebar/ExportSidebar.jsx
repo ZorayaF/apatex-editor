@@ -58,7 +58,7 @@ export const ExportSidebar = ({
   const preliminares = storePreliminares || projectMetadata?.preliminares || {};
   const metadataWithPrelim = { ...projectMetadata, preliminares };
 
-  // 1. Páginas físicas totales existentes en el documento
+  // 1. Páginas físicas existentes en su totalidad
   const allExistingPages = useMemo(() => {
     const fullActiveSections = Object.keys(SECTION_METADATA).reduce(
       (acc, k) => {
@@ -141,8 +141,11 @@ export const ExportSidebar = ({
   const renderSectionItem = (item) => {
     const isChecked = item.isVisible;
 
-    const handleCardClick = () => {
-      // Si está visible y tiene página asignada, navega a ella
+    const handleCardClick = (e) => {
+      // Si el clic fue en el switch, dejamos que el switch lo maneje
+      if (e.target.closest(`.${classes.tightSwitch}`)) return;
+
+      // Si la sección está visible y tiene página asignada, navegamos
       if (isChecked && item.pageNumber) {
         onScrollToPage(item.pageNumber);
       }
@@ -158,13 +161,14 @@ export const ExportSidebar = ({
         <Group gap="xs" style={{ flex: 1, minWidth: 0 }}>
           <div
             className={`${classes.tightSwitch} ${isChecked ? classes.tightSwitchActive : ""}`}
-            onClick={(e) => e.stopPropagation()} // Evita que al tocar el switch se active la navegación de la tarjeta
+            onClick={(e) => {
+              e.stopPropagation();
+            }}
           >
             <Switch
               size="xs"
               checked={isChecked}
               onChange={(e) => {
-                e.stopPropagation();
                 onToggleSection(item.key);
               }}
             />
