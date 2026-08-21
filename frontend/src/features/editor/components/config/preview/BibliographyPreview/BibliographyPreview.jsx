@@ -19,17 +19,22 @@ export const BibliographyPreview = ({ metadata, pageNumber }) => {
 
   return (
     <PageLayout metadata={metadata} pageNumber={finalPageNumber}>
-      <div
-        className={classes.bodyText}
+      {/* TÍTULO CENTRADO Y EN NEGRITA */}
+      <h1
         style={{
+          fontFamily: "var(--apa-font, 'Times New Roman', serif)",
+          fontSize: "12pt",
           textAlign: "center",
           fontWeight: "bold",
-          marginBottom: "2rem",
+          marginTop: 0,
+          marginBottom: "1.5em", // Espacio simple antes de iniciar las referencias
+          lineHeight: 1.5,
         }}
       >
         Referencias
-      </div>
+      </h1>
 
+      {/* RENDERIZADO DE LA LISTA */}
       {sortedSources.length === 0 ? (
         <p
           className={classes.bodyText}
@@ -38,18 +43,28 @@ export const BibliographyPreview = ({ metadata, pageNumber }) => {
           [No has agregado fuentes bibliográficas al proyecto]
         </p>
       ) : (
+        /* CONTENEDOR SIN GAPS (Espaciado cero entre referencias) */
         <div
-          style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 0, // <--- ELIMINADO EL 1.5rem
+          }}
         >
           {sortedSources.map((source) => (
             <p
               key={source.id}
               id={`ref-${source.id}`}
-              className={classes.bodyText}
               style={{
-                paddingLeft: "1.27cm",
+                fontFamily: "var(--apa-font, 'Times New Roman', serif)",
+                fontSize: "12pt",
+                lineHeight: 1.5, // <--- INTERLINEADO EXACTO 1.5
+                textAlign: "left",
+                paddingLeft: "1.27cm", // <--- SANGRÍA FRANCESA
                 textIndent: "-1.27cm",
-                margin: 0,
+                marginTop: 0, // <--- CERO MÁRGENES EXTRA
+                marginBottom: 0,
+                color: "inherit",
               }}
               dangerouslySetInnerHTML={{ __html: renderSourceAPA(source) }}
             />

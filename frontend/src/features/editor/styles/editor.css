@@ -2,10 +2,17 @@
 :root {
   /* Valores estándar de APA 7 */
   --apa-font: "Times New Roman", Times, serif;
+  --font-apa: "Times New Roman", Times, serif;
   --apa-line-height: 1.5;
+  --line-height-apa: 1.5;
   --apa-size: 12pt;
+  --font-size-base: 12pt;
 
-  /* Colores de la interfaz (puedes usarlos abajo) */
+  /* Sangría reglamentaria APA (0.5 pulgadas / 1.27 cm) */
+  --indent-apa: 1.27cm;
+
+  /* Colores */
+  --color-text-dark: #000000;
   --editor-blue: #228be6;
   --editor-bg-selected: rgba(34, 139, 230, 0.05);
   --editor-border-hover: #e9ecef;

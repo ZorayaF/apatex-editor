@@ -2,6 +2,7 @@
 import { Text } from "@mantine/core";
 import { useStore } from "@store";
 import classes from "./FigureBlock.module.css";
+import { renderApaNote } from "@logic/utils/apaNoteFormatter"; // o formatApaNote según como lo hayas nombrado
 
 export const FigureBlock = ({ id, url, title, note, width = 100 }) => {
   const { blocks, setSelectedBlockId } = useStore();
@@ -41,7 +42,7 @@ export const FigureBlock = ({ id, url, title, note, width = 100 }) => {
       </div>
 
       {/* Nota académica */}
-      {note && <p className={classes.figureNote}>{note}</p>}
+      {note && <p className={classes.figureNote}>{renderApaNote(note)}</p>}
     </div>
   );
 };

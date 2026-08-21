@@ -17,16 +17,13 @@ export const buildDocumentPages = ({
   // Helper para verificar texto no vacío
   const hasContent = (val) => typeof val === "string" && val.trim().length > 0;
 
-  // 1. Portada (Título del proyecto requerido o al menos título diligenciado)
+  // 1. Portada
   if (activeSections.titlePage !== false) {
     rawList.push({ type: "portada", data: projectMetadata });
   }
 
-  // 2. Contraportada
-  if (
-    activeSections.contraportada !== false &&
-    projectMetadata?.contraportada?.enabled
-  ) {
+  // 2. Contraportada (Depende únicamente de activeSections, sin exigir .enabled)
+  if (activeSections.contraportada !== false) {
     rawList.push({ type: "contraportada", data: projectMetadata });
   }
 

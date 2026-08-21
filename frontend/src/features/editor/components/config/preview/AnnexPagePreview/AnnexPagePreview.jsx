@@ -1,12 +1,11 @@
+// src/features/editor/components/config/preview/AnnexPagePreview/AnnexPagePreview.jsx
+import React from "react";
 import { Anchor, Stack } from "@mantine/core";
 import { PageLayout } from "../PageLayout/PageLayout";
+import { renderApaNote } from "@logic/utils/apaNoteFormatter";
 import classes from "./AnnexPagePreview.module.css";
 
-// 1. Añadimos pageNumber a los props recibidos
 export const AnnexPagePreview = ({ item, metadata, pageNumber }) => {
-  const isCenteredType = ["image", "table", "links"].includes(item?.type);
-
-  // 2. LÓGICA INTELIGENTE: Usamos el prop de exportación, o el fallback del docMap/"x"
   const finalPageNumber =
     pageNumber || metadata?._docMap?.anexos?.[item?.id] || "x";
 
@@ -21,12 +20,12 @@ export const AnnexPagePreview = ({ item, metadata, pageNumber }) => {
                 "https://placehold.co/600x400?text=Sin+Imagen"
               }
               alt={item?.title || "Imagen del anexo"}
-              style={{ maxWidth: "100%", height: "auto", objectFit: "contain" }}
+              className={classes.annexImage}
             />
           </div>
         );
 
-      case "table":
+      case "table": {
         const tableData = item?.contentTable || [];
         if (tableData.length === 0) return null;
 
@@ -38,7 +37,7 @@ export const AnnexPagePreview = ({ item, metadata, pageNumber }) => {
             <thead>
               <tr>
                 {headers.map((h, i) => (
-                  <th key={i}>{h || "..."}</th>
+                  <th key={i}>{h || " "}</th>
                 ))}
               </tr>
             </thead>
@@ -53,21 +52,22 @@ export const AnnexPagePreview = ({ item, metadata, pageNumber }) => {
             </tbody>
           </table>
         );
+      }
 
       case "links":
         return (
-          <Stack gap="xs" align="center">
+          <Stack gap="xs" align="flex-start" className={classes.linksContainer}>
             {item?.contentLinks?.map((link, idx) => (
               <Anchor
                 key={idx}
                 href={link?.url}
                 target="_blank"
                 underline="hover"
-                fw="bold"
+                fw={600}
                 c="blue.7"
                 style={{ fontSize: "11pt" }}
               >
-                {link?.label || link?.url}
+                • {link?.label || link?.url}
               </Anchor>
             ))}
           </Stack>
@@ -80,24 +80,19 @@ export const AnnexPagePreview = ({ item, metadata, pageNumber }) => {
   };
 
   return (
-    // 3. Pasamos el finalPageNumber al PageLayout
     <PageLayout metadata={metadata} pageNumber={finalPageNumber}>
-      <div
-        className={`${classes.contentContainer} ${
-          isCenteredType ? classes.centeredContent : classes.startContent
-        }`}
-      >
-        {/* TÍTULO DEL ANEXO */}
-        <p className={classes.annexTitle}>
+      <div className={classes.annexPageContainer}>
+        {/* TÍTULO DEL ANEXO: Centrado horizontal en la parte superior */}
+        <h1 className={classes.annexTitle}>
           Anexo {item?.id || "A"}. {item?.title || "Título del Anexo"}
-        </p>
+        </h1>
 
-        {/* CUERPO DEL CONTENIDO VARIABLE */}
-        <div style={{ width: "100%" }}>{renderAnnexBody()}</div>
+        {/* CONTENIDO: Inicia inmediatamente debajo del título */}
+        <div className={classes.annexContentWrapper}>{renderAnnexBody()}</div>
 
-        {/* NOTA REGLAMENTARIA AL PIE APA */}
-        {item?.description && (
-          <p className={classes.annexNote}>Nota. {item.description}</p>
+        {/* NOTA REGLAMENTARIA AL PIE */}
+        {item?.description && item.description.trim().length > 0 && (
+          <p className={classes.annexNote}>{renderApaNote(item.description)}</p>
         )}
       </div>
     </PageLayout>

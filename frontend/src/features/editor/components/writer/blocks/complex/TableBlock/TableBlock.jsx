@@ -1,6 +1,7 @@
 import { Table } from "@mantine/core";
 import { useStore } from "@store";
 import classes from "./TableBlock.module.css";
+import { renderApaNote } from "@logic/utils/apaNoteFormatter";
 
 export const TableBlock = ({ id, data, title, note, type }) => {
   const { blocks, updateBlock, setSelectedBlockId } = useStore();
@@ -81,7 +82,7 @@ export const TableBlock = ({ id, data, title, note, type }) => {
       </Table>
 
       {/* Nota reglamentaria al pie */}
-      {note && <p className={classes.tableNote}>{note}</p>}
+      {note && <p className={classes.tableNote}>{renderApaNote(note)}</p>}
     </div>
   );
 };

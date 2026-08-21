@@ -16,6 +16,7 @@
   text-align: left;
   margin: 0 0 16px 0;
   line-height: var(--line-height-apa);
+  text-align: justify;
 }
 
 /* CUERPO DE REDACCIÓN DEL BLOQUE */
@@ -36,6 +37,7 @@
   font-size: var(--font-size-base);
   line-height: var(--line-height-apa);
   color: var(--color-text-dark);
+  text-align: justify;
 }
 
 .keywordsLabel {

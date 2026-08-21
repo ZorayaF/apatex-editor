@@ -1,38 +1,45 @@
-/* TÍTULO DEL GLOSARIO */
+/* src/features/editor/components/config/preview/GlossaryPagePreview/GlossaryPagePreview.module.css */
+
+/* Título: centrado, negrita, 12pt */
 .glossaryTitle {
-  font-family: var(--font-apa);
-  font-size: var(--font-size-base); /* 12pt */
+  font-family: var(--font-apa, "Times New Roman", serif);
+  font-size: var(--font-size-base, 12pt);
   font-weight: bold;
   text-align: center;
   margin-top: 0;
   margin-bottom: 24px;
+  line-height: var(--line-height-apa, 1.5);
+  color: var(--color-text-dark, #000);
 }
 
-/* BLOQUES DE TÉRMINOS CON SANGRÍA NORMAL APA */
+/* Bloque de cada término y su definición */
 .termDefinitionBlock {
+  font-family: var(--font-apa, "Times New Roman", serif);
+  font-size: var(--font-size-base, 12pt);
+  line-height: var(--line-height-apa, 1.5);
   text-align: justify;
-  margin: 0;
-  font-family: var(--font-apa);
-  font-size: var(--font-size-base);
-  line-height: var(--line-height-apa);
-  color: var(--color-text-dark);
+  color: var(--color-text-dark, #000);
 
-  /* Sangría reglamentaria estándar en la primera línea de cada bloque */
-  text-indent: var(--indent-apa); /* 1.27cm */
+  /* 1. Sangría de 1.27 cm en la primera línea (las siguientes van contra el margen izquierdo) */
+  text-indent: var(--indent-apa, 1.27cm);
+
+  /* 2. Interlínea / espacio de separación entre términos */
+  margin-top: 0;
+  margin-bottom: 1.5em;
 }
 
-/* El término va en Negrita y Cursiva */
+/* Término: Negrita y Cursiva */
 .termLabel {
   font-weight: bold;
   font-style: italic;
 }
 
-/* TEXTO FALLBACK SI NO EXISTEN TÉRMINOS */
+/* Fallback vacío */
 .emptyNotice {
+  font-family: var(--font-apa, "Times New Roman", serif);
+  font-size: var(--font-size-base, 12pt);
+  font-style: italic;
   text-align: center;
   color: #666666;
-  font-style: italic;
-  font-size: var(--font-size-base);
-  line-height: var(--line-height-apa);
   margin-top: 40px;
 }
